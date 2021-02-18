@@ -337,6 +337,45 @@ private: System::Void richTextBox1_TextChanged(System::Object^ sender, System::E
 private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e) 
 {
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+
+	if (e->KeyCode == Keys::Delete || e->KeyCode == Keys::Back)
+	{
+		e->Handled = true;
+		return;
+	}
+
+	// if we are moving the arrow keys we need to only allow within a certain range on the text
+	int position = rtb->SelectionStart;
+
+	if (e->KeyCode == Keys::Left)
+	{
+		if (position > 0 && rtb->Text[position - 1] == ' ')
+		{
+			rtb->Select(position - 3, 0);
+			e->Handled = true;
+			return;
+		}
+	}
+	if (e->KeyCode == Keys::Right)
+	{
+		if (rtb->Text[position] == ' ')
+		{
+			rtb->Select(position + 2, 0);
+			e->Handled = true;
+			return;
+		}
+	}
+
+	if ( (e->KeyCode >= Keys::A || e->KeyCode <= Keys::Z) ||
+		 (e->KeyCode >= Keys::NumPad0 || e->KeyCode <= Keys::NumPad9))
+	{
+		if (rtb->Text[position] == ' ')
+		{
+			rtb->Select(position + 2, 0);
+			e->Handled = true;
+			return;
+		}
+	}
 }
 
 private: System::Void MemoryWindow_TextChanged(System::Object^ sender, System::EventArgs^ e) 
