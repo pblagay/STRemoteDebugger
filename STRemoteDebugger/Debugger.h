@@ -22,6 +22,7 @@ public:
 		strcpy(Label, pLabel);
 		Comment = new char[strlen(pComment) + 1];
 		strcpy(Comment, pComment);
+		BreakpointSet = false;
 	}
 
 	~OpcodeInstruction() 
@@ -32,6 +33,7 @@ public:
 	char	Text[OPCODE_TEXT_BUFFER_SIZE] = { 0 };		// text conversion of the opcode
 	char*	Label = nullptr;							// label
 	char*	Comment = nullptr;							// comment
+	bool	BreakpointSet = false;						// set breakpoint
 };
 
 class Register
