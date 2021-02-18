@@ -3,13 +3,20 @@
 #include "cDynArray.h"
 #include <stdio.h>
 
+#define MEMORY_BUFFER_SIZE				(1024 * 4)			// 4K
+#define OPCODE_TEXT_BUFFER_SIZE			64
+#define	MEMORY_WINDOW_LINES				10
+#define MEMORY_WINDOW_COLUMNS			8
+#define MEMORY_WINDOW_BYTES_PER_COLUMN	4
+#define MEMORY_WINDOW_BYTES_PER_LINE	MEMORY_WINDOW_BYTES_PER_COLUMN * MEMORY_WINDOW_COLUMNS				// 4 bytes per entry / 16 columns
+
 class OpcodeInstruction
 {
 public:
 	OpcodeInstruction(int pOpCode, const char* pText, const char* pLabel, const char* pComment)
 	{
 		Opcode = pOpCode;
-		memset(Text, 0, sizeof(Text));
+		memset(Text, 0, OPCODE_TEXT_BUFFER_SIZE);
 		strcpy(Text, pText);
 		Label = new char[strlen(pLabel) + 1];
 		strcpy(Label, pLabel);
@@ -21,10 +28,10 @@ public:
 	{
 	}
 
-	int		Opcode = 0;				// raw 68K opcode
-	char	Text[64] = { 0 };		// text conversion of the opcode
-	char*	Label = nullptr;		// label
-	char*	Comment = nullptr;		// comment
+	int		Opcode = 0;									// raw 68K opcode
+	char	Text[OPCODE_TEXT_BUFFER_SIZE] = { 0 };		// text conversion of the opcode
+	char*	Label = nullptr;							// label
+	char*	Comment = nullptr;							// comment
 };
 
 class Register
@@ -85,15 +92,21 @@ private:
 	bool	rawmode = false;
 
 	// Vars
-	char* LoadBuffer;	// where raw 68K program is loaded
-	u32								LoadBufferSize;
+	u32								LoadBufferSize = 0;
 	DynArray<OpcodeInstruction*>	Opcodes;			// opcodes for the program
 	DynArray<Register*>				DataRegisters;		// CPU registers
 	DynArray<Register*>				AddressRegisters;	// CPU registers
 	Register*						PC = nullptr;		// Program counter
 	Register*						SR = nullptr;		// Status register
+	char*	LoadBuffer = nullptr;	// where raw 68K program is loaded
 
-	// disassembler
+	// Memory window
+	char*	MemoryBuffer = nullptr;		// memory buffer for memory window
+	u32		MemoryStartAddress = 0;		// Start Address of memory buffer
+	u32		MemoryBytesPerLine = 0;		// Bytes per line
+	u32		MemoryBytesPerColumn = 0;	// Byters per column
+
+		// disassembler
 	u32 address = 0;
 	u32 programStart = 0;
 	u32 currentWord = 0;

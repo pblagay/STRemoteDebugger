@@ -85,6 +85,7 @@ void STDebugger::Init(void* formPtr)
 {
 	FormWindow = formPtr;
 	SetupRegisters();
+	SetupMemory();
 }
 
 // Shutdown
@@ -124,6 +125,89 @@ void STDebugger::DisconnectFromTarget()
 // Setup Memory 
 void STDebugger::SetupMemory()
 {
+	if (MemoryBuffer)
+	{
+		delete[] MemoryBuffer;
+	}
+
+	MemoryBuffer = new char[MEMORY_BUFFER_SIZE];
+	memset(MemoryBuffer, 0, MEMORY_BUFFER_SIZE);
+	for (s32 k = 0; k < MEMORY_BUFFER_SIZE; k++)
+	{
+		MemoryBuffer[k] = (char)k;
+	}
+
+	MemoryBytesPerLine = MEMORY_WINDOW_BYTES_PER_LINE;
+	MemoryBytesPerColumn = MEMORY_WINDOW_BYTES_PER_COLUMN;
+
+	// get form
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+
+	// draw all the registers
+	System::Windows::Forms::RichTextBox^ memoryWindow = mainWindow->GetMemoryWindow();
+
+	if (memoryWindow != nullptr)
+	{
+		memoryWindow->Clear();
+		System::String^ MemoryString;
+
+		u32 CurrentMemoryAddress = MemoryStartAddress;
+		char* CurrentMemoryBuffer = MemoryBuffer;
+
+		// create a string to show the memory
+		for (s32 i = 0; i < 1 /*MEMORY_WINDOW_LINES*/; i++)
+		{
+			// display the address first
+			char AddressString[12];
+			sprintf(AddressString, "0x%08x", CurrentMemoryAddress);
+			MemoryString += ConvertCharToString(AddressString) + "\t";
+
+			// loop over columns
+			for (s32 columns = 0; columns < MEMORY_WINDOW_COLUMNS; columns++)
+			{
+				// now show the bytes
+				char MemDword[MEMORY_WINDOW_BYTES_PER_COLUMN] = { 0 };
+				for (u32 bytes = 0; bytes < MemoryBytesPerColumn; bytes++)
+				{
+					MemDword[bytes] = *CurrentMemoryBuffer++;
+				}
+
+				char MemValue1[8] = { 0 };
+				char MemValue2[8] = { 0 };
+				char MemValue3[8] = { 0 };
+				char MemValue4[8] = { 0 };
+				switch (MemoryBytesPerColumn)
+				{
+				case 4: 
+					sprintf(MemValue1, "%02x", MemDword[0]);
+					MemoryString += ConvertCharToString(MemValue1);
+					sprintf(MemValue2, "%02x", MemDword[1]);
+					MemoryString += ConvertCharToString(MemValue2);
+					sprintf(MemValue3, "%02x", MemDword[2]);
+					MemoryString += ConvertCharToString(MemValue3);
+					sprintf(MemValue4, "%02x", MemDword[3]);
+					MemoryString += ConvertCharToString(MemValue4);
+					break;
+				case 2:
+					MemoryString += ConvertIntToString(MemDword[0]);
+					MemoryString += ConvertIntToString(MemDword[1]);
+					break;
+				case 1:
+				default:
+					MemoryString += ConvertIntToString(MemDword[0]);
+					break;
+				}
+
+				MemoryString += "  ";
+			}
+			MemoryString += "\r\n";
+
+			// increment for next line
+			CurrentMemoryAddress += MemoryBytesPerLine;
+		}
+		memoryWindow->Text = MemoryString;
+	}
 }
 
 // Setup Registers
