@@ -76,6 +76,7 @@ public:
 private:
 	void	ParseProgram();
 	void	SetupRegisters();
+	void	SetupMemory();
 	int		GetMode(int instruction);
 	int		GetWord();
 	void	SprintMode(unsigned int mode, unsigned int reg, unsigned int size, char* out_s);

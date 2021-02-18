@@ -121,6 +121,11 @@ void STDebugger::DisconnectFromTarget()
 {
 }
 
+// Setup Memory 
+void STDebugger::SetupMemory()
+{
+}
+
 // Setup Registers
 void STDebugger::SetupRegisters()
 {

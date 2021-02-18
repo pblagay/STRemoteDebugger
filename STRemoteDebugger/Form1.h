@@ -29,6 +29,9 @@ namespace CppCLRWinformsSTDebugger {
 		}
 
 		System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
+		System::Windows::Forms::RichTextBox^ GetAssemblyWindow() { return AssemblyWindow; }
+		System::Windows::Forms::RichTextBox^ GetSourceWindow() { return SourceCodeWindow; }
+		System::Windows::Forms::RichTextBox^ GetMemoryWindow() { return MemoryWindow; }
 
 	protected:
 		/// <summary>
@@ -41,13 +44,14 @@ namespace CppCLRWinformsSTDebugger {
 			{
 				delete components;
 			}
-		}
-	private: System::Windows::Forms::MenuStrip^ menuStrip1;
+		
+		}	
 	protected:
 	private: System::Windows::Forms::ToolStripMenuItem^ fileToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^ openToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^ quitToolStripMenuItem;
-	private: System::Windows::Forms::RichTextBox^ CodeWindow;
+	private: System::Windows::Forms::RichTextBox^ SourceCodeWindow;
+	private: System::Windows::Forms::MenuStrip^ menuStrip1;
 	private: System::Windows::Forms::Label^ label1;
 	private: System::Windows::Forms::Label^ label2;
 	private: System::Windows::Forms::RichTextBox^ RegisterWindow;
@@ -56,6 +60,8 @@ namespace CppCLRWinformsSTDebugger {
 	private: System::Windows::Forms::RichTextBox^ richTextBox1;
 	private: System::Windows::Forms::ToolStripMenuItem^ preferencesToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripSeparator^ toolStripSeparator1;
+	private: System::Windows::Forms::RichTextBox^ AssemblyWindow;
+	private: System::Windows::Forms::Label^ label4;
 	private: System::Windows::Forms::OpenFileDialog^ openFileDialog1;
 
 
@@ -79,7 +85,7 @@ namespace CppCLRWinformsSTDebugger {
 			this->preferencesToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolStripSeparator1 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->quitToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->CodeWindow = (gcnew System::Windows::Forms::RichTextBox());
+			this->SourceCodeWindow = (gcnew System::Windows::Forms::RichTextBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->RegisterWindow = (gcnew System::Windows::Forms::RichTextBox());
@@ -87,12 +93,13 @@ namespace CppCLRWinformsSTDebugger {
 			this->MemoryWindow = (gcnew System::Windows::Forms::RichTextBox());
 			this->openFileDialog1 = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->richTextBox1 = (gcnew System::Windows::Forms::RichTextBox());
+			this->AssemblyWindow = (gcnew System::Windows::Forms::RichTextBox());
+			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->menuStrip1->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// menuStrip1
 			// 
-			this->menuStrip1->GripMargin = System::Windows::Forms::Padding(2, 2, 0, 2);
 			this->menuStrip1->ImageScalingSize = System::Drawing::Size(24, 24);
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fileToolStripMenuItem });
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
@@ -135,21 +142,21 @@ namespace CppCLRWinformsSTDebugger {
 			this->quitToolStripMenuItem->Size = System::Drawing::Size(204, 34);
 			this->quitToolStripMenuItem->Text = L"Quit";
 			// 
-			// CodeWindow
+			// SourceCodeWindow
 			// 
-			this->CodeWindow->Location = System::Drawing::Point(12, 86);
-			this->CodeWindow->Name = L"CodeWindow";
-			this->CodeWindow->ReadOnly = true;
-			this->CodeWindow->Size = System::Drawing::Size(761, 520);
-			this->CodeWindow->TabIndex = 1;
-			this->CodeWindow->Text = L"";
+			this->SourceCodeWindow->Location = System::Drawing::Point(408, 86);
+			this->SourceCodeWindow->Name = L"SourceCodeWindow";
+			this->SourceCodeWindow->ReadOnly = true;
+			this->SourceCodeWindow->Size = System::Drawing::Size(365, 492);
+			this->SourceCodeWindow->TabIndex = 1;
+			this->SourceCodeWindow->Text = L"";
 			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
 			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->label1->Location = System::Drawing::Point(12, 58);
+			this->label1->Location = System::Drawing::Point(403, 58);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(128, 25);
 			this->label1->TabIndex = 2;
@@ -210,18 +217,40 @@ namespace CppCLRWinformsSTDebugger {
 			this->richTextBox1->TabIndex = 7;
 			this->richTextBox1->Text = L"0x00000000";
 			// 
+			// AssemblyWindow
+			// 
+			this->AssemblyWindow->Location = System::Drawing::Point(32, 86);
+			this->AssemblyWindow->Name = L"AssemblyWindow";
+			this->AssemblyWindow->ReadOnly = true;
+			this->AssemblyWindow->Size = System::Drawing::Size(365, 492);
+			this->AssemblyWindow->TabIndex = 8;
+			this->AssemblyWindow->Text = L"";
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->label4->Location = System::Drawing::Point(27, 58);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(98, 25);
+			this->label4->TabIndex = 9;
+			this->label4->Text = L"Assembly";
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1159, 829);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->AssemblyWindow);
 			this->Controls->Add(this->richTextBox1);
 			this->Controls->Add(this->MemoryWindow);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->RegisterWindow);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->label1);
-			this->Controls->Add(this->CodeWindow);
+			this->Controls->Add(this->SourceCodeWindow);
 			this->Controls->Add(this->menuStrip1);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::Fixed3D;
 			this->MainMenuStrip = this->menuStrip1;
