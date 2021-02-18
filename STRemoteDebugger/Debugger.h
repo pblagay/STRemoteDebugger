@@ -79,6 +79,7 @@ public:
 	void ConnectToTarget();
 	void DisconnectFromTarget();
 	void LoadExecutable(LPCWSTR Filename);
+	void SetStartingMemoryAddress(u32 Address);
 
 private:
 	void	ParseProgram();

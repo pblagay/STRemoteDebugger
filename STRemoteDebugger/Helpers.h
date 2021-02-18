@@ -21,6 +21,7 @@ void ConvertStringToLChar(System::String^ string, WCHAR& wcharString);
 System::String^ ConvertCharToString(const char* string);
 System::String^ ConvertFloatToString(float value);
 System::String^ ConvertIntToString(int value);
+System::String^ ConvertIntToAscii(int value);
 System::String^ ConvertUintToString(unsigned int value);
 System::Drawing::Bitmap^ createColorIcon(System::Drawing::Color colour);
 

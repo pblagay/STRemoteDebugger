@@ -55,6 +55,15 @@ System::String^ ConvertIntToString(int value)
 	return strString;
 }
 
+// convert from int to System.String
+System::String^ ConvertIntToAscii(int value)
+{
+	char	buf[2] = { 0 };
+	buf[0] = value;
+	System::String^ strString = gcnew System::String(buf);
+	return strString;
+}
+
 // convert from Uint to System.String
 System::String^ ConvertUintToString(unsigned int value)
 {

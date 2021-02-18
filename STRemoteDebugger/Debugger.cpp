@@ -151,17 +151,23 @@ void STDebugger::SetupMemory()
 	{
 		memoryWindow->Clear();
 		System::String^ MemoryString;
+		System::String^ AsciiString;
 
 		u32 CurrentMemoryAddress = MemoryStartAddress;
 		char* CurrentMemoryBuffer = MemoryBuffer;
 
+		// number of lines 
+		s32 numLines = 32;
+
 		// create a string to show the memory
-		for (s32 i = 0; i < 1 /*MEMORY_WINDOW_LINES*/; i++)
+		for (s32 i = 0; i < numLines; i++)
 		{
 			// display the address first
 			char AddressString[12];
-			sprintf(AddressString, "0x%08x", CurrentMemoryAddress);
+			sprintf(AddressString, "0x%08d", CurrentMemoryAddress);
 			MemoryString += ConvertCharToString(AddressString) + "\t";
+
+			AsciiString = "";
 
 			// loop over columns
 			for (s32 columns = 0; columns < MEMORY_WINDOW_COLUMNS; columns++)
@@ -170,7 +176,16 @@ void STDebugger::SetupMemory()
 				char MemDword[MEMORY_WINDOW_BYTES_PER_COLUMN] = { 0 };
 				for (u32 bytes = 0; bytes < MemoryBytesPerColumn; bytes++)
 				{
-					MemDword[bytes] = *CurrentMemoryBuffer++;
+					char mv = *CurrentMemoryBuffer++;
+					MemDword[bytes] = mv;
+					if (mv >= 32 && mv < 127)
+					{
+						AsciiString += ConvertIntToAscii(mv);
+					}
+					else
+					{
+						AsciiString += ".";
+					}
 				}
 
 				char MemValue1[8] = { 0 };
@@ -179,15 +194,21 @@ void STDebugger::SetupMemory()
 				char MemValue4[8] = { 0 };
 				switch (MemoryBytesPerColumn)
 				{
-				case 4: 
-					sprintf(MemValue1, "%02x", MemDword[0]);
-					MemoryString += ConvertCharToString(MemValue1);
-					sprintf(MemValue2, "%02x", MemDword[1]);
-					MemoryString += ConvertCharToString(MemValue2);
-					sprintf(MemValue3, "%02x", MemDword[2]);
-					MemoryString += ConvertCharToString(MemValue3);
-					sprintf(MemValue4, "%02x", MemDword[3]);
-					MemoryString += ConvertCharToString(MemValue4);
+				case 4:
+					{
+						u8 c = MemDword[0];
+						sprintf(MemValue1, "%02x", c);
+						MemoryString += ConvertCharToString(MemValue1);
+						c = MemDword[1];
+						sprintf(MemValue2, "%02x", c);
+						MemoryString += ConvertCharToString(MemValue2);
+						c = MemDword[2];
+						sprintf(MemValue3, "%02x", c);
+						MemoryString += ConvertCharToString(MemValue3);
+						c = MemDword[3];
+						sprintf(MemValue4, "%02x", c);
+						MemoryString += ConvertCharToString(MemValue4);
+					}
 					break;
 				case 2:
 					MemoryString += ConvertIntToString(MemDword[0]);
@@ -201,6 +222,9 @@ void STDebugger::SetupMemory()
 
 				MemoryString += "  ";
 			}
+
+			MemoryString += "\t";
+			MemoryString += AsciiString;
 			MemoryString += "\r\n";
 
 			// increment for next line
@@ -267,22 +291,22 @@ void STDebugger::SetupRegisters()
 			RegString += ConvertCharToString(Regs[i]->Label) + ": " + ConvertCharToString(Regs[i]->ValueString) + "\t" +
 		 				 ConvertCharToString(Regs[i + DataRegisters.Count()]->Label) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString);
 
-			if (i == 0)
-			{
-				RegString += "\t" + ConvertCharToString(PC->Label) + ": " + ConvertCharToString(PC->ValueString) + "\r\n";
-			}
-			else if (i == 1)
-			{
-				RegString += "\t" + ConvertCharToString(SR->Label) + ": " + ConvertCharToString(SR->ValueString) + "\r\n";
-			}
-			else
-			{
-				RegString += "\r\n";
-			}
+			RegString += "\r\n";
 		}
+
+		RegString += "\r\n";
+		RegString += ConvertCharToString(PC->Label) + ": " + ConvertCharToString(PC->ValueString) + "\r\n";
+		RegString += ConvertCharToString(SR->Label) + ": " + ConvertCharToString(SR->ValueString) + "\r\n";
 
 		registerWindow->Text = RegString;
 	}
+}
+
+// set starting memory address for memory window
+void STDebugger::SetStartingMemoryAddress(u32 Address)
+{
+	MemoryStartAddress = Address;
+	SetupMemory();
 }
 
 // Load Executable
