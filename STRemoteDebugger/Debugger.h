@@ -83,6 +83,13 @@ public:
 	void LoadExecutable(LPCWSTR Filename);
 	void SetStartingMemoryAddress(u32 Address);
 
+	u32 GetMemoryWindowFirstCharacterPosition() { return MemoryWindowFirstCharacterPosition; }
+	u32	GetMemoryWindowLineLength() { return MemoryWindowLineLength; }
+	u32 GetMemoryWindowWrapRight() { return MemoryWindowWrapRight; }
+	u32 GetMemoryWindowLastCharacterOfFirstLine() { return MemoryWindowLastCharacterOfFirstLine; }
+	bool GetMemoryAddressChanged() { return MemoryAddressChanged; }
+	void SetMemoryAddressChanged(bool pMemoryAddressChanged) { MemoryAddressChanged = pMemoryAddressChanged; }
+
 private:
 	void	ParseProgram();
 	void	SetupRegisters();
@@ -108,12 +115,19 @@ private:
 	u32		MemoryStartAddress = 0;		// Start Address of memory buffer
 	u32		MemoryBytesPerLine = 0;		// Bytes per line
 	u32		MemoryBytesPerColumn = 0;	// Byters per column
+	u32		MemoryWindowFirstCharacterPosition = 11;
+	u32		MemoryWindowLastCharacterOfFirstLine = 88;
+	u32		MemoryWindowLineLength = 125;
+	u32		MemoryWindowWrapRight = 47;
+	bool	MemoryAddressChanged = false;
 
-		// disassembler
+	// disassembler
 	u32 address = 0;
 	u32 programStart = 0;
 	u32 currentWord = 0;
 
 	// form references
 	void* FormWindow = nullptr;
+
+
 };

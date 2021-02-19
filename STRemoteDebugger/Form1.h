@@ -5,7 +5,8 @@
 
 extern STDebugger* g_STDebugger;
 
-namespace CppCLRWinformsSTDebugger {
+namespace CppCLRWinformsSTDebugger 
+{
 
 	using namespace System;
 	using namespace System::ComponentModel;
@@ -33,6 +34,8 @@ namespace CppCLRWinformsSTDebugger {
 		System::Windows::Forms::RichTextBox^ GetMemoryWindow() { return MemoryWindow; }
 
 	protected:
+		bool	MemoryWindowInsertModeOn = false;
+
 		/// <summary>
 		/// Verwendete Ressourcen bereinigen.
 		/// </summary>
@@ -211,9 +214,11 @@ namespace CppCLRWinformsSTDebugger {
 			this->MemoryWindow->Text = L"";
 			this->MemoryWindow->WordWrap = false;
 			this->MemoryWindow->VScroll += gcnew System::EventHandler(this, &Form1::MemoryWindow_VScroll);
-			this->MemoryWindow->TextChanged += gcnew System::EventHandler(this, &Form1::MemoryWindow_TextChanged);
+//			this->MemoryWindow->TextChanged += gcnew System::EventHandler(this, &Form1::MemoryWindow_TextChanged);
+			this->MemoryWindow->Enter += gcnew System::EventHandler(this, &Form1::MemoryWindow_Enter);
 			this->MemoryWindow->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::MemoryWindow_KeyDown);
 			this->MemoryWindow->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::MemoryWindow_KeyPress);
+			this->MemoryWindow->Leave += gcnew System::EventHandler(this, &Form1::MemoryWindow_Leave);
 			// 
 			// openFileDialog1
 			// 
@@ -229,6 +234,8 @@ namespace CppCLRWinformsSTDebugger {
 			this->richTextBox1->TabIndex = 7;
 			this->richTextBox1->Text = L"0x00000000";
 			this->richTextBox1->TextChanged += gcnew System::EventHandler(this, &Form1::richTextBox1_TextChanged);
+			this->richTextBox1->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::richTextBox1_KeyDown);
+			this->richTextBox1->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::richTextBox1_KeyPress);
 			// 
 			// AssemblyWindow
 			// 
@@ -287,6 +294,7 @@ namespace CppCLRWinformsSTDebugger {
 			this->MainMenuStrip = this->menuStrip1;
 			this->Name = L"Form1";
 			this->Text = L"Atari ST Remote Debugger";
+			this->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::Form1_KeyPress);
 			this->menuStrip1->ResumeLayout(false);
 			this->menuStrip1->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->EndInit();
@@ -296,7 +304,7 @@ namespace CppCLRWinformsSTDebugger {
 
 		}
 #pragma endregion
-	private: System::Void openToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+	private: System::Void openToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e)
 	{
 		// show file dialog
 		openFileDialog1->Title = "Load ST Executable";
@@ -315,15 +323,15 @@ namespace CppCLRWinformsSTDebugger {
 			g_STDebugger->LoadExecutable(filenameBuffer);
 		}
 	}
-private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e) 
+private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e)
 {
 }
-private: System::Void MemoryWindow_VScroll(System::Object^ sender, System::EventArgs^ e) 
+private: System::Void MemoryWindow_VScroll(System::Object^ sender, System::EventArgs^ e)
 {
 }
 
 // Memory address change
-private: System::Void richTextBox1_TextChanged(System::Object^ sender, System::EventArgs^ e) 
+private: System::Void richTextBox1_TextChanged(System::Object^ sender, System::EventArgs^ e)
 {
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
 	System::String^ newText = rtb->Text;
@@ -334,9 +342,17 @@ private: System::Void richTextBox1_TextChanged(System::Object^ sender, System::E
 }
 
 // memory window events
-private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e) 
+private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e)
 {
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+	u32 position = rtb->SelectionStart;
+
+	if (e->KeyCode == Keys::Insert)
+	{
+		MemoryWindowInsertModeOn = !MemoryWindowInsertModeOn;
+		e->Handled = true;
+		return;
+	}
 
 	if (e->KeyCode == Keys::Delete || e->KeyCode == Keys::Back)
 	{
@@ -345,10 +361,25 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	}
 
 	// if we are moving the arrow keys we need to only allow within a certain range on the text
-	int position = rtb->SelectionStart;
-
 	if (e->KeyCode == Keys::Left)
 	{
+		// clamp cursor left side (first post)
+		if (position == g_STDebugger->GetMemoryWindowFirstCharacterPosition())
+		{
+			rtb->Select(position + 1, 0);
+			e->Handled = false;
+			return;
+		}
+
+		// wrap from other lines to the end of previous
+		if ( position > g_STDebugger->GetMemoryWindowFirstCharacterPosition() && (position - g_STDebugger->GetMemoryWindowFirstCharacterPosition()) % g_STDebugger->GetMemoryWindowLineLength() == 0)
+		{
+			rtb->Select(position - g_STDebugger->GetMemoryWindowWrapRight(), 0);
+			e->Handled = false;
+			return;
+		}
+
+		// gaps
 		if (position > 0 && rtb->Text[position - 1] == ' ')
 		{
 			rtb->Select(position - 3, 0);
@@ -358,16 +389,40 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	}
 	if (e->KeyCode == Keys::Right)
 	{
-		if (rtb->Text[position] == ' ')
+		//// clamp cursor right side
+		//if (position < g_STDebugger->GetMemoryWindowFirstCharacterPosition())
+		//{
+		//	rtb->Select(position, 0);
+		//	e->Handled = false;
+		//	return;
+		//}
+
+		// temp until we get memory window scrolling in
+		if (position > 3962)
 		{
-			rtb->Select(position + 2, 0);
+			rtb->Select(position - 1, 0);
+			e->Handled = false;
+			return;
+		}
+
+		// wrap from end of line to next start
+		if (position == g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() || (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() && (position - g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine()) % g_STDebugger->GetMemoryWindowLineLength() == 0))
+		{
+			rtb->Select(position + g_STDebugger->GetMemoryWindowWrapRight(), 0);
+			e->Handled = false;
+			return;
+		}
+
+		if (rtb->Text[position + 1] == ' ')
+		{
+			rtb->Select(position + 3, 0);
 			e->Handled = true;
 			return;
 		}
 	}
 
-	if ( (e->KeyCode >= Keys::A || e->KeyCode <= Keys::Z) ||
-		 (e->KeyCode >= Keys::NumPad0 || e->KeyCode <= Keys::NumPad9))
+	if ( (e->KeyCode >= Keys::A && e->KeyCode <= Keys::F) ||
+		 (e->KeyCode >= Keys::NumPad0 && e->KeyCode <= Keys::NumPad9))
 	{
 		if (rtb->Text[position] == ' ')
 		{
@@ -378,6 +433,7 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	}
 }
 
+// memory window text changed
 private: System::Void MemoryWindow_TextChanged(System::Object^ sender, System::EventArgs^ e) 
 {
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
@@ -386,17 +442,71 @@ private: System::Void MemoryWindow_TextChanged(System::Object^ sender, System::E
 	rtb->Text = rtb->Text->Remove(position, 1);
 	rtb->SelectionStart = position;
 }
-private: System::Void MemoryWindow_KeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e) 
+
+// memory window key press
+private: System::Void MemoryWindow_KeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e)
 {
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
 
 	// ignore anything but 0 / alphanumeric and arrows
-	if (!System::Char::IsDigit(e->KeyChar) && 
-		!System::Char::IsLetter(e->KeyChar)	)
+	if (!System::Char::IsDigit(e->KeyChar) &&
+		!System::Char::IsLetter(e->KeyChar))
 	{
 		e->Handled = true;
 		return;
 	}
+
+	String^ letter = System::Char::ToString(e->KeyChar);
+	char* cl = ConvertStringToChar(letter);
+	int lk = *cl;
+
+	bool keyAllowed = false;
+	if ((lk >= 'A' && lk <= 'F') || (lk >= 'a' && lk <= 'f'))
+	{
+		keyAllowed = true;
+	}
+
+	if (!keyAllowed)
+	{
+		e->Handled = true;
+		return;
+	}
+
+	if (System::Char::IsLower(e->KeyChar))
+	{
+		e->KeyChar = System::Char::ToUpper(e->KeyChar);
+	}
 }
+
+// Form 1 keypress
+private: System::Void Form1_KeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e) 
+{
+}
+
+// Memory Address key press
+private: System::Void richTextBox1_KeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e)
+{
+
+}
+
+// Memory address key down
+private: System::Void richTextBox1_KeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e)
+{
+}
+
+// Memory Window lost focus
+private: System::Void MemoryWindow_Leave(System::Object^ sender, System::EventArgs^ e)
+{
+	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+	rtb->TextChanged -= gcnew System::EventHandler(this, &Form1::MemoryWindow_TextChanged);
+}
+
+// Memory Window Got Focus
+private: System::Void MemoryWindow_Enter(System::Object^ sender, System::EventArgs^ e)
+{
+	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+	rtb->TextChanged += gcnew System::EventHandler(this, &Form1::MemoryWindow_TextChanged);
+}
+	   
 };
 }
