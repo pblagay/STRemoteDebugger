@@ -433,9 +433,20 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 						g_STDebugger->SetMemoryWindowInAsciiBlock(true);
 						rtb->Select((offsetIntoLine - position) + position, 0);
 						e->Handled = true;
+						return;
 					}
 				}
 			}
+		}
+	}
+	else // handle clicking on end of ascii block
+	{
+		if (relativePosition == g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() + 1)
+		{
+			g_STDebugger->SetMemoryWindowInAsciiBlock(false);
+			rtb->Select(position + g_STDebugger->GetMemoryWindowWrapRight(), 0);
+			e->Handled = false;
+			return;
 		}
 	}
 
