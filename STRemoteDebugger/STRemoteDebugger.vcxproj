@@ -152,6 +152,9 @@
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="llttypes.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Preferences.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +169,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Debugger.cpp" />
+    <ClCompile Include="Preferences.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
@@ -181,6 +185,12 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.h</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Preferences.resx">
+      <DependentUpon>Preferences.h</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
