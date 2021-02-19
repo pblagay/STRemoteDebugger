@@ -389,14 +389,6 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	}
 	if (e->KeyCode == Keys::Right)
 	{
-		//// clamp cursor right side
-		//if (position < g_STDebugger->GetMemoryWindowFirstCharacterPosition())
-		//{
-		//	rtb->Select(position, 0);
-		//	e->Handled = false;
-		//	return;
-		//}
-
 		// temp until we get memory window scrolling in
 		if (position > 3962)
 		{
@@ -408,6 +400,7 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 		// jump to ascii
 		if (position == g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() || (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() && (position - g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine()) % g_STDebugger->GetMemoryWindowLineLength() == 0))
 		{
+			g_STDebugger->SetMemoryWindowInAsciiBlock(true);
 			rtb->Select(position + 3, 0);
 			e->Handled = false;
 			return;
@@ -416,6 +409,7 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 		// wrap from end of line to next start
 		if (position == g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() || (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() && (position - g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii()) % g_STDebugger->GetMemoryWindowLineLength() == 0))
 		{
+			g_STDebugger->SetMemoryWindowInAsciiBlock(false);
 			rtb->Select(position + g_STDebugger->GetMemoryWindowWrapRight(), 0);
 			e->Handled = false;
 			return;
@@ -430,11 +424,19 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	}
 
 	if ( (e->KeyCode >= Keys::A && e->KeyCode <= Keys::F) ||
-		 (e->KeyCode >= Keys::NumPad0 && e->KeyCode <= Keys::NumPad9))
+		 (e->KeyCode >= Keys::D0 && e->KeyCode <= Keys::D9)  ||
+		(e->KeyCode >= Keys::NumPad0 && e->KeyCode <= Keys::NumPad9))
 	{
 		if (rtb->Text[position] == ' ')
 		{
-			rtb->Select(position + 2, 0);
+			if (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine())
+			{
+				rtb->Select(position + 3, 0);
+			}
+			else
+			{
+				rtb->Select(position + 2, 0);
+			}
 			e->Handled = true;
 			return;
 		}
@@ -446,9 +448,24 @@ private: System::Void MemoryWindow_TextChanged(System::Object^ sender, System::E
 {
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
 	System::String^ newText = rtb->Text;
-	int position = rtb->SelectionStart;
+	u32 position = rtb->SelectionStart;
+
 	rtb->Text = rtb->Text->Remove(position, 1);
 	rtb->SelectionStart = position;
+
+	// typed off end of mem into ascii
+	if (position == (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) || (position > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) && (position - (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1)) % g_STDebugger->GetMemoryWindowLineLength() == 0))
+	{
+		rtb->Select(position + 3, 0);
+		g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+	}
+
+	// typed off end of ascii / wrap to next line
+	if (position == (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() + 1) || (position > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() + 1) && (position - (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() + 1)) % g_STDebugger->GetMemoryWindowLineLength() == 0))
+	{
+		rtb->Select(position + g_STDebugger->GetMemoryWindowWrapRight(), 0);
+		g_STDebugger->SetMemoryWindowInAsciiBlock(false);
+	}
 }
 
 // memory window key press
@@ -469,7 +486,9 @@ private: System::Void MemoryWindow_KeyPress(System::Object^ sender, System::Wind
 	int lk = *cl;
 
 	bool keyAllowed = false;
-	if ((lk >= 'A' && lk <= 'F') || (lk >= 'a' && lk <= 'f'))
+	if ((lk >= 'A' && lk <= 'F') || 
+		(lk >= 'a' && lk <= 'f') ||
+		(lk >= '0' && lk <= '9'))
 	{
 		keyAllowed = true;
 	}

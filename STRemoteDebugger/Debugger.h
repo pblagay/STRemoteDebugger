@@ -91,6 +91,8 @@ public:
 
 	bool GetMemoryAddressChanged() { return MemoryAddressChanged; }
 	void SetMemoryAddressChanged(bool pMemoryAddressChanged) { MemoryAddressChanged = pMemoryAddressChanged; }
+	bool GetMemoryWindowInAsciiBlock() { return MemoryWindowInAsciiBlock; }
+	void SetMemoryWindowInAsciiBlock(bool pMemoryWindowInAsciiBlock) { MemoryWindowInAsciiBlock = pMemoryWindowInAsciiBlock; }
 
 private:
 	void	ParseProgram();
@@ -110,7 +112,7 @@ private:
 	DynArray<Register*>				AddressRegisters;	// CPU registers
 	Register*						PC = nullptr;		// Program counter
 	Register*						SR = nullptr;		// Status register
-	char*	LoadBuffer = nullptr;	// where raw 68K program is loaded
+	char*							LoadBuffer = nullptr;	// where raw 68K program is loaded
 
 	// Memory window
 	char*	MemoryBuffer = nullptr;		// memory buffer for memory window
@@ -123,6 +125,7 @@ private:
 	u32		MemoryWindowLineLength = 125;
 	u32		MemoryWindowWrapRight = 12;
 	bool	MemoryAddressChanged = false;
+	bool	MemoryWindowInAsciiBlock = false;
 
 	// disassembler
 	u32 address = 0;
