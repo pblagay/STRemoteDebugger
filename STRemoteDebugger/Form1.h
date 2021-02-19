@@ -643,6 +643,8 @@ private: System::Void MemoryWindow_Enter(System::Object^ sender, System::EventAr
 {
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
 	rtb->TextChanged += gcnew System::EventHandler(this, &Form1::MemoryWindow_TextChanged);
+
+//	rtb->Cursor = System::Windows::Forms::Cursors.Cross;
 }
 	   
 };

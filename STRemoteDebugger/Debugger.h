@@ -10,6 +10,22 @@
 #define MEMORY_WINDOW_BYTES_PER_COLUMN	4
 #define MEMORY_WINDOW_BYTES_PER_LINE	MEMORY_WINDOW_BYTES_PER_COLUMN * MEMORY_WINDOW_COLUMNS				// 4 bytes per entry / 16 columns
 
+
+class ComPort
+{
+public:
+	ComPort()
+	{
+	}
+
+	~ComPort()
+	{
+	}
+
+	char	PortName[8] = { 0 };
+	char	PortDescription[1024] = { 0 };
+};
+
 class OpcodeInstruction
 {
 public:
@@ -34,6 +50,7 @@ public:
 	char*	Label = nullptr;							// label
 	char*	Comment = nullptr;							// comment
 	bool	BreakpointSet = false;						// set breakpoint
+	u32		Color = 0xFFFFFFFF;							// Color for line
 };
 
 class Register
@@ -46,6 +63,7 @@ public:
 		strcpy(Label, pLabel);
 		Comment = new char[strlen(pComment) + 1];
 		strcpy(Comment, pComment);
+
 	}
 
 	~Register()
@@ -65,6 +83,7 @@ public:
 	char*	Label = nullptr;		// label
 	char*	Comment = nullptr;		// comment
 	char	ValueString[12] = { 0 };// value as a string
+	u32		Color = 0xFFFFFFFF;		// Color for register
 };
 
 // Main Class
@@ -100,6 +119,7 @@ public:
 	void DebugMemoryData();
 
 private:
+	void	GetComPortsAvailable();
 	void	ParseProgram();
 	void	SetupRegisters();
 	void	SetupMemory();
@@ -141,5 +161,7 @@ private:
 	// form references
 	void* FormWindow = nullptr;
 
+	// Serial ports
+	DynArray<ComPort*>	ComPorts;
 
 };

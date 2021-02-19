@@ -18,6 +18,7 @@
 
 char* ConvertStringToChar(System::String^ string);
 void ConvertStringToLChar(System::String^ string, WCHAR& wcharString);
+void ConvertWCharToChar(WCHAR* string, char* charString);
 System::String^ ConvertCharToString(const char* string);
 System::String^ ConvertFloatToString(float value);
 System::String^ ConvertIntToString(int value);

@@ -88,11 +88,14 @@ void STDebugger::Init(void* formPtr)
 	DebugMemoryData();
 //	LoadMemory();
 	SetupMemory();
+
+	GetComPortsAvailable();
 }
 
 // Shutdown
 void STDebugger::Shutdown()
 {
+	// cleanup regs
 	for (s32 i = 0; i < DataRegisters.Count(); i++)
 	{
 		delete DataRegisters[i];
@@ -107,11 +110,19 @@ void STDebugger::Shutdown()
 	PC = nullptr;
 	SR = nullptr;
 
+	// cleanup opcodes
 	for (s32 i = 0; i < Opcodes.Count(); i++)
 	{
 		delete Opcodes[i];
 	}
 	Opcodes.Reset();
+
+	// cleanup ports
+	for (s32 i = 0; i < ComPorts.Count(); i++)
+	{
+		delete ComPorts[i];
+	}
+	ComPorts.Reset();
 }
 
 // Connect to target
@@ -122,6 +133,31 @@ void STDebugger::ConnectToTarget()
 // Disconnect from target
 void STDebugger::DisconnectFromTarget()
 {
+}
+
+// Get COM ports available
+void STDebugger::GetComPortsAvailable()
+{
+	TCHAR lpTargetPath[1024];
+	WCHAR* deviceNameW = new WCHAR[32];
+
+	for (u32 i = 0; i < 255; i++) // checking ports from COM0 to COM255
+	{
+		System::String^ deviceName = "COM" + ConvertIntToString(i);
+		ConvertStringToLChar(deviceName, *deviceNameW);
+
+		DWORD numChars = QueryDosDevice(deviceNameW, lpTargetPath, 1024);
+		if (numChars > 0)
+		{
+			ComPort* port = new ComPort();
+			strcpy(port->PortName, ConvertStringToChar(deviceName));
+
+			char buf[1024];
+			ConvertWCharToChar(lpTargetPath, buf);
+			strcpy(port->PortDescription, buf);
+			ComPorts.Add(port);
+		}
+	}
 }
 
 // debug memory data

@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <wtypes.h>
 #include "Helpers.h"
+#include "llttypes.h"
 
 // string helper function to convert from marshalled C++ to char*
 char* ConvertStringToChar(System::String^ string)
@@ -30,6 +31,15 @@ void ConvertStringToLChar(System::String^ string, WCHAR& wcharString)
 	mbstowcs(&wcharString, simpleString, length);
 	WCHAR* w = &wcharString;
 	w[length] = 0;
+}
+// string helper function to convert from lchar to char
+void ConvertWCharToChar(WCHAR* string, char* charString)
+{
+	u32 len = wcslen(string);
+	for (u32 i = 0; i < len; i++)
+	{
+		charString[i] = (char)string[i];
+	}
 }
 
 // convert from char* to System.String
