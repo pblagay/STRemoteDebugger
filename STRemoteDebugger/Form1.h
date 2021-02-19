@@ -347,6 +347,65 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
 	u32 position = rtb->SelectionStart;
 
+	// determine if we are in ascii or not
+	u32 relativePosition = position;
+
+	while (1)
+	{
+		s32 newOffset = relativePosition - g_STDebugger->GetMemoryWindowLineLength();
+		if (newOffset < 0)
+		{
+			break;
+		}
+		relativePosition = newOffset;
+	}
+
+	if (relativePosition >= g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii())
+	{
+		g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+	}
+	else
+	{
+		g_STDebugger->SetMemoryWindowInAsciiBlock(false);
+	}
+
+	// if we click in the area between memory / ascii
+	if (position)
+	{
+		if (!g_STDebugger->GetMemoryWindowInAsciiBlock())
+		{
+			// first line
+			if ((position > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) && position <= g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()))
+			{
+				u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
+				g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+				rtb->Select((offsetIntoLine - position) + position, 0);
+				e->Handled = true;
+				return;
+			}
+			else if ((relativePosition > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1))) // && ((position - g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()) % g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() == 0))
+			{
+				u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
+
+				while (1)
+				{
+					s32 newOffset = offsetIntoLine + g_STDebugger->GetMemoryWindowLineLength();
+					if (newOffset > (s32)position)
+					{
+						offsetIntoLine = newOffset;
+						break;
+					}
+					offsetIntoLine = newOffset;
+				}
+
+				g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+				rtb->Select((offsetIntoLine - position) + position, 0);
+				e->Handled = true;
+				return;
+			}
+		}
+	}
+
 	if (e->KeyCode == Keys::Insert)
 	{
 		MemoryWindowInsertModeOn = !MemoryWindowInsertModeOn;
