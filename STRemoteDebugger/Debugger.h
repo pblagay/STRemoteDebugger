@@ -82,6 +82,7 @@ public:
 	void DisconnectFromTarget();
 	void LoadExecutable(LPCWSTR Filename);
 	void SetStartingMemoryAddress(u32 Address);
+	void LoadMemory(char* SrcData);
 
 	u32 GetMemoryWindowFirstCharacterPosition() { return MemoryWindowFirstCharacterPosition; }
 	u32	GetMemoryWindowLineLength() { return MemoryWindowLineLength; }
@@ -94,6 +95,9 @@ public:
 	void SetMemoryAddressChanged(bool pMemoryAddressChanged) { MemoryAddressChanged = pMemoryAddressChanged; }
 	bool GetMemoryWindowInAsciiBlock() { return MemoryWindowInAsciiBlock; }
 	void SetMemoryWindowInAsciiBlock(bool pMemoryWindowInAsciiBlock) { MemoryWindowInAsciiBlock = pMemoryWindowInAsciiBlock; }
+
+
+	void DebugMemoryData();
 
 private:
 	void	ParseProgram();

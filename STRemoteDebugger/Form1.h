@@ -105,7 +105,6 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// menuStrip1
 			// 
-			this->menuStrip1->GripMargin = System::Windows::Forms::Padding(2, 2, 0, 2);
 			this->menuStrip1->ImageScalingSize = System::Drawing::Size(24, 24);
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fileToolStripMenuItem });
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
@@ -205,6 +204,7 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// MemoryWindow
 			// 
+			this->MemoryWindow->DetectUrls = false;
 			this->MemoryWindow->Font = (gcnew System::Drawing::Font(L"Courier New", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->MemoryWindow->Location = System::Drawing::Point(12, 762);
@@ -214,7 +214,6 @@ namespace CppCLRWinformsSTDebugger
 			this->MemoryWindow->Text = L"";
 			this->MemoryWindow->WordWrap = false;
 			this->MemoryWindow->VScroll += gcnew System::EventHandler(this, &Form1::MemoryWindow_VScroll);
-//			this->MemoryWindow->TextChanged += gcnew System::EventHandler(this, &Form1::MemoryWindow_TextChanged);
 			this->MemoryWindow->Enter += gcnew System::EventHandler(this, &Form1::MemoryWindow_Enter);
 			this->MemoryWindow->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::MemoryWindow_KeyDown);
 			this->MemoryWindow->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::MemoryWindow_KeyPress);
@@ -561,6 +560,8 @@ private: System::Void MemoryWindow_TextChanged(System::Object^ sender, System::E
 
 	rtb->Text = rtb->Text->Remove(position, 1);
 	rtb->SelectionStart = position;
+
+	// also need to change the memory / ascii in relation to this change
 
 	// typed off end of mem into ascii
 	if (position == (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) || (position > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) && (position - (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1)) % g_STDebugger->GetMemoryWindowLineLength() == 0))

@@ -85,6 +85,8 @@ void STDebugger::Init(void* formPtr)
 {
 	FormWindow = formPtr;
 	SetupRegisters();
+	DebugMemoryData();
+//	LoadMemory();
 	SetupMemory();
 }
 
@@ -122,8 +124,19 @@ void STDebugger::DisconnectFromTarget()
 {
 }
 
-// Setup Memory 
-void STDebugger::SetupMemory()
+// debug memory data
+void STDebugger::DebugMemoryData()
+{
+	char buf[MEMORY_BUFFER_SIZE];
+	for (s32 k = 0; k < MEMORY_BUFFER_SIZE; k++)
+	{
+		buf[k] = (char)k;
+	}
+	LoadMemory(buf);
+}
+
+// Load memory
+void STDebugger::LoadMemory(char* SrcData)
 {
 	if (MemoryBuffer)
 	{
@@ -132,11 +145,12 @@ void STDebugger::SetupMemory()
 
 	MemoryBuffer = new char[MEMORY_BUFFER_SIZE];
 	memset(MemoryBuffer, 0, MEMORY_BUFFER_SIZE);
-	for (s32 k = 0; k < MEMORY_BUFFER_SIZE; k++)
-	{
-		MemoryBuffer[k] = (char)k;
-	}
+	memcpy(MemoryBuffer, SrcData, MEMORY_BUFFER_SIZE);
+}
 
+// Setup Memory 
+void STDebugger::SetupMemory()
+{
 	MemoryBytesPerLine = MEMORY_WINDOW_BYTES_PER_LINE;
 	MemoryBytesPerColumn = MEMORY_WINDOW_BYTES_PER_COLUMN;
 
@@ -154,7 +168,7 @@ void STDebugger::SetupMemory()
 		System::String^ AsciiString;
 
 		u32 CurrentMemoryAddress = MemoryStartAddress;
-		char* CurrentMemoryBuffer = MemoryBuffer;
+		char* CurrentMemoryBuffer = &MemoryBuffer[CurrentMemoryAddress];
 
 		// number of lines 
 		s32 numLines = 32;
