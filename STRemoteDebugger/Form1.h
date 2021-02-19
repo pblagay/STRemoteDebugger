@@ -370,42 +370,70 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	}
 
 	// if we click in the area between memory / ascii
-	if (position)
+	if (!g_STDebugger->GetMemoryWindowInAsciiBlock())
 	{
-		if (!g_STDebugger->GetMemoryWindowInAsciiBlock())
+		if ((e->KeyCode >= Keys::A && e->KeyCode <= Keys::F) ||
+			(e->KeyCode >= Keys::D0 && e->KeyCode <= Keys::D9) ||
+			(e->KeyCode >= Keys::NumPad0 && e->KeyCode <= Keys::NumPad9))
 		{
-			if ((e->KeyCode >= Keys::A && e->KeyCode <= Keys::F) ||
-				(e->KeyCode >= Keys::D0 && e->KeyCode <= Keys::D9) ||
-				(e->KeyCode >= Keys::NumPad0 && e->KeyCode <= Keys::NumPad9))
+			// first line
+			if ((position > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) && position <= g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()))
 			{
-				// first line
-				if ((position > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) && position <= g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()))
+				u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
+				g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+				rtb->Select((offsetIntoLine - position) + position, 0);
+				e->Handled = true;
+				return;
+			}
+			else if ((relativePosition > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1))) // && ((position - g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()) % g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() == 0))
+			{
+				u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
+
+				while (1)
 				{
-					u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
-					g_STDebugger->SetMemoryWindowInAsciiBlock(true);
-					rtb->Select((offsetIntoLine - position) + position, 0);
+					s32 newOffset = offsetIntoLine + g_STDebugger->GetMemoryWindowLineLength();
+					if (newOffset > (s32)position)
+					{
+						offsetIntoLine = newOffset;
+						break;
+					}
+					offsetIntoLine = newOffset;
+				}
+
+				g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+				rtb->Select((offsetIntoLine - position) + position, 0);
+				e->Handled = true;
+				return;
+			}
+			else // handle address block input (ignore)
+			{
+				if (position < g_STDebugger->GetMemoryWindowFirstCharacterPosition())
+				{
+					rtb->Select(g_STDebugger->GetMemoryWindowFirstCharacterPosition(), 0);
 					e->Handled = true;
 					return;
 				}
-				else if ((relativePosition > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1))) // && ((position - g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()) % g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() == 0))
+				else // secondary lines
 				{
-					u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
-
-					while (1)
+					if (relativePosition < g_STDebugger->GetMemoryWindowFirstCharacterPosition())
 					{
-						s32 newOffset = offsetIntoLine + g_STDebugger->GetMemoryWindowLineLength();
-						if (newOffset > (s32)position)
-						{
-							offsetIntoLine = newOffset;
-							break;
-						}
-						offsetIntoLine = newOffset;
-					}
+						u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPosition();
 
-					g_STDebugger->SetMemoryWindowInAsciiBlock(true);
-					rtb->Select((offsetIntoLine - position) + position, 0);
-					e->Handled = true;
-					return;
+						while (1)
+						{
+							s32 newOffset = offsetIntoLine + g_STDebugger->GetMemoryWindowLineLength();
+							if (newOffset > (s32)position)
+							{
+								offsetIntoLine = newOffset;
+								break;
+							}
+							offsetIntoLine = newOffset;
+						}
+
+						g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+						rtb->Select((offsetIntoLine - position) + position, 0);
+						e->Handled = true;
+					}
 				}
 			}
 		}
@@ -493,13 +521,19 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	{
 		if (rtb->Text[position] == ' ')
 		{
+			u32 gapValue = 1;
+			if (rtb->Text[position + 1] == ' ')
+			{
+				gapValue = 2;
+			}
+
 			if (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine())
 			{
-				rtb->Select(position + 2, 0);
+				rtb->Select(position + gapValue, 0);
 			}
 			else
 			{
-				rtb->Select(position + 2, 0);
+				rtb->Select(position + gapValue, 0);
 			}
 			e->Handled = true;
 			return;
