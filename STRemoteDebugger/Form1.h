@@ -405,8 +405,16 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 			return;
 		}
 
-		// wrap from end of line to next start
+		// jump to ascii
 		if (position == g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() || (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() && (position - g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine()) % g_STDebugger->GetMemoryWindowLineLength() == 0))
+		{
+			rtb->Select(position + 3, 0);
+			e->Handled = false;
+			return;
+		}
+
+		// wrap from end of line to next start
+		if (position == g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() || (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() && (position - g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii()) % g_STDebugger->GetMemoryWindowLineLength() == 0))
 		{
 			rtb->Select(position + g_STDebugger->GetMemoryWindowWrapRight(), 0);
 			e->Handled = false;

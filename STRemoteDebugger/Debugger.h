@@ -87,6 +87,8 @@ public:
 	u32	GetMemoryWindowLineLength() { return MemoryWindowLineLength; }
 	u32 GetMemoryWindowWrapRight() { return MemoryWindowWrapRight; }
 	u32 GetMemoryWindowLastCharacterOfFirstLine() { return MemoryWindowLastCharacterOfFirstLine; }
+	u32 GetMemoryWindowLastCharacterOfFirstLineAscii() { return MemoryWindowLastCharacterOfFirstLineAscii; }
+
 	bool GetMemoryAddressChanged() { return MemoryAddressChanged; }
 	void SetMemoryAddressChanged(bool pMemoryAddressChanged) { MemoryAddressChanged = pMemoryAddressChanged; }
 
@@ -117,8 +119,9 @@ private:
 	u32		MemoryBytesPerColumn = 0;	// Byters per column
 	u32		MemoryWindowFirstCharacterPosition = 11;
 	u32		MemoryWindowLastCharacterOfFirstLine = 88;
+	u32		MemoryWindowLastCharacterOfFirstLineAscii = 123;
 	u32		MemoryWindowLineLength = 125;
-	u32		MemoryWindowWrapRight = 47;
+	u32		MemoryWindowWrapRight = 12;
 	bool	MemoryAddressChanged = false;
 
 	// disassembler
