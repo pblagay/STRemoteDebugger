@@ -178,7 +178,7 @@ void STDebugger::SetupMemory()
 				{
 					char mv = *CurrentMemoryBuffer++;
 					MemDword[bytes] = mv;
-					if (mv >= 32 && mv < 127)
+					if (mv > 32 && mv < 127)
 					{
 						AsciiString += ConvertIntToAscii(mv);
 					}

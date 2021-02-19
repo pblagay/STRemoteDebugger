@@ -374,34 +374,39 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	{
 		if (!g_STDebugger->GetMemoryWindowInAsciiBlock())
 		{
-			// first line
-			if ((position > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) && position <= g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()))
+			if ((e->KeyCode >= Keys::A && e->KeyCode <= Keys::F) ||
+				(e->KeyCode >= Keys::D0 && e->KeyCode <= Keys::D9) ||
+				(e->KeyCode >= Keys::NumPad0 && e->KeyCode <= Keys::NumPad9))
 			{
-				u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
-				g_STDebugger->SetMemoryWindowInAsciiBlock(true);
-				rtb->Select((offsetIntoLine - position) + position, 0);
-				e->Handled = true;
-				return;
-			}
-			else if ((relativePosition > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1))) // && ((position - g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()) % g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() == 0))
-			{
-				u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
-
-				while (1)
+				// first line
+				if ((position > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1) && position <= g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()))
 				{
-					s32 newOffset = offsetIntoLine + g_STDebugger->GetMemoryWindowLineLength();
-					if (newOffset > (s32)position)
-					{
-						offsetIntoLine = newOffset;
-						break;
-					}
-					offsetIntoLine = newOffset;
+					u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
+					g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+					rtb->Select((offsetIntoLine - position) + position, 0);
+					e->Handled = true;
+					return;
 				}
+				else if ((relativePosition > (g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine() + 1))) // && ((position - g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()) % g_STDebugger->GetMemoryWindowLastCharacterOfFirstLineAscii() == 0))
+				{
+					u32 offsetIntoLine = g_STDebugger->GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
 
-				g_STDebugger->SetMemoryWindowInAsciiBlock(true);
-				rtb->Select((offsetIntoLine - position) + position, 0);
-				e->Handled = true;
-				return;
+					while (1)
+					{
+						s32 newOffset = offsetIntoLine + g_STDebugger->GetMemoryWindowLineLength();
+						if (newOffset > (s32)position)
+						{
+							offsetIntoLine = newOffset;
+							break;
+						}
+						offsetIntoLine = newOffset;
+					}
+
+					g_STDebugger->SetMemoryWindowInAsciiBlock(true);
+					rtb->Select((offsetIntoLine - position) + position, 0);
+					e->Handled = true;
+					return;
+				}
 			}
 		}
 	}
@@ -490,7 +495,7 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 		{
 			if (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine())
 			{
-				rtb->Select(position + 3, 0);
+				rtb->Select(position + 2, 0);
 			}
 			else
 			{
