@@ -115,6 +115,7 @@ public:
 	bool GetMemoryWindowInAsciiBlock() { return MemoryWindowInAsciiBlock; }
 	void SetMemoryWindowInAsciiBlock(bool pMemoryWindowInAsciiBlock) { MemoryWindowInAsciiBlock = pMemoryWindowInAsciiBlock; }
 
+	DynArray<ComPort*>	GetComPortsArray() { return ComPorts; }
 
 	void DebugMemoryData();
 
