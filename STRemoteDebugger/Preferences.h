@@ -77,13 +77,13 @@ namespace CppCLRWinformsSTDebugger
 			this->errorProvider2 = (gcnew System::Windows::Forms::ErrorProvider(this->components));
 			this->PreferencesTabControl = (gcnew System::Windows::Forms::TabControl());
 			this->tabPage1 = (gcnew System::Windows::Forms::TabPage());
+			this->BaudRate = (gcnew System::Windows::Forms::ComboBox());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->ComPorts = (gcnew System::Windows::Forms::ComboBox());
 			this->SerialPortDesc = (gcnew System::Windows::Forms::RichTextBox());
 			this->tabPage2 = (gcnew System::Windows::Forms::TabPage());
-			this->label2 = (gcnew System::Windows::Forms::Label());
-			this->label3 = (gcnew System::Windows::Forms::Label());
-			this->BaudRate = (gcnew System::Windows::Forms::ComboBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
 			this->PreferencesTabControl->SuspendLayout();
@@ -126,12 +126,44 @@ namespace CppCLRWinformsSTDebugger
 			this->tabPage1->Text = L"Serial Port";
 			this->tabPage1->UseVisualStyleBackColor = true;
 			// 
+			// BaudRate
+			// 
+			this->BaudRate->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->BaudRate->FormattingEnabled = true;
+			this->BaudRate->Items->AddRange(gcnew cli::array< System::Object^  >(7) {
+				L"115200", L"57600", L"38400", L"19200", L"9600",
+					L"4800", L"2400"
+			});
+			this->BaudRate->Location = System::Drawing::Point(451, 50);
+			this->BaudRate->Name = L"BaudRate";
+			this->BaudRate->Size = System::Drawing::Size(121, 24);
+			this->BaudRate->TabIndex = 6;
+			this->BaudRate->SelectedIndexChanged += gcnew System::EventHandler(this, &Preferences::BaudRate_SelectedIndexChanged);
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(448, 18);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(65, 15);
+			this->label3->TabIndex = 5;
+			this->label3->Text = L"Baud Rate";
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Location = System::Drawing::Point(153, 18);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(69, 15);
+			this->label2->TabIndex = 4;
+			this->label2->Text = L"Description";
+			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
 			this->label1->Location = System::Drawing::Point(12, 18);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(111, 17);
+			this->label1->Size = System::Drawing::Size(96, 15);
 			this->label1->TabIndex = 3;
 			this->label1->Text = L"Select COM port";
 			// 
@@ -144,6 +176,7 @@ namespace CppCLRWinformsSTDebugger
 			this->ComPorts->Name = L"ComPorts";
 			this->ComPorts->Size = System::Drawing::Size(108, 24);
 			this->ComPorts->TabIndex = 2;
+			this->ComPorts->SelectedIndexChanged += gcnew System::EventHandler(this, &Preferences::ComPorts_SelectedIndexChanged);
 			// 
 			// SerialPortDesc
 			// 
@@ -166,37 +199,6 @@ namespace CppCLRWinformsSTDebugger
 			this->tabPage2->Text = L"Options";
 			this->tabPage2->UseVisualStyleBackColor = true;
 			// 
-			// label2
-			// 
-			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(153, 18);
-			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(79, 17);
-			this->label2->TabIndex = 4;
-			this->label2->Text = L"Description";
-			// 
-			// label3
-			// 
-			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(448, 18);
-			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(75, 17);
-			this->label3->TabIndex = 5;
-			this->label3->Text = L"Baud Rate";
-			// 
-			// BaudRate
-			// 
-			this->BaudRate->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
-			this->BaudRate->FormattingEnabled = true;
-			this->BaudRate->Items->AddRange(gcnew cli::array< System::Object^  >(7) {
-				L"115200", L"57600", L"38400", L"19200", L"9600",
-					L"4800", L"2400"
-			});
-			this->BaudRate->Location = System::Drawing::Point(451, 50);
-			this->BaudRate->Name = L"BaudRate";
-			this->BaudRate->Size = System::Drawing::Size(121, 24);
-			this->BaudRate->TabIndex = 6;
-			// 
 			// Preferences
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
@@ -204,7 +206,7 @@ namespace CppCLRWinformsSTDebugger
 			this->ClientSize = System::Drawing::Size(740, 346);
 			this->Controls->Add(this->PreferencesTabControl);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::Fixed3D;
-			this->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->Margin = System::Windows::Forms::Padding(4);
 			this->Name = L"Preferences";
 			this->Text = L"Preferences";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->EndInit();
@@ -218,5 +220,37 @@ namespace CppCLRWinformsSTDebugger
 #pragma endregion
 	   
 
+private: System::Void ComPorts_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
+{
+	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
+	char* portName = ConvertStringToChar(cb->SelectedItem->ToString());
+	g_STDebugger->SetComPortName(portName);
+
+	// set the new description
+	bool foundComPort = false;
+	DynArray<ComPort*>& comPorts = g_STDebugger->GetComPortsArray();
+	for (s32 i = 0; i < comPorts.Count(); i++)
+	{
+		if (comPorts[i]->PortName == portName)
+		{
+			SerialPortDesc->Text = ConvertCharToString(comPorts[i]->PortDescription.GetPtr());
+			foundComPort = true;
+			break;
+		}
+	}
+
+	if (!foundComPort)
+	{
+		SerialPortDesc->Text = "";
+	}
+
+
+}
+private: System::Void BaudRate_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
+{
+	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
+	char* baud = ConvertStringToChar(cb->SelectedItem->ToString());
+	g_STDebugger->SetBaudRate(atoi(baud));
+}
 };
 }

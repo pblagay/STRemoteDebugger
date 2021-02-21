@@ -106,7 +106,9 @@ public:
 	bool GetMemoryWindowInAsciiBlock() { return MemoryWindowInAsciiBlock; }
 	void SetMemoryWindowInAsciiBlock(bool pMemoryWindowInAsciiBlock) { MemoryWindowInAsciiBlock = pMemoryWindowInAsciiBlock; }
 
-	DynArray<ComPort*>	GetComPortsArray() { return ComPorts; }
+	DynArray<ComPort*>&	GetComPortsArray() { return ComPorts; }
+	void SetComPortName(char* pComPortName) { ComPortName = pComPortName; }
+	void SetBaudRate(u32 pBaudRate) { BaudRate = pBaudRate; }
 
 	void DebugMemoryData();
 
