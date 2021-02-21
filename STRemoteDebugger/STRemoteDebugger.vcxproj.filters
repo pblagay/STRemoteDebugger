@@ -47,6 +47,15 @@
     <ClInclude Include="Preferences.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="mString.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="cString.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="cString.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -68,6 +77,12 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Preferences.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="mString.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="cString.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

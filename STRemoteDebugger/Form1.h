@@ -674,20 +674,24 @@ private: System::Void preferencesToolStripMenuItem_Click(System::Object^ sender,
 		// setup the dropdownlist with the COM ports available
 		System::Windows::Forms::ComboBox^ comportsList = preferencesWindow->GetComportsList();
 		System::Windows::Forms::RichTextBox^ comportsDesc = preferencesWindow->GetSerialPortDescBox();
+		System::Windows::Forms::ComboBox^ baudRateList = preferencesWindow->GetBaudRateList();
 
 		DynArray<ComPort*> comports = g_STDebugger->GetComPortsArray();
 		comportsList->Items->Add("<None>");
 		for (s32 i = 0; i < comports.Count(); i++)
 		{
 			ComPort* port = comports[i];
-			comportsList->Items->Add(ConvertCharToString(port->PortName));
+			comportsList->Items->Add(ConvertCharToString(port->PortName.GetPtr()));
 		}
 
 		if (comports.Count() != 0)
 		{
 			comportsList->SelectedItem = comportsList->Items[1];
-			comportsDesc->Text = ConvertCharToString(comports[1]->PortDescription);
+			comportsDesc->Text = ConvertCharToString(comports[1]->PortDescription.GetPtr());
 		}
+
+		baudRateList->SelectedItem = baudRateList->Items[3];	// set to ST max as default
+		
 
 		preferencesWindow->Show();
 	}

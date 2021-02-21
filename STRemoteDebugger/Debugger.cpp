@@ -151,11 +151,11 @@ void STDebugger::GetComPortsAvailable()
 		if (numChars > 0)
 		{
 			ComPort* port = new ComPort();
-			strcpy(port->PortName, ConvertStringToChar(deviceName));
+			port->PortName = ConvertStringToChar(deviceName);
 
 			char buf[1024];
 			ConvertWCharToChar(lpTargetPath, buf);
-			strcpy(port->PortDescription, buf);
+			port->PortDescription = buf;
 			ComPorts.Add(port);
 		}
 	}
@@ -339,15 +339,15 @@ void STDebugger::SetupRegisters()
 		// Data registers
 		for (s32 i = 0; i < DataRegisters.Count(); i++)
 		{
-			RegString += ConvertCharToString(Regs[i]->Label) + ": " + ConvertCharToString(Regs[i]->ValueString) + "\t" +
-		 				 ConvertCharToString(Regs[i + DataRegisters.Count()]->Label) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString);
+			RegString += ConvertCharToString(Regs[i]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i]->ValueString.GetPtr()) + "\t" +
+		 				 ConvertCharToString(Regs[i + DataRegisters.Count()]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString.GetPtr());
 
 			RegString += "\r\n";
 		}
 
 		RegString += "\r\n";
-		RegString += ConvertCharToString(PC->Label) + ": " + ConvertCharToString(PC->ValueString) + "\r\n";
-		RegString += ConvertCharToString(SR->Label) + ": " + ConvertCharToString(SR->ValueString) + "\r\n";
+		RegString += ConvertCharToString(PC->Label.GetPtr()) + ": " + ConvertCharToString(PC->ValueString.GetPtr()) + "\r\n";
+		RegString += ConvertCharToString(SR->Label.GetPtr()) + ": " + ConvertCharToString(SR->ValueString.GetPtr()) + "\r\n";
 
 		registerWindow->Text = RegString;
 	}

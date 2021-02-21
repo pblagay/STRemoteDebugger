@@ -145,12 +145,15 @@
   <ItemGroup>
     <ClInclude Include="cDynArray.h" />
     <ClInclude Include="cDynArray.hpp" />
+    <ClInclude Include="cString.h" />
+    <ClInclude Include="cString.hpp" />
     <ClInclude Include="Form1.h">
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="llttypes.h" />
+    <ClInclude Include="mString.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Preferences.h">
       <FileType>CppForm</FileType>
@@ -159,9 +162,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="cString.cpp" />
     <ClCompile Include="Form1.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="mString.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

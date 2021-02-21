@@ -2,6 +2,7 @@
 #include <wtypes.h>
 #include "cDynArray.h"
 #include <stdio.h>
+#include "mString.h"
 
 #define MEMORY_BUFFER_SIZE				(1024 * 4)			// 4K
 #define OPCODE_TEXT_BUFFER_SIZE			64
@@ -22,8 +23,8 @@ public:
 	{
 	}
 
-	char	PortName[8] = { 0 };
-	char	PortDescription[1024] = { 0 };
+	mString PortName;
+	mString PortDescription;
 };
 
 class OpcodeInstruction
@@ -32,12 +33,9 @@ public:
 	OpcodeInstruction(int pOpCode, const char* pText, const char* pLabel, const char* pComment)
 	{
 		Opcode = pOpCode;
-		memset(Text, 0, OPCODE_TEXT_BUFFER_SIZE);
-		strcpy(Text, pText);
-		Label = new char[strlen(pLabel) + 1];
-		strcpy(Label, pLabel);
-		Comment = new char[strlen(pComment) + 1];
-		strcpy(Comment, pComment);
+		Text = pText;
+		Label = pLabel;
+		Comment = pComment;
 		BreakpointSet = false;
 	}
 
@@ -46,9 +44,9 @@ public:
 	}
 
 	int		Opcode = 0;									// raw 68K opcode
-	char	Text[OPCODE_TEXT_BUFFER_SIZE] = { 0 };		// text conversion of the opcode
-	char*	Label = nullptr;							// label
-	char*	Comment = nullptr;							// comment
+	mString Text;
+	mString Label;
+	mString Comment;
 	bool	BreakpointSet = false;						// set breakpoint
 	u32		Color = 0xFFFFFFFF;							// Color for line
 };
@@ -59,30 +57,23 @@ public:
 	Register(u32 pValue, const char* pLabel, char* const pComment)
 	{
 		SetValue(pValue);
-		Label = new char[strlen(pLabel) + 1];
-		strcpy(Label, pLabel);
-		Comment = new char[strlen(pComment) + 1];
-		strcpy(Comment, pComment);
-
+		Label = pLabel;
+		Comment = pComment;
 	}
 
 	~Register()
 	{
-		if (Label)
-			delete[] Label;
-		if (Comment)
-			delete[] Comment;
 	}
 
 	void SetValue(u32 pValue)
 	{
-		sprintf(ValueString, "0x%08x", pValue);
+		ValueString.Set("0x%08x", pValue);
 	}
 
 	u32		Value = 0;				// register value
-	char*	Label = nullptr;		// label
-	char*	Comment = nullptr;		// comment
-	char	ValueString[12] = { 0 };// value as a string
+	mString Label;
+	mString Comment;
+	mString ValueString;
 	u32		Color = 0xFFFFFFFF;		// Color for register
 };
 
@@ -162,7 +153,8 @@ private:
 	// form references
 	void* FormWindow = nullptr;
 
-	// Serial ports
+	// Serial port
 	DynArray<ComPort*>	ComPorts;
-
+	mString				ComPortName;
+	u32					BaudRate;
 };
