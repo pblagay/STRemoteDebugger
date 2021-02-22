@@ -94,7 +94,6 @@ void STDebugger::Init(void* formPtr)
 	GetComPortsAvailable();
 
 	CreateTickThread();
-	ConnectToTarget();
 }
 
 // Shutdown
@@ -135,8 +134,16 @@ void STDebugger::Shutdown()
 // Connect to target
 void STDebugger::ConnectToTarget()
 {
+	DisconnectFromTarget();			// temp
+
+	if (SerialPortHandle != INVALID_HANDLE_VALUE)
+	{
+		// need to disconnect first, ignoring
+		return;
+	}
+
 	mString FullPortName = "\\\\.\\";
-	FullPortName += "COM3"; // ComPortName;
+	FullPortName += ComPortName;
 
 	SerialPortHandle = CreateFileA(FullPortName.GetPtr(),
 		GENERIC_READ | GENERIC_WRITE,	// Read/Write
@@ -150,12 +157,57 @@ void STDebugger::ConnectToTarget()
 	{
 		// show message for connected or not
 	}
+	SetSerialConfig();
+}
+
+// Set Serial Port baud rate etc
+bool STDebugger::SetSerialConfig()
+{
+	if (SerialPortHandle == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+
+	bool	fSuccess = false;
+	DCB		dcb;
+
+	//  Initialize the DCB structure.
+	SecureZeroMemory(&dcb, sizeof(DCB));
+	dcb.DCBlength = sizeof(DCB);
+
+	//  Build on the current configuration by first retrieving all current
+	//  settings.
+	fSuccess = GetCommState(SerialPortHandle, &dcb);
+
+	if (!fSuccess)
+	{
+		return false;
+	}
+
+	//  Fill in some DCB values and set the com state: 
+	//  57,600 bps, 8 data bits, no parity, and 1 stop bit.
+	dcb.BaudRate = BaudRate;		//  baud rate
+	dcb.ByteSize = 8;				//  data size, xmit and rcv
+	dcb.Parity = NOPARITY;			//  parity bit
+	dcb.StopBits = ONESTOPBIT;		//  stop bit
+
+	fSuccess = SetCommState(SerialPortHandle, &dcb);
+	if (!fSuccess)
+	{
+		return false;
+	}
+
+	return fSuccess;
 }
 
 // Disconnect from target
 void STDebugger::DisconnectFromTarget()
 {
-	CloseHandle(SerialPortHandle);
+	if (SerialPortHandle != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(SerialPortHandle);
+	}
+	SerialPortHandle = INVALID_HANDLE_VALUE;
 }
 
 // Get COM ports available

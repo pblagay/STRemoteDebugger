@@ -128,6 +128,9 @@ private:
 	int		GetWord();
 	void	SprintMode(unsigned int mode, unsigned int reg, unsigned int size, char* out_s);
 
+	// serial 
+	bool	SetSerialConfig();
+
 	// thread
 	s32		CreateTickThread();
 	void	ShutdownThreads();
