@@ -56,6 +56,9 @@
     <ClInclude Include="cString.hpp">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Commands.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">

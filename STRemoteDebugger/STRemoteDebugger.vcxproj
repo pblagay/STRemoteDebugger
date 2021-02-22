@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="cDynArray.h" />
     <ClInclude Include="cDynArray.hpp" />
+    <ClInclude Include="Commands.h" />
     <ClInclude Include="cString.h" />
     <ClInclude Include="cString.hpp" />
     <ClInclude Include="Form1.h">

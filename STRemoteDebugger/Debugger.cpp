@@ -7,11 +7,11 @@
 // Copyright (C) 2021 Biotic Software LLC.				//
 //******************************************************//
 
-#include "Debugger.h"
 #include <stdio.h>
-#include "Form1.h"
 #include <process.h>
-
+#include "Form1.h"
+#include "Debugger.h"
+#include "Commands.h"
 
 using namespace System;
 
@@ -211,8 +211,19 @@ bool STDebugger::SetSerialConfig()
 		return false;
 	}
 
+	// TODO
+	COMMTIMEOUTS cto;
+	GetCommTimeouts(SerialPortHandle, &cto);
+	// Set the new timeouts
+	cto.ReadIntervalTimeout = 0;
+	cto.ReadTotalTimeoutConstant = 10;
+	cto.ReadTotalTimeoutMultiplier = 0;
+	SetCommTimeouts(SerialPortHandle, &cto);
+
 	logString.Set("Set config for Serial port '%s', Baud Rate: %d", ComPortName.GetPtr(), BaudRate);
 	OutputToLog(logString);
+
+	SendCmd(DEBUGGER_CMD_CONNECT);
 
 	return fSuccess;
 }
@@ -228,6 +239,64 @@ void STDebugger::DisconnectFromTarget()
 		OutputToLog(mString("Serial port closed successfully!"));
 	}
 	SerialPortHandle = INVALID_HANDLE_VALUE;
+}
+
+// send commands to serial port
+void STDebugger::SendCmd(u8 Cmd, u32 MemoryAdress, u32 NumBytes)
+{
+	u8 packetBuffer[128] = { 0 };
+
+	packetBuffer[0] = Cmd;		// set cmd
+
+	switch (Cmd)
+	{
+		// on host
+	case DEBUGGER_CMD_CONNECT:
+		packetBuffer[0] = Cmd;
+		SendPacket(packetBuffer, 1);
+		break;
+	case DEBUGGER_CMD_DISCONNECT:
+		SendPacket(packetBuffer, 1);
+		break;
+		// usually on target
+	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
+		strcpy((char*)&packetBuffer[1], "Atari ST - Tos 1.04");
+		SendPacket(packetBuffer);
+		break;
+	default:
+		break;
+	}
+}
+
+// send packet to serial port
+bool STDebugger::SendPacket(u8* packet, u32 NumBytes)
+{
+	bool	result = false;
+	u32		NumBytesWritten = 0;
+	DWORD	errCode = 0;
+
+	if (NumBytes == 0)
+	{
+		NumBytes = strlen((char*)packet);
+	}
+	else
+	{
+
+	}
+
+	result = WriteFile(SerialPortHandle, packet, NumBytes, &NumBytesWritten, NULL);
+	if (result)
+	{
+		OutputDebugString(L"Sent packet successfully..\n");
+//		OutputToLog(mString("Sent packet successfully.."));
+	}
+	else
+	{
+		OutputDebugString(L"Packet failed to send..\n");
+//		OutputToLog(mString("Packet failed to send"));
+	}
+
+	return result;
 }
 
 // Get COM ports available
@@ -1572,6 +1641,7 @@ s32 STDebugger::CreateTickThread()
 	DWORD	dwThrdParam = 1;
 	BOOL	result;
 	s32		handle = 0;
+	TickFunctionExit = false;
 
 	// create a new thread
 	TickThreadHandle = _beginthreadex(NULL, 65536, &STDebugger::TickThread, this, 0 /*CREATE_SUSPENDED*/, (unsigned int*)&TickThreadID);
@@ -1598,10 +1668,18 @@ s32 STDebugger::CreateTickThread()
 unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 {
 	STDebugger* std = (STDebugger*)lpParameter;
+	u32			numBytesRead = 0;
 
 	while (!std->TickFunctionExit)
 	{
+		HANDLE handle = std->GetSerialPortHandle();
 
+		u8 buffer[32] = { 0 };
+		bool result = ReadFile(handle, buffer, 32, &numBytesRead, NULL);
+		if (result && numBytesRead != 0)
+		{
+			std->ProcessCommand(buffer);
+		}
 		Sleep(17);
 	}
 
@@ -1609,6 +1687,44 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 	GetExitCodeThread((HANDLE)std->TickThreadHandle, &ExitCode);
 	_endthreadex(ExitCode);
 	return 0;
+}
+
+// process command from serial port
+void STDebugger::ProcessCommand(u8* packet)
+{
+	u8 cmd = packet[0];
+	mString output;
+
+	switch (cmd)
+	{
+		// on the target usually only
+	case DEBUGGER_CMD_CONNECT:
+		printf("Got Connect cmd!");
+		OutputDebugString(L"Got Connect cmd!\n");
+
+		// need to send back some thing now
+		SendCmd(DEBUGGER_TARGET_RESPONSE_CONNECTED);
+		break;
+
+	case DEBUGGER_CMD_DISCONNECT:
+		OutputDebugString(L"Got Disconnect cmd!");
+		break;
+	default:
+		break;
+
+
+
+
+		// on the host
+	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
+		char* targetInfo = (char*)&packet[1];
+		output = "Connected to Target: ";
+		output += targetInfo;
+		output += "\n";
+		output.ToWide();
+		OutputDebugString((LPCWSTR)output.GetPtr());
+		break;
+	}
 }
 
 // shutdown threads

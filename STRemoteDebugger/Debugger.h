@@ -11,7 +11,6 @@
 #define MEMORY_WINDOW_BYTES_PER_COLUMN	4
 #define MEMORY_WINDOW_BYTES_PER_LINE	MEMORY_WINDOW_BYTES_PER_COLUMN * MEMORY_WINDOW_COLUMNS				// 4 bytes per entry / 16 columns
 
-
 class ComPort
 {
 public:
@@ -117,6 +116,9 @@ public:
 
 	void DebugMemoryData();
 
+
+	HANDLE GetSerialPortHandle() { return SerialPortHandle; }
+
 private:
 	void	GetComPortsAvailable();
 	void	ParseProgram();
@@ -133,6 +135,9 @@ private:
 
 	// serial 
 	bool	SetSerialConfig();
+	bool	SendPacket(u8* packet, u32 NumBytes = 0);
+	void	SendCmd(u8 Cmd, u32 MemoryAdress = 0, u32 NumBytes = 0);
+	void	ProcessCommand(u8* packet);
 
 	// thread
 	s32		CreateTickThread();
