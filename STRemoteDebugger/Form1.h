@@ -41,7 +41,6 @@ namespace CppCLRWinformsSTDebugger
 		bool	MemoryWindowInsertModeOn = false;
 
 	protected:
-
 		/// <summary>
 		/// Verwendete Ressourcen bereinigen.
 		/// </summary>
@@ -74,11 +73,12 @@ namespace CppCLRWinformsSTDebugger
 	private: System::Windows::Forms::ErrorProvider^ errorProvider2;
 	private: System::Windows::Forms::Button^ ConnectButton;
 	private: System::Windows::Forms::Label^ LogLabel;
+	private: System::Windows::Forms::Button^ button2;
 	private: System::Windows::Forms::Button^ button1;
 	private: System::Windows::Forms::RichTextBox^ LogWindow;
-
 	private: System::Windows::Forms::ErrorProvider^ errorProvider1;
 	private: System::ComponentModel::IContainer^ components;
+		    
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -110,6 +110,7 @@ namespace CppCLRWinformsSTDebugger
 			this->LogWindow = (gcnew System::Windows::Forms::RichTextBox());
 			this->LogLabel = (gcnew System::Windows::Forms::Label());
 			this->button1 = (gcnew System::Windows::Forms::Button());
+			this->button2 = (gcnew System::Windows::Forms::Button());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
@@ -329,11 +330,22 @@ namespace CppCLRWinformsSTDebugger
 			this->button1->UseVisualStyleBackColor = true;
 			this->button1->Click += gcnew System::EventHandler(this, &Form1::button1_Click);
 			// 
+			// button2
+			// 
+			this->button2->Location = System::Drawing::Point(316, 42);
+			this->button2->Name = L"TestingButton";
+			this->button2->Size = System::Drawing::Size(173, 38);
+			this->button2->TabIndex = 14;
+			this->button2->Text = L"Test Button";
+			this->button2->UseVisualStyleBackColor = true;
+			this->button2->Click += gcnew System::EventHandler(this, &Form1::button2_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1542, 1119);
+			this->Controls->Add(this->button2);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->LogLabel);
 			this->Controls->Add(this->LogWindow);
@@ -788,6 +800,12 @@ private: System::Void ConnectButton_Click(System::Object^ sender, System::EventA
 private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) 
 {
 	g_STDebugger->DisconnectFromTarget();
+}
+
+// for testing
+private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->RequestRegisters();
 }
 };
 }

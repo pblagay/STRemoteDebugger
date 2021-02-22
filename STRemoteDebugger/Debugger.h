@@ -87,11 +87,14 @@ public:
 	void Init(void* formPtr);
 	void Shutdown();
 
-	void ConnectToTarget();
-	void DisconnectFromTarget();
 	void LoadExecutable(LPCWSTR Filename);
 	void SetStartingMemoryAddress(u32 Address);
 	void LoadMemory(char* SrcData);
+
+	// cmds
+	void ConnectToTarget();
+	void DisconnectFromTarget();
+	void RequestRegisters();
 
 	u32 GetMemoryWindowFirstCharacterPosition() { return MemoryWindowFirstCharacterPosition; }
 	u32	GetMemoryWindowLineLength() { return MemoryWindowLineLength; }
@@ -124,6 +127,7 @@ private:
 	void	ParseProgram();
 	void	SetupRegisters();
 	void	SetupMemory();
+	void	UpdateRegisters();
 
 	// log
 	void	OutputToLog(mString Text);

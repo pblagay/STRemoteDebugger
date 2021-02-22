@@ -257,22 +257,65 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAdress, u32 NumBytes)
 
 	switch (Cmd)
 	{
-		// on host
+	// on host
 	case DEBUGGER_CMD_CONNECT:
-		SendPacket(packetBuffer, 1);
+		SendPacket(packetBuffer, 4);
 		break;
 	case DEBUGGER_CMD_DISCONNECT:
-		SendPacket(packetBuffer, 1);
+		SendPacket(packetBuffer, 4);
 		break;
-		// usually on target
+	case DEBUGGER_CMD_REQUEST_REGISTERS:
+		SendPacket(packetBuffer, 4);
+		break;
+
+	// usually on target
 	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
-		strcpy((char*)&packetBuffer[1], "Atari ST - Tos 1.04");
-		SendPacket(packetBuffer);
+	{
+		const char* targetName = "Atari ST - Tos 1.04";
+		u32 len = strlen(targetName);
+		strcpy((char*)&packetBuffer[4], targetName);
+		SendPacket(packetBuffer, 4 + len);
+	}
 		break;
 	case DEBUGGER_TARGET_RESPONSE_DISCONNECTED:
-		strcpy((char*)&packetBuffer[1], "Atari ST Disconnected");
-		SendPacket(packetBuffer);
+	{
+		const char* targetName = "Atari ST Disconnected";
+		u32 len = strlen(targetName);
+		strcpy((char*)&packetBuffer[4], targetName);
+		SendPacket(packetBuffer, 4 + len);
+	}
 		break;
+	case DEBUGGER_TARGET_RESPONSE_REGISTERS:
+	{
+		// setup registers
+		// d0 - d7
+		u32* regBuf = (u32*)&packetBuffer[4];
+		*regBuf++ = 0x12345678;
+		*regBuf++ = 0x11111111;
+		*regBuf++ = 0x22222222;
+		*regBuf++ = 0x33333333;
+		*regBuf++ = 0x44444444;
+		*regBuf++ = 0x55555555;
+		*regBuf++ = 0x66666666;
+		*regBuf++ = 0x77777777;
+		// a0 - a7
+		*regBuf++ = 0xA2345678;
+		*regBuf++ = 0xA1111111;
+		*regBuf++ = 0xA2222222;
+		*regBuf++ = 0xA3333333;
+		*regBuf++ = 0xA4444444;
+		*regBuf++ = 0xA5555555;
+		*regBuf++ = 0xA6666666;
+		*regBuf++ = 0xA7777777;
+
+		// PC
+		*regBuf++ = 0xCCCCCCCC;
+		// SR
+		*regBuf++ = 0xDDDDDDDD;
+		SendPacket(packetBuffer, 4 + (16 * 4));		// cmd, 
+	}
+
+
 	default:
 		break;
 	}
@@ -307,6 +350,12 @@ bool STDebugger::SendPacket(u8* packet, u32 NumBytes)
 	}
 
 	return result;
+}
+
+// update registers
+void STDebugger::RequestRegisters()
+{
+	SendCmd(DEBUGGER_CMD_REQUEST_REGISTERS);
 }
 
 // Get COM ports available
@@ -486,7 +535,12 @@ void STDebugger::SetupRegisters()
 
 	// Status
 	SR = new Register(0x00000000, "SR", "");
+	UpdateRegisters();
+}
 
+// udpate registers display
+void STDebugger::UpdateRegisters()
+{
 	// get form
 	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
 	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
@@ -513,7 +567,7 @@ void STDebugger::SetupRegisters()
 		for (s32 i = 0; i < DataRegisters.Count(); i++)
 		{
 			RegString += ConvertCharToString(Regs[i]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i]->ValueString.GetPtr()) + "\t" +
-		 				 ConvertCharToString(Regs[i + DataRegisters.Count()]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString.GetPtr());
+				ConvertCharToString(Regs[i + DataRegisters.Count()]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString.GetPtr());
 
 			RegString += "\r\n";
 		}
@@ -525,6 +579,7 @@ void STDebugger::SetupRegisters()
 		registerWindow->Text = RegString;
 	}
 }
+
 
 // set starting memory address for memory window
 void STDebugger::SetStartingMemoryAddress(u32 Address)
@@ -1684,8 +1739,8 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 	{
 		HANDLE handle = std->GetSerialPortHandle();
 
-		u8 buffer[32] = { 0 };
-		bool result = ReadFile(handle, buffer, 32, &numBytesRead, NULL);
+		u8 buffer[1024] = { 0 };
+		bool result = ReadFile(handle, buffer, 1024, &numBytesRead, NULL);
 		if (result && numBytesRead != 0)
 		{
 			std->ProcessCommand(buffer);
@@ -1710,27 +1765,34 @@ void STDebugger::ProcessCommand(u8* packet)
 		// on the target usually only
 	case DEBUGGER_CMD_CONNECT:
 		OutputDebugString(L"Got Connect cmd!\n");
-
-		// need to send back some thing now
 		SendCmd(DEBUGGER_TARGET_RESPONSE_CONNECTED);
 		break;
 
 	case DEBUGGER_CMD_DISCONNECT:
 		OutputDebugString(L"Got Disconnect cmd!\n");
-
 		SendCmd(DEBUGGER_TARGET_RESPONSE_DISCONNECTED);
 		break;
-	default:
+
+	case DEBUGGER_CMD_REQUEST_REGISTERS:
+		OutputDebugString(L"Got send registers cmd!\n");
+		SendCmd(DEBUGGER_TARGET_RESPONSE_REGISTERS);
 		break;
-
-
-
 
 		// on the host
 	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
 	{
-		char* targetInfo = (char*)&packet[1];
+		char* targetInfo = (char*)&packet[4];
 		output = "Connected to Target: ";
+		output += targetInfo;
+		output += "\n";
+		output.ToWide();
+		OutputDebugString((LPCWSTR)output.GetPtr());
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_DISCONNECTED:
+	{
+		char* targetInfo = (char*)&packet[4];
 		output += targetInfo;
 		output += "\n";
 		output.ToWide();
@@ -1738,12 +1800,30 @@ void STDebugger::ProcessCommand(u8* packet)
 	}
 		break;
 
-	case DEBUGGER_TARGET_RESPONSE_DISCONNECTED:
-		char* targetInfo = (char*)&packet[1];
-		output += targetInfo;
-		output += "\n";
-		output.ToWide();
-		OutputDebugString((LPCWSTR)output.GetPtr());
+	case DEBUGGER_TARGET_RESPONSE_REGISTERS:
+	{
+		OutputDebugString(L"Updated Registers from Target");
+
+		// udpate the debugger registers
+		u32* regBuf = (u32*)&packet[4];
+		for (s32 i = 0; i < DataRegisters.Count(); i++)
+		{
+			Register* reg = DataRegisters[i];
+			reg->Value = *regBuf++;
+		}
+		for (s32 i = 0; i < AddressRegisters.Count(); i++)
+		{
+			Register* reg = AddressRegisters[i];
+			reg->Value = *regBuf++;
+		}
+		PC->Value = *regBuf++;
+		SR->Value = *regBuf++;
+		UpdateRegisters();
+	}
+	break;
+
+
+	default:
 		break;
 	}
 }
