@@ -172,6 +172,7 @@ private:
 	DynArray<ComPort*>	ComPorts;
 	mString				ComPortName = "COM1";
 	u32					BaudRate = 19200;
+	HANDLE				SerialPortHandle = INVALID_HANDLE_VALUE;
 
 	// threads
 	u32					TickThreadHandle = 0;

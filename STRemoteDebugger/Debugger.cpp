@@ -94,6 +94,7 @@ void STDebugger::Init(void* formPtr)
 	GetComPortsAvailable();
 
 	CreateTickThread();
+	ConnectToTarget();
 }
 
 // Shutdown
@@ -134,11 +135,27 @@ void STDebugger::Shutdown()
 // Connect to target
 void STDebugger::ConnectToTarget()
 {
+	mString FullPortName = "\\\\.\\";
+	FullPortName += "COM3"; // ComPortName;
+
+	SerialPortHandle = CreateFileA(FullPortName.GetPtr(),
+		GENERIC_READ | GENERIC_WRITE,	// Read/Write
+		0,								// No Sharing
+		NULL,							// No Security
+		OPEN_EXISTING,					// Open existing port only
+		0,								// Non Overlapped I/O
+		NULL);							// Null for Comm Devices
+
+	if (SerialPortHandle == INVALID_HANDLE_VALUE)
+	{
+		// show message for connected or not
+	}
 }
 
 // Disconnect from target
 void STDebugger::DisconnectFromTarget()
 {
+	CloseHandle(SerialPortHandle);
 }
 
 // Get COM ports available
@@ -1487,6 +1504,9 @@ s32 STDebugger::CreateTickThread()
 	return (s32)TickThreadHandle;
 }
 
+// Serial IO input / output
+
+
 // tick function
 unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 {
@@ -1494,6 +1514,7 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 
 	while (!std->TickFunctionExit)
 	{
+
 		Sleep(17);
 	}
 
