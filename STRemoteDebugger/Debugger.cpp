@@ -10,6 +10,7 @@
 #include "Debugger.h"
 #include <stdio.h>
 #include "Form1.h"
+#include <process.h>
 
 
 using namespace System;
@@ -91,11 +92,15 @@ void STDebugger::Init(void* formPtr)
 	SetupMemory();
 
 	GetComPortsAvailable();
+
+	CreateTickThread();
 }
 
 // Shutdown
 void STDebugger::Shutdown()
 {
+	ShutdownThreads();
+
 	// cleanup regs
 	for (s32 i = 0; i < DataRegisters.Count(); i++)
 	{
@@ -1452,4 +1457,59 @@ void STDebugger::ParseProgram()
 
 
 	}
+}
+
+
+//////////////////////////////////////////////////////////////
+// SERIAL IO
+//////////////////////////////////////////////////////////////
+s32 STDebugger::CreateTickThread()
+{
+	DWORD	dwThrdParam = 1;
+	BOOL	result;
+	s32		handle = 0;
+
+	// create a new thread
+	TickThreadHandle = _beginthreadex(NULL, 65536, &STDebugger::TickThread, this, 0 /*CREATE_SUSPENDED*/, (unsigned int*)&TickThreadID);
+
+	if (!TickThreadHandle)
+		return -1;			// bad handle
+
+	// set the priority
+	result = SetThreadPriority((HANDLE)TickThreadHandle, THREAD_PRIORITY_NORMAL);
+	if (!result)
+		return -1;
+
+	result = ResumeThread((HANDLE)TickThreadHandle);
+	if (result == -1)
+		return -1;
+
+	return (s32)TickThreadHandle;
+}
+
+// tick function
+unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
+{
+	STDebugger* std = (STDebugger*)lpParameter;
+
+	while (!std->TickFunctionExit)
+	{
+		Sleep(17);
+	}
+
+	DWORD	ExitCode = 0;
+	GetExitCodeThread((HANDLE)std->TickThreadHandle, &ExitCode);
+	_endthreadex(ExitCode);
+	return 0;
+}
+
+// shutdown threads
+void STDebugger::ShutdownThreads()
+{
+	WaitForSingleObject((HANDLE)TickThreadHandle, 1);
+	TickFunctionExit = true;
+	WaitForSingleObject((HANDLE)TickThreadHandle, 1);
+	CloseHandle((HANDLE)TickThreadHandle);
+
+	TickThreadHandle = 0;
 }

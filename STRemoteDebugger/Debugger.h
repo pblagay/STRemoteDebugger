@@ -122,10 +122,18 @@ private:
 	void	ParseProgram();
 	void	SetupRegisters();
 	void	SetupMemory();
+
+	// disasm
 	int		GetMode(int instruction);
 	int		GetWord();
 	void	SprintMode(unsigned int mode, unsigned int reg, unsigned int size, char* out_s);
 
+	// thread
+	s32		CreateTickThread();
+	void	ShutdownThreads();
+	static unsigned int __stdcall TickThread(void* lpParameter);
+
+//	u32		TickThread(void* lpParameter);
 	u8*		LoadBufferPtr = nullptr;
 	bool	rawmode = false;
 
@@ -164,4 +172,9 @@ private:
 	DynArray<ComPort*>	ComPorts;
 	mString				ComPortName = "COM1";
 	u32					BaudRate = 19200;
+
+	// threads
+	u32					TickThreadHandle = 0;
+	u32					TickThreadID = 0;
+	bool				TickFunctionExit = false;
 };
