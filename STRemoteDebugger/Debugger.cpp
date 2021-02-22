@@ -92,8 +92,6 @@ void STDebugger::Init(void* formPtr)
 	SetupMemory();
 
 	GetComPortsAvailable();
-
-	CreateTickThread();
 }
 
 // Shutdown
@@ -134,12 +132,15 @@ void STDebugger::Shutdown()
 // Connect to target
 void STDebugger::ConnectToTarget()
 {
+	mString logString;
+
 	DisconnectFromTarget();			// temp
 
 	if (SerialPortHandle != INVALID_HANDLE_VALUE)
 	{
 		// need to disconnect first, ignoring
-		OutputToLog(mString("Serial port already open, disconnect first then try again.."));
+		logString.Set("Serial port '%s' already open, disconnect first then try again..", ComPortName.GetPtr());
+		OutputToLog(logString);
 		return;
 	}
 
@@ -156,17 +157,22 @@ void STDebugger::ConnectToTarget()
 
 	if (SerialPortHandle == INVALID_HANDLE_VALUE)
 	{
-		OutputToLog(mString("Failed to open serial port!"));
+		logString.Set("Failed to open Serial port '%s'!", ComPortName.GetPtr());
+		OutputToLog(logString);
 		return;
 	}
-
-	OutputToLog(mString("Serial port opened successfully!"));
+	
+	logString.Set("Serial port '%s' opened successfully!", ComPortName.GetPtr());
+	OutputToLog(logString);
 	SetSerialConfig();
+	CreateTickThread();
 }
 
 // Set Serial Port baud rate etc
 bool STDebugger::SetSerialConfig()
 {
+	mString logString;
+
 	if (SerialPortHandle == INVALID_HANDLE_VALUE)
 	{
 		return false;
@@ -185,7 +191,8 @@ bool STDebugger::SetSerialConfig()
 
 	if (!fSuccess)
 	{
-		OutputToLog(mString("Failed to get Serial port comm config!"));
+		logString.Set("Failed to get Serial port comm config for '%s'", ComPortName.GetPtr());
+		OutputToLog(logString);
 		return false;
 	}
 
@@ -199,9 +206,13 @@ bool STDebugger::SetSerialConfig()
 	fSuccess = SetCommState(SerialPortHandle, &dcb);
 	if (!fSuccess)
 	{
-		OutputToLog(mString("Failed to set Serial port comm config!"));
+		logString.Set("Failed to set Serial port comm config for '%s'", ComPortName.GetPtr());
+		OutputToLog(logString);
 		return false;
 	}
+
+	logString.Set("Set config for Serial port '%s', Baud Rate: %d", ComPortName.GetPtr(), BaudRate);
+	OutputToLog(logString);
 
 	return fSuccess;
 }
@@ -209,6 +220,8 @@ bool STDebugger::SetSerialConfig()
 // Disconnect from target
 void STDebugger::DisconnectFromTarget()
 {
+	ShutdownThreads();
+
 	if (SerialPortHandle != INVALID_HANDLE_VALUE)
 	{
 		CloseHandle(SerialPortHandle);
