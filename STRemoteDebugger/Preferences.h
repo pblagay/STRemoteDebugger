@@ -5,6 +5,8 @@
 
 extern STDebugger* g_STDebugger;
 
+ref class Form1;
+
 namespace CppCLRWinformsSTDebugger 
 {
 	using namespace System;
@@ -30,13 +32,17 @@ namespace CppCLRWinformsSTDebugger
 
 	private: System::Windows::Forms::Label^ label3;
 	private: System::Windows::Forms::Label^ label2;
+
+	private: System::Windows::Forms::Button^ OKButton;
+	private: System::Windows::Forms::Button^ button1;
 	public:
 
 	System::Windows::Forms::Form^ mainWindow = nullptr;
 	System::Windows::Forms::ComboBox^ GetComportsList() { return ComPorts; }
 	System::Windows::Forms::RichTextBox^ GetSerialPortDescBox() { return SerialPortDesc; }
 	System::Windows::Forms::ComboBox^ GetBaudRateList() { return BaudRate; }
-
+	u32 SelectedBaudRate;
+	System::String^ SelectedComPort;
 
 	private: System::Windows::Forms::TabControl^ PreferencesTabControl;
 	public:
@@ -84,6 +90,8 @@ namespace CppCLRWinformsSTDebugger
 			this->ComPorts = (gcnew System::Windows::Forms::ComboBox());
 			this->SerialPortDesc = (gcnew System::Windows::Forms::RichTextBox());
 			this->tabPage2 = (gcnew System::Windows::Forms::TabPage());
+			this->OKButton = (gcnew System::Windows::Forms::Button());
+			this->button1 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
 			this->PreferencesTabControl->SuspendLayout();
@@ -111,6 +119,7 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// tabPage1
 			// 
+			this->tabPage1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
 			this->tabPage1->Controls->Add(this->BaudRate);
 			this->tabPage1->Controls->Add(this->label3);
 			this->tabPage1->Controls->Add(this->label2);
@@ -199,16 +208,42 @@ namespace CppCLRWinformsSTDebugger
 			this->tabPage2->Text = L"Options";
 			this->tabPage2->UseVisualStyleBackColor = true;
 			// 
+			// OKButton
+			// 
+			this->OKButton->FlatAppearance->BorderColor = System::Drawing::Color::Blue;
+			this->OKButton->Location = System::Drawing::Point(552, 369);
+			this->OKButton->Name = L"OKButton";
+			this->OKButton->Size = System::Drawing::Size(81, 36);
+			this->OKButton->TabIndex = 7;
+			this->OKButton->Text = L"OK";
+			this->OKButton->UseVisualStyleBackColor = true;
+			this->OKButton->Click += gcnew System::EventHandler(this, &Preferences::OKButton_Click);
+			this->OKButton->Enter += gcnew System::EventHandler(this, &Preferences::OKButton_Enter);
+			// 
+			// button1
+			// 
+			this->button1->Location = System::Drawing::Point(651, 369);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(75, 36);
+			this->button1->TabIndex = 8;
+			this->button1->Text = L"Cancel";
+			this->button1->UseVisualStyleBackColor = true;
+			this->button1->Click += gcnew System::EventHandler(this, &Preferences::button1_Click);
+			// 
 			// Preferences
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(740, 346);
+			this->ClientSize = System::Drawing::Size(743, 417);
+			this->Controls->Add(this->button1);
+			this->Controls->Add(this->OKButton);
 			this->Controls->Add(this->PreferencesTabControl);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::Fixed3D;
 			this->Margin = System::Windows::Forms::Padding(4);
 			this->Name = L"Preferences";
 			this->Text = L"Preferences";
+			this->Activated += gcnew System::EventHandler(this, &Preferences::Preferences_Activated);
+			this->Enter += gcnew System::EventHandler(this, &Preferences::Preferences_Enter);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->EndInit();
 			this->PreferencesTabControl->ResumeLayout(false);
@@ -223,8 +258,8 @@ namespace CppCLRWinformsSTDebugger
 private: System::Void ComPorts_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
 {
 	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
-	char* portName = ConvertStringToChar(cb->SelectedItem->ToString());
-	g_STDebugger->SetComPortName(portName);
+	SelectedComPort = cb->SelectedItem->ToString();
+	char* portName = ConvertStringToChar(SelectedComPort);
 
 	// set the new description
 	bool foundComPort = false;
@@ -243,14 +278,42 @@ private: System::Void ComPorts_SelectedIndexChanged(System::Object^ sender, Syst
 	{
 		SerialPortDesc->Text = "";
 	}
-
-
 }
 private: System::Void BaudRate_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
 {
 	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
 	char* baud = ConvertStringToChar(cb->SelectedItem->ToString());
-	g_STDebugger->SetBaudRate(atoi(baud));
+	SelectedBaudRate = atoi(baud);
+}
+
+// OK
+private: System::Void OKButton_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	// send values to the debugger
+	g_STDebugger->SetBaudRate(SelectedBaudRate);
+	char* portName = ConvertStringToChar(SelectedComPort);
+	g_STDebugger->SetComPortName(portName);
+	g_STDebugger->ClearMainWindowPreferencesReference();
+	Close();
+}
+private: System::Void OKButton_Enter(System::Object^ sender, System::EventArgs^ e) 
+{
+
+}
+
+private: System::Void Preferences_Activated(System::Object^ sender, System::EventArgs^ e) 
+{
+}
+	   
+private: System::Void Preferences_Enter(System::Object^ sender, System::EventArgs^ e) 
+{
+}
+
+// cancel
+private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->ClearMainWindowPreferencesReference();
+	Close();
 }
 };
 }

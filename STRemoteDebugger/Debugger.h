@@ -107,8 +107,13 @@ public:
 	void SetMemoryWindowInAsciiBlock(bool pMemoryWindowInAsciiBlock) { MemoryWindowInAsciiBlock = pMemoryWindowInAsciiBlock; }
 
 	DynArray<ComPort*>&	GetComPortsArray() { return ComPorts; }
+	char* GetComPortName() { return ComPortName.GetPtr(); }
 	void SetComPortName(char* pComPortName) { ComPortName = pComPortName; }
 	void SetBaudRate(u32 pBaudRate) { BaudRate = pBaudRate; }
+	u32 GetBaudRate() { return BaudRate;  }
+
+	// clear refs
+	void ClearMainWindowPreferencesReference();
 
 	void DebugMemoryData();
 
@@ -157,6 +162,6 @@ private:
 
 	// Serial port
 	DynArray<ComPort*>	ComPorts;
-	mString				ComPortName;
-	u32					BaudRate;
+	mString				ComPortName = "COM1";
+	u32					BaudRate = 19200;
 };
