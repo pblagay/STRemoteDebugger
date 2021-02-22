@@ -139,6 +139,7 @@ void STDebugger::ConnectToTarget()
 	if (SerialPortHandle != INVALID_HANDLE_VALUE)
 	{
 		// need to disconnect first, ignoring
+		OutputToLog(mString("Serial port already open, disconnect first then try again.."));
 		return;
 	}
 
@@ -155,8 +156,11 @@ void STDebugger::ConnectToTarget()
 
 	if (SerialPortHandle == INVALID_HANDLE_VALUE)
 	{
-		// show message for connected or not
+		OutputToLog(mString("Failed to open serial port!"));
+		return;
 	}
+
+	OutputToLog(mString("Serial port opened successfully!"));
 	SetSerialConfig();
 }
 
@@ -181,6 +185,7 @@ bool STDebugger::SetSerialConfig()
 
 	if (!fSuccess)
 	{
+		OutputToLog(mString("Failed to get Serial port comm config!"));
 		return false;
 	}
 
@@ -194,6 +199,7 @@ bool STDebugger::SetSerialConfig()
 	fSuccess = SetCommState(SerialPortHandle, &dcb);
 	if (!fSuccess)
 	{
+		OutputToLog(mString("Failed to set Serial port comm config!"));
 		return false;
 	}
 
@@ -206,6 +212,7 @@ void STDebugger::DisconnectFromTarget()
 	if (SerialPortHandle != INVALID_HANDLE_VALUE)
 	{
 		CloseHandle(SerialPortHandle);
+		OutputToLog(mString("Serial port closed successfully!"));
 	}
 	SerialPortHandle = INVALID_HANDLE_VALUE;
 }
@@ -1528,6 +1535,21 @@ void STDebugger::ParseProgram()
 	}
 }
 
+//////////////////////////////////////////////////////////////
+void STDebugger::OutputToLog(mString Text)
+{
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+
+	if (mainWindow != nullptr)
+	{
+		System::Windows::Forms::RichTextBox^ logWindow = mainWindow->GetLogWindow();
+		if (logWindow != nullptr)
+		{
+			logWindow->Text += "\n" + ConvertCharToString(Text.GetPtr());
+		}
+	}
+}
 
 //////////////////////////////////////////////////////////////
 // SERIAL IO

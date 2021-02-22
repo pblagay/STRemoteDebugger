@@ -33,6 +33,7 @@ namespace CppCLRWinformsSTDebugger
 		System::Windows::Forms::RichTextBox^ GetAssemblyWindow() { return AssemblyWindow; }
 		System::Windows::Forms::RichTextBox^ GetSourceWindow() { return SourceCodeWindow; }
 		System::Windows::Forms::RichTextBox^ GetMemoryWindow() { return MemoryWindow; }
+		System::Windows::Forms::RichTextBox^ GetLogWindow() { return LogWindow; }
 		System::Windows::Forms::Form^ GetMainWindow() { return this; }
 		Preferences^ GetPreferencesWindow() { return preferencesWindow; }
 		void SetPreferencesWindow(Preferences^ pWindow) { preferencesWindow = pWindow; }
@@ -119,7 +120,7 @@ namespace CppCLRWinformsSTDebugger
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
 			this->menuStrip1->Padding = System::Windows::Forms::Padding(5, 2, 0, 2);
-			this->menuStrip1->Size = System::Drawing::Size(1542, 28);
+			this->menuStrip1->Size = System::Drawing::Size(1285, 25);
 			this->menuStrip1->TabIndex = 0;
 			this->menuStrip1->Text = L"menuStrip1";
 			// 
@@ -130,7 +131,7 @@ namespace CppCLRWinformsSTDebugger
 					this->preferencesToolStripMenuItem, this->toolStripSeparator1, this->quitToolStripMenuItem
 			});
 			this->fileToolStripMenuItem->Name = L"fileToolStripMenuItem";
-			this->fileToolStripMenuItem->Size = System::Drawing::Size(46, 24);
+			this->fileToolStripMenuItem->Size = System::Drawing::Size(46, 21);
 			this->fileToolStripMenuItem->Text = L"File";
 			// 
 			// openToolStripMenuItem
@@ -296,6 +297,8 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// LogWindow
 			// 
+			this->LogWindow->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
 			this->LogWindow->Location = System::Drawing::Point(25, 1011);
 			this->LogWindow->Name = L"LogWindow";
 			this->LogWindow->ReadOnly = true;

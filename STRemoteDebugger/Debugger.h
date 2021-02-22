@@ -123,6 +123,9 @@ private:
 	void	SetupRegisters();
 	void	SetupMemory();
 
+	// log
+	void	OutputToLog(mString Text);
+
 	// disasm
 	int		GetMode(int instruction);
 	int		GetWord();
