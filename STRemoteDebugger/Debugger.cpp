@@ -134,8 +134,6 @@ void STDebugger::ConnectToTarget()
 {
 	mString logString;
 
-	DisconnectFromTarget();			// temp
-
 	if (SerialPortHandle != INVALID_HANDLE_VALUE)
 	{
 		// need to disconnect first, ignoring
@@ -166,6 +164,8 @@ void STDebugger::ConnectToTarget()
 	OutputToLog(logString);
 	SetSerialConfig();
 	CreateTickThread();
+
+	SendCmd(DEBUGGER_CMD_CONNECT);
 }
 
 // Set Serial Port baud rate etc
@@ -223,14 +223,21 @@ bool STDebugger::SetSerialConfig()
 	logString.Set("Set config for Serial port '%s', Baud Rate: %d", ComPortName.GetPtr(), BaudRate);
 	OutputToLog(logString);
 
-	SendCmd(DEBUGGER_CMD_CONNECT);
-
 	return fSuccess;
 }
 
 // Disconnect from target
 void STDebugger::DisconnectFromTarget()
 {
+	if (SerialPortHandle == INVALID_HANDLE_VALUE)
+	{
+		// not connected, ignore
+		return;
+	}
+
+	SendCmd(DEBUGGER_CMD_DISCONNECT);
+	Sleep(100);
+
 	ShutdownThreads();
 
 	if (SerialPortHandle != INVALID_HANDLE_VALUE)
@@ -252,7 +259,6 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAdress, u32 NumBytes)
 	{
 		// on host
 	case DEBUGGER_CMD_CONNECT:
-		packetBuffer[0] = Cmd;
 		SendPacket(packetBuffer, 1);
 		break;
 	case DEBUGGER_CMD_DISCONNECT:
@@ -261,6 +267,10 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAdress, u32 NumBytes)
 		// usually on target
 	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
 		strcpy((char*)&packetBuffer[1], "Atari ST - Tos 1.04");
+		SendPacket(packetBuffer);
+		break;
+	case DEBUGGER_TARGET_RESPONSE_DISCONNECTED:
+		strcpy((char*)&packetBuffer[1], "Atari ST Disconnected");
 		SendPacket(packetBuffer);
 		break;
 	default:
@@ -287,7 +297,7 @@ bool STDebugger::SendPacket(u8* packet, u32 NumBytes)
 	result = WriteFile(SerialPortHandle, packet, NumBytes, &NumBytesWritten, NULL);
 	if (result)
 	{
-		OutputDebugString(L"Sent packet successfully..\n");
+//		OutputDebugString(L"Sent packet successfully..\n");
 //		OutputToLog(mString("Sent packet successfully.."));
 	}
 	else
@@ -1699,7 +1709,6 @@ void STDebugger::ProcessCommand(u8* packet)
 	{
 		// on the target usually only
 	case DEBUGGER_CMD_CONNECT:
-		printf("Got Connect cmd!");
 		OutputDebugString(L"Got Connect cmd!\n");
 
 		// need to send back some thing now
@@ -1707,7 +1716,9 @@ void STDebugger::ProcessCommand(u8* packet)
 		break;
 
 	case DEBUGGER_CMD_DISCONNECT:
-		OutputDebugString(L"Got Disconnect cmd!");
+		OutputDebugString(L"Got Disconnect cmd!\n");
+
+		SendCmd(DEBUGGER_TARGET_RESPONSE_DISCONNECTED);
 		break;
 	default:
 		break;
@@ -1717,8 +1728,18 @@ void STDebugger::ProcessCommand(u8* packet)
 
 		// on the host
 	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
+	{
 		char* targetInfo = (char*)&packet[1];
 		output = "Connected to Target: ";
+		output += targetInfo;
+		output += "\n";
+		output.ToWide();
+		OutputDebugString((LPCWSTR)output.GetPtr());
+	}
+		break;
+
+	case DEBUGGER_TARGET_RESPONSE_DISCONNECTED:
+		char* targetInfo = (char*)&packet[1];
 		output += targetInfo;
 		output += "\n";
 		output.ToWide();

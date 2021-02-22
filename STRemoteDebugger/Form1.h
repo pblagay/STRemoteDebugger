@@ -74,6 +74,7 @@ namespace CppCLRWinformsSTDebugger
 	private: System::Windows::Forms::ErrorProvider^ errorProvider2;
 	private: System::Windows::Forms::Button^ ConnectButton;
 	private: System::Windows::Forms::Label^ LogLabel;
+	private: System::Windows::Forms::Button^ button1;
 	private: System::Windows::Forms::RichTextBox^ LogWindow;
 
 	private: System::Windows::Forms::ErrorProvider^ errorProvider1;
@@ -108,6 +109,7 @@ namespace CppCLRWinformsSTDebugger
 			this->ConnectButton = (gcnew System::Windows::Forms::Button());
 			this->LogWindow = (gcnew System::Windows::Forms::RichTextBox());
 			this->LogLabel = (gcnew System::Windows::Forms::Label());
+			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
@@ -120,7 +122,7 @@ namespace CppCLRWinformsSTDebugger
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
 			this->menuStrip1->Padding = System::Windows::Forms::Padding(5, 2, 0, 2);
-			this->menuStrip1->Size = System::Drawing::Size(1285, 25);
+			this->menuStrip1->Size = System::Drawing::Size(1542, 28);
 			this->menuStrip1->TabIndex = 0;
 			this->menuStrip1->Text = L"menuStrip1";
 			// 
@@ -131,7 +133,7 @@ namespace CppCLRWinformsSTDebugger
 					this->preferencesToolStripMenuItem, this->toolStripSeparator1, this->quitToolStripMenuItem
 			});
 			this->fileToolStripMenuItem->Name = L"fileToolStripMenuItem";
-			this->fileToolStripMenuItem->Size = System::Drawing::Size(46, 21);
+			this->fileToolStripMenuItem->Size = System::Drawing::Size(46, 24);
 			this->fileToolStripMenuItem->Text = L"File";
 			// 
 			// openToolStripMenuItem
@@ -317,11 +319,22 @@ namespace CppCLRWinformsSTDebugger
 			this->LogLabel->TabIndex = 12;
 			this->LogLabel->Text = L"Log Window";
 			// 
+			// button1
+			// 
+			this->button1->Location = System::Drawing::Point(160, 42);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(50, 38);
+			this->button1->TabIndex = 13;
+			this->button1->Text = L"Disconnected";
+			this->button1->UseVisualStyleBackColor = true;
+			this->button1->Click += gcnew System::EventHandler(this, &Form1::button1_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1542, 1119);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->LogLabel);
 			this->Controls->Add(this->LogWindow);
 			this->Controls->Add(this->ConnectButton);
@@ -770,6 +783,11 @@ private: System::Void preferencesToolStripMenuItem_Click(System::Object^ sender,
 private: System::Void ConnectButton_Click(System::Object^ sender, System::EventArgs^ e) 
 {
 	g_STDebugger->ConnectToTarget();
+}
+// Clicked disconnected
+private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->DisconnectFromTarget();
 }
 };
 }
