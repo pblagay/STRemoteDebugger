@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source\IniFile">
+      <UniqueIdentifier>{12073da0-0a70-4a87-87a2-f532684b6337}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc">
@@ -59,6 +62,9 @@
     <ClInclude Include="Commands.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\VariousSourceCodes\minIni-master\dev\minIni.h">
+      <Filter>Source\IniFile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -87,6 +93,9 @@
     </ClCompile>
     <ClCompile Include="cString.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VariousSourceCodes\minIni-master\dev\minIni.c">
+      <Filter>Source\IniFile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

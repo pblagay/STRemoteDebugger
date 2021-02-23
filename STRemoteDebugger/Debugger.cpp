@@ -12,6 +12,10 @@
 #include "Form1.h"
 #include "Debugger.h"
 #include "Commands.h"
+#include "..\..\..\VariousSourceCodes\minIni-master\dev\minIni.h"
+
+#define sizearray(a)  (sizeof(a) / sizeof((a)[0]))
+const char inifile[] = "STRemoteDebugger.ini";
 
 using namespace System;
 
@@ -92,11 +96,14 @@ void STDebugger::Init(void* formPtr)
 	SetupMemory();
 
 	GetComPortsAvailable();
+
+	ReadIniFile();
 }
 
 // Shutdown
 void STDebugger::Shutdown()
 {
+	WriteIniFile();
 	ShutdownThreads();
 
 	// cleanup regs
@@ -127,6 +134,29 @@ void STDebugger::Shutdown()
 		delete ComPorts[i];
 	}
 	ComPorts.Reset();
+}
+
+// read ini file
+void STDebugger::ReadIniFile()
+{
+	char str[100];
+	long n;
+
+	n = ini_gets("Serial Port", "Port", "COM1", str, sizearray(str), inifile);
+	ComPortName = str;
+
+	n = ini_getl("Serial Port", "Baud", 19200, inifile);
+	BaudRate = n;
+}
+
+// write ini file
+void STDebugger::WriteIniFile()
+{
+	char str[100];
+	long n;
+
+	n = ini_puts("Serial Port", "Port", ComPortName.GetPtr(), inifile);
+	n = ini_putl("Serial Port", "Baud", BaudRate, inifile);
 }
 
 // Connect to target

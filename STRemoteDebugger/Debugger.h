@@ -92,6 +92,9 @@ public:
 	void Init(void* formPtr);
 	void Shutdown();
 
+	void ReadIniFile();
+	void WriteIniFile();
+
 	void LoadExecutable(LPCWSTR Filename);
 	void SetStartingMemoryAddress(u32 Address);
 	void LoadMemory(char* SrcData);
