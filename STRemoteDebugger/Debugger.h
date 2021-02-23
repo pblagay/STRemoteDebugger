@@ -70,6 +70,7 @@ public:
 
 	void SetValue(u32 pValue)
 	{
+		Value = pValue;
 		ValueString.Set("0x%08x", pValue);
 	}
 

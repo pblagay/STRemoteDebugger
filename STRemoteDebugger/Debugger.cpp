@@ -1836,12 +1836,12 @@ void STDebugger::ProcessCommand(u8* packet)
 		for (s32 i = 0; i < DataRegisters.Count(); i++)
 		{
 			Register* reg = DataRegisters[i];
-			reg->Value = *regBuf++;
+			reg->SetValue(*regBuf++);
 		}
 		for (s32 i = 0; i < AddressRegisters.Count(); i++)
 		{
 			Register* reg = AddressRegisters[i];
-			reg->Value = *regBuf++;
+			reg->SetValue(*regBuf++);
 		}
 		PC->Value = *regBuf++;
 		SR->Value = *regBuf++;
