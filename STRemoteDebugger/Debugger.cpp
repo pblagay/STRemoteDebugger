@@ -281,23 +281,49 @@ void STDebugger::DisconnectFromTarget()
 void STDebugger::SendCmd(u8 Cmd, u32 MemoryAdress, u32 NumBytes)
 {
 	u8 packetBuffer[128] = { 0 };
+	u32* packetData = (u32*)(packetBuffer + 4);
 
 	packetBuffer[0] = Cmd;		// set cmd
 
 	switch (Cmd)
 	{
 	// on host
+	case DEBUGGER_CMD_STEP:
+	case DEBUGGER_CMD_RUN:
+	case DEBUGGER_CMD_STOP:
 	case DEBUGGER_CMD_CONNECT:
-		SendPacket(packetBuffer, 4);
-		break;
 	case DEBUGGER_CMD_DISCONNECT:
-		SendPacket(packetBuffer, 4);
-		break;
 	case DEBUGGER_CMD_REQUEST_REGISTERS:
+	case DEBUGGER_CMD_REQUEST_MEMORY:
 		SendPacket(packetBuffer, 4);
 		break;
 
 	// usually on target
+	case DEBUGGER_TARGET_RESPONSE_STEP:
+	{
+		*packetData++ = 0x88888888;				// send back the PC
+		SendPacket(packetBuffer, 4 + 4);
+	}
+		break;
+
+	case DEBUGGER_TARGET_RESPONSE_RUN:
+	{
+		const char* response = "OK";
+		u32 len = strlen(response);
+		strcpy((char*)&packetBuffer[4], response);
+		SendPacket(packetBuffer, 4 + len);
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_STOP:
+	{
+		const char* response = "OK";
+		u32 len = strlen(response);
+		strcpy((char*)&packetBuffer[4], response);
+		SendPacket(packetBuffer, 4 + len);
+	}
+	break;
+
 	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
 	{
 		const char* targetName = "Atari ST - Tos 1.04";
@@ -1835,6 +1861,27 @@ void STDebugger::ProcessCommand(u8* packet)
 		break;
 
 		// on the host
+	case DEBUGGER_TARGET_RESPONSE_STEP:
+	{
+		char* response = (char*)&packet[4];
+		// update PC if response we ok
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_STOP:
+	{
+		char* response = (char*)&packet[4];
+		// did we stop (set PC)
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_RUN:
+	{
+		char* response = (char*)&packet[4];
+		// did we run? set debugger to active
+	}
+	break;
+
 	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
 	{
 		char* targetInfo = (char*)&packet[4];
