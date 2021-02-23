@@ -294,6 +294,7 @@ private: System::Void OKButton_Click(System::Object^ sender, System::EventArgs^ 
 	char* portName = ConvertStringToChar(SelectedComPort);
 	g_STDebugger->SetComPortName(portName);
 	g_STDebugger->ClearMainWindowPreferencesReference();
+	g_STDebugger->WriteIniFile();
 	Close();
 }
 private: System::Void OKButton_Enter(System::Object^ sender, System::EventArgs^ e) 

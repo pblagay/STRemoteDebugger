@@ -127,14 +127,15 @@ namespace CppCLRWinformsSTDebugger
 			this->LogLabel = (gcnew System::Windows::Forms::Label());
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->button2 = (gcnew System::Windows::Forms::Button());
-			this->TickTimer = (gcnew System::Windows::Forms::Timer(this->components));
 			this->menuStrip1->SuspendLayout();
+			this->TickTimer = (gcnew System::Windows::Forms::Timer(this->components));
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// menuStrip1
 			// 
+			this->menuStrip1->GripMargin = System::Windows::Forms::Padding(2, 2, 0, 2);
 			this->menuStrip1->ImageScalingSize = System::Drawing::Size(24, 24);
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fileToolStripMenuItem });
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
@@ -157,27 +158,28 @@ namespace CppCLRWinformsSTDebugger
 			// openToolStripMenuItem
 			// 
 			this->openToolStripMenuItem->Name = L"openToolStripMenuItem";
-			this->openToolStripMenuItem->Size = System::Drawing::Size(204, 34);
+			this->openToolStripMenuItem->Size = System::Drawing::Size(270, 34);
 			this->openToolStripMenuItem->Text = L"Open";
 			this->openToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::openToolStripMenuItem_Click);
 			// 
 			// preferencesToolStripMenuItem
 			// 
 			this->preferencesToolStripMenuItem->Name = L"preferencesToolStripMenuItem";
-			this->preferencesToolStripMenuItem->Size = System::Drawing::Size(204, 34);
+			this->preferencesToolStripMenuItem->Size = System::Drawing::Size(270, 34);
 			this->preferencesToolStripMenuItem->Text = L"Preferences";
 			this->preferencesToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::preferencesToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this->toolStripSeparator1->Name = L"toolStripSeparator1";
-			this->toolStripSeparator1->Size = System::Drawing::Size(201, 6);
+			this->toolStripSeparator1->Size = System::Drawing::Size(267, 6);
 			// 
 			// quitToolStripMenuItem
 			// 
 			this->quitToolStripMenuItem->Name = L"quitToolStripMenuItem";
-			this->quitToolStripMenuItem->Size = System::Drawing::Size(204, 34);
+			this->quitToolStripMenuItem->Size = System::Drawing::Size(270, 34);
 			this->quitToolStripMenuItem->Text = L"Quit";
+			this->quitToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::quitToolStripMenuItem_Click);
 			// 
 			// SourceCodeWindow
 			// 
@@ -310,7 +312,7 @@ namespace CppCLRWinformsSTDebugger
 			this->LogWindow->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->LogWindow->Location = System::Drawing::Point(18, 783);
-			this->LogWindow->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->LogWindow->Margin = System::Windows::Forms::Padding(2);
 			this->LogWindow->Name = L"LogWindow";
 			this->LogWindow->ReadOnly = true;
 			this->LogWindow->Size = System::Drawing::Size(1118, 115);
@@ -332,7 +334,7 @@ namespace CppCLRWinformsSTDebugger
 			// button1
 			// 
 			this->button1->Location = System::Drawing::Point(120, 34);
-			this->button1->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->button1->Margin = System::Windows::Forms::Padding(2);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(38, 31);
 			this->button1->TabIndex = 13;
@@ -343,7 +345,7 @@ namespace CppCLRWinformsSTDebugger
 			// button2
 			// 
 			this->button2->Location = System::Drawing::Point(237, 34);
-			this->button2->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->button2->Margin = System::Windows::Forms::Padding(2);
 			this->button2->Name = L"button2";
 			this->button2->Size = System::Drawing::Size(130, 31);
 			this->button2->TabIndex = 14;
@@ -820,6 +822,11 @@ private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e
 private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) 
 {
 	g_STDebugger->RequestRegisters();
+}
+private: System::Void quitToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->Shutdown();
+	Close();
 }
 };
 }
