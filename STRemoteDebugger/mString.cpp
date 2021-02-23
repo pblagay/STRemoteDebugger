@@ -65,6 +65,7 @@ mString::mString(u32 size, bool isWide)
 
 mString::~mString()
 {
+	Clear();
 }
 
 //////////////////////////////////////////////////////////

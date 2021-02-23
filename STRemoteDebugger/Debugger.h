@@ -11,6 +11,10 @@
 #define MEMORY_WINDOW_BYTES_PER_COLUMN	4
 #define MEMORY_WINDOW_BYTES_PER_LINE	MEMORY_WINDOW_BYTES_PER_COLUMN * MEMORY_WINDOW_COLUMNS				// 4 bytes per entry / 16 columns
 
+#define UPDATE_REGISTERS_WINDOW			0x01
+
+
+
 class ComPort
 {
 public:
@@ -118,7 +122,7 @@ public:
 	void ClearMainWindowPreferencesReference();
 
 	void DebugMemoryData();
-
+	void RefreshWindows();
 
 	HANDLE GetSerialPortHandle() { return SerialPortHandle; }
 
@@ -128,9 +132,12 @@ private:
 	void	SetupRegisters();
 	void	SetupMemory();
 	void	UpdateRegisters();
+	void	UpdateLog();
 
 	// log
+
 	void	OutputToLog(mString Text);
+	DynArray<mString*>	LogQueue;
 
 	// disasm
 	int		GetMode(int instruction);
@@ -193,4 +200,7 @@ private:
 	u32					TickThreadHandle = 0;
 	u32					TickThreadID = 0;
 	bool				TickFunctionExit = false;
+
+	// update windows (threading)
+	u32					UpdateWindowMask = 0;
 };

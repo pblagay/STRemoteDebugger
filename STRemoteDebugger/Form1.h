@@ -27,6 +27,13 @@ namespace CppCLRWinformsSTDebugger
 			InitializeComponent();
 			void* thisPtr = System::Runtime::InteropServices::GCHandle::ToIntPtr(System::Runtime::InteropServices::GCHandle::Alloc(this)).ToPointer();
 			g_STDebugger->Init(thisPtr);
+
+			// set up tick function
+			TickTimer->Interval = 17;
+			TickTimer->Tick += gcnew System::EventHandler(this, &Form1::TickFunction);
+
+			// Enable timer.  
+			TickTimer->Enabled = true;
 		}
 
 		System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
@@ -38,6 +45,15 @@ namespace CppCLRWinformsSTDebugger
 		Preferences^ GetPreferencesWindow() { return preferencesWindow; }
 		void SetPreferencesWindow(Preferences^ pWindow) { preferencesWindow = pWindow; }
 		Preferences^ preferencesWindow = nullptr;
+		
+	// do GUI related updates
+	private: System::Void TickFunction(System::Object^ sender, System::EventArgs^ e)
+		{
+			g_STDebugger->RefreshWindows();
+		}
+
+	private: System::Windows::Forms::Timer^ TickTimer;
+	public:
 		bool	MemoryWindowInsertModeOn = false;
 
 	protected:
@@ -111,6 +127,7 @@ namespace CppCLRWinformsSTDebugger
 			this->LogLabel = (gcnew System::Windows::Forms::Label());
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->button2 = (gcnew System::Windows::Forms::Button());
+			this->TickTimer = (gcnew System::Windows::Forms::Timer(this->components));
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
@@ -122,8 +139,8 @@ namespace CppCLRWinformsSTDebugger
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fileToolStripMenuItem });
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
-			this->menuStrip1->Padding = System::Windows::Forms::Padding(5, 2, 0, 2);
-			this->menuStrip1->Size = System::Drawing::Size(1542, 28);
+			this->menuStrip1->Padding = System::Windows::Forms::Padding(4, 2, 0, 2);
+			this->menuStrip1->Size = System::Drawing::Size(1156, 33);
 			this->menuStrip1->TabIndex = 0;
 			this->menuStrip1->Text = L"menuStrip1";
 			// 
@@ -134,41 +151,40 @@ namespace CppCLRWinformsSTDebugger
 					this->preferencesToolStripMenuItem, this->toolStripSeparator1, this->quitToolStripMenuItem
 			});
 			this->fileToolStripMenuItem->Name = L"fileToolStripMenuItem";
-			this->fileToolStripMenuItem->Size = System::Drawing::Size(46, 24);
+			this->fileToolStripMenuItem->Size = System::Drawing::Size(54, 29);
 			this->fileToolStripMenuItem->Text = L"File";
 			// 
 			// openToolStripMenuItem
 			// 
 			this->openToolStripMenuItem->Name = L"openToolStripMenuItem";
-			this->openToolStripMenuItem->Size = System::Drawing::Size(168, 26);
+			this->openToolStripMenuItem->Size = System::Drawing::Size(204, 34);
 			this->openToolStripMenuItem->Text = L"Open";
 			this->openToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::openToolStripMenuItem_Click);
 			// 
 			// preferencesToolStripMenuItem
 			// 
 			this->preferencesToolStripMenuItem->Name = L"preferencesToolStripMenuItem";
-			this->preferencesToolStripMenuItem->Size = System::Drawing::Size(168, 26);
+			this->preferencesToolStripMenuItem->Size = System::Drawing::Size(204, 34);
 			this->preferencesToolStripMenuItem->Text = L"Preferences";
 			this->preferencesToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::preferencesToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this->toolStripSeparator1->Name = L"toolStripSeparator1";
-			this->toolStripSeparator1->Size = System::Drawing::Size(165, 6);
+			this->toolStripSeparator1->Size = System::Drawing::Size(201, 6);
 			// 
 			// quitToolStripMenuItem
 			// 
 			this->quitToolStripMenuItem->Name = L"quitToolStripMenuItem";
-			this->quitToolStripMenuItem->Size = System::Drawing::Size(168, 26);
+			this->quitToolStripMenuItem->Size = System::Drawing::Size(204, 34);
 			this->quitToolStripMenuItem->Text = L"Quit";
 			// 
 			// SourceCodeWindow
 			// 
-			this->SourceCodeWindow->Location = System::Drawing::Point(587, 148);
-			this->SourceCodeWindow->Margin = System::Windows::Forms::Padding(4);
+			this->SourceCodeWindow->Location = System::Drawing::Point(440, 120);
 			this->SourceCodeWindow->Name = L"SourceCodeWindow";
 			this->SourceCodeWindow->ReadOnly = true;
-			this->SourceCodeWindow->Size = System::Drawing::Size(459, 513);
+			this->SourceCodeWindow->Size = System::Drawing::Size(345, 418);
 			this->SourceCodeWindow->TabIndex = 1;
 			this->SourceCodeWindow->Text = L"";
 			// 
@@ -177,10 +193,9 @@ namespace CppCLRWinformsSTDebugger
 			this->label1->AutoSize = true;
 			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->label1->Location = System::Drawing::Point(583, 114);
-			this->label1->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label1->Location = System::Drawing::Point(437, 93);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(106, 20);
+			this->label1->Size = System::Drawing::Size(128, 25);
 			this->label1->TabIndex = 2;
 			this->label1->Text = L"Source Code";
 			// 
@@ -189,10 +204,9 @@ namespace CppCLRWinformsSTDebugger
 			this->label2->AutoSize = true;
 			this->label2->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->label2->Location = System::Drawing::Point(1103, 114);
-			this->label2->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label2->Location = System::Drawing::Point(827, 93);
 			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(81, 20);
+			this->label2->Size = System::Drawing::Size(93, 25);
 			this->label2->TabIndex = 3;
 			this->label2->Text = L"Registers";
 			this->label2->Click += gcnew System::EventHandler(this, &Form1::label2_Click);
@@ -201,11 +215,10 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->RegisterWindow->Font = (gcnew System::Drawing::Font(L"Courier New", 10, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->RegisterWindow->Location = System::Drawing::Point(1107, 148);
-			this->RegisterWindow->Margin = System::Windows::Forms::Padding(4);
+			this->RegisterWindow->Location = System::Drawing::Point(830, 120);
 			this->RegisterWindow->Name = L"RegisterWindow";
 			this->RegisterWindow->ReadOnly = true;
-			this->RegisterWindow->Size = System::Drawing::Size(407, 312);
+			this->RegisterWindow->Size = System::Drawing::Size(306, 254);
 			this->RegisterWindow->TabIndex = 4;
 			this->RegisterWindow->Text = L"";
 			// 
@@ -214,10 +227,9 @@ namespace CppCLRWinformsSTDebugger
 			this->label3->AutoSize = true;
 			this->label3->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->label3->Location = System::Drawing::Point(24, 683);
-			this->label3->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label3->Location = System::Drawing::Point(18, 555);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(69, 20);
+			this->label3->Size = System::Drawing::Size(83, 25);
 			this->label3->TabIndex = 5;
 			this->label3->Text = L"Memory";
 			// 
@@ -226,10 +238,9 @@ namespace CppCLRWinformsSTDebugger
 			this->MemoryWindow->DetectUrls = false;
 			this->MemoryWindow->Font = (gcnew System::Drawing::Font(L"Courier New", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->MemoryWindow->Location = System::Drawing::Point(25, 743);
-			this->MemoryWindow->Margin = System::Windows::Forms::Padding(4);
+			this->MemoryWindow->Location = System::Drawing::Point(19, 604);
 			this->MemoryWindow->Name = L"MemoryWindow";
-			this->MemoryWindow->Size = System::Drawing::Size(1489, 168);
+			this->MemoryWindow->Size = System::Drawing::Size(1118, 137);
 			this->MemoryWindow->TabIndex = 6;
 			this->MemoryWindow->Text = L"";
 			this->MemoryWindow->WordWrap = false;
@@ -247,10 +258,9 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->richTextBox1->Font = (gcnew System::Drawing::Font(L"Courier New", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->richTextBox1->Location = System::Drawing::Point(25, 707);
-			this->richTextBox1->Margin = System::Windows::Forms::Padding(4);
+			this->richTextBox1->Location = System::Drawing::Point(19, 574);
 			this->richTextBox1->Name = L"richTextBox1";
-			this->richTextBox1->Size = System::Drawing::Size(284, 27);
+			this->richTextBox1->Size = System::Drawing::Size(214, 23);
 			this->richTextBox1->TabIndex = 7;
 			this->richTextBox1->Text = L"0x00000000";
 			this->richTextBox1->TextChanged += gcnew System::EventHandler(this, &Form1::richTextBox1_TextChanged);
@@ -259,11 +269,10 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// AssemblyWindow
 			// 
-			this->AssemblyWindow->Location = System::Drawing::Point(28, 148);
-			this->AssemblyWindow->Margin = System::Windows::Forms::Padding(4);
+			this->AssemblyWindow->Location = System::Drawing::Point(21, 120);
 			this->AssemblyWindow->Name = L"AssemblyWindow";
 			this->AssemblyWindow->ReadOnly = true;
-			this->AssemblyWindow->Size = System::Drawing::Size(486, 513);
+			this->AssemblyWindow->Size = System::Drawing::Size(366, 418);
 			this->AssemblyWindow->TabIndex = 8;
 			this->AssemblyWindow->Text = L"";
 			// 
@@ -272,10 +281,9 @@ namespace CppCLRWinformsSTDebugger
 			this->label4->AutoSize = true;
 			this->label4->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->label4->Location = System::Drawing::Point(28, 114);
-			this->label4->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label4->Location = System::Drawing::Point(21, 93);
 			this->label4->Name = L"label4";
-			this->label4->Size = System::Drawing::Size(82, 20);
+			this->label4->Size = System::Drawing::Size(98, 25);
 			this->label4->TabIndex = 9;
 			this->label4->Text = L"Assembly";
 			// 
@@ -289,10 +297,9 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// ConnectButton
 			// 
-			this->ConnectButton->Location = System::Drawing::Point(101, 42);
-			this->ConnectButton->Margin = System::Windows::Forms::Padding(4);
+			this->ConnectButton->Location = System::Drawing::Point(76, 34);
 			this->ConnectButton->Name = L"ConnectButton";
-			this->ConnectButton->Size = System::Drawing::Size(51, 38);
+			this->ConnectButton->Size = System::Drawing::Size(38, 31);
 			this->ConnectButton->TabIndex = 10;
 			this->ConnectButton->Text = L"Connect";
 			this->ConnectButton->UseVisualStyleBackColor = true;
@@ -302,10 +309,11 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->LogWindow->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->LogWindow->Location = System::Drawing::Point(25, 1011);
+			this->LogWindow->Location = System::Drawing::Point(18, 783);
+			this->LogWindow->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
 			this->LogWindow->Name = L"LogWindow";
 			this->LogWindow->ReadOnly = true;
-			this->LogWindow->Size = System::Drawing::Size(1489, 96);
+			this->LogWindow->Size = System::Drawing::Size(1118, 115);
 			this->LogWindow->TabIndex = 11;
 			this->LogWindow->Text = L"";
 			// 
@@ -314,17 +322,19 @@ namespace CppCLRWinformsSTDebugger
 			this->LogLabel->AutoSize = true;
 			this->LogLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->LogLabel->Location = System::Drawing::Point(24, 988);
+			this->LogLabel->Location = System::Drawing::Point(18, 756);
+			this->LogLabel->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
 			this->LogLabel->Name = L"LogLabel";
-			this->LogLabel->Size = System::Drawing::Size(101, 20);
+			this->LogLabel->Size = System::Drawing::Size(130, 25);
 			this->LogLabel->TabIndex = 12;
 			this->LogLabel->Text = L"Log Window";
 			// 
 			// button1
 			// 
-			this->button1->Location = System::Drawing::Point(160, 42);
+			this->button1->Location = System::Drawing::Point(120, 34);
+			this->button1->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
 			this->button1->Name = L"button1";
-			this->button1->Size = System::Drawing::Size(50, 38);
+			this->button1->Size = System::Drawing::Size(38, 31);
 			this->button1->TabIndex = 13;
 			this->button1->Text = L"Disconnected";
 			this->button1->UseVisualStyleBackColor = true;
@@ -332,9 +342,10 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// button2
 			// 
-			this->button2->Location = System::Drawing::Point(316, 42);
-			this->button2->Name = L"TestingButton";
-			this->button2->Size = System::Drawing::Size(173, 38);
+			this->button2->Location = System::Drawing::Point(237, 34);
+			this->button2->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->button2->Name = L"button2";
+			this->button2->Size = System::Drawing::Size(130, 31);
 			this->button2->TabIndex = 14;
 			this->button2->Text = L"Test Button";
 			this->button2->UseVisualStyleBackColor = true;
@@ -342,9 +353,9 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// Form1
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
+			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1542, 1119);
+			this->ClientSize = System::Drawing::Size(1156, 909);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->LogLabel);
@@ -362,7 +373,6 @@ namespace CppCLRWinformsSTDebugger
 			this->Controls->Add(this->menuStrip1);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::Fixed3D;
 			this->MainMenuStrip = this->menuStrip1;
-			this->Margin = System::Windows::Forms::Padding(4);
 			this->Name = L"Form1";
 			this->Text = L"Atari ST Remote Debugger";
 			this->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::Form1_KeyPress);

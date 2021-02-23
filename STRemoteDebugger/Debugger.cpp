@@ -1685,6 +1685,16 @@ void STDebugger::ParseProgram()
 //////////////////////////////////////////////////////////////
 void STDebugger::OutputToLog(mString Text)
 {
+	mString* t = new mString(Text);
+	LogQueue.Add(t);
+}
+
+//////////////////////////////////////////////////////////////
+void STDebugger::UpdateLog()
+{
+	if (LogQueue.Count() == 0)
+		return;
+
 	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
 	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
 
@@ -1693,8 +1703,24 @@ void STDebugger::OutputToLog(mString Text)
 		System::Windows::Forms::RichTextBox^ logWindow = mainWindow->GetLogWindow();
 		if (logWindow != nullptr)
 		{
-			logWindow->Text += "\n" + ConvertCharToString(Text.GetPtr());
+			for (s32 i = 0; i < LogQueue.Count(); i++)
+			{
+				logWindow->Text += "\n" + ConvertCharToString(LogQueue[i]->GetPtr());
+			}
 		}
+	}
+	LogQueue.RemoveAll();
+}
+
+//////////////////////////////////////////////////////////////
+void STDebugger::RefreshWindows()
+{
+	UpdateLog();
+
+	if (UpdateWindowMask & UPDATE_REGISTERS_WINDOW)
+	{
+		UpdateRegisters();
+		UpdateWindowMask = UpdateWindowMask & ~UPDATE_REGISTERS_WINDOW;
 	}
 }
 
@@ -1745,6 +1771,7 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 		{
 			std->ProcessCommand(buffer);
 		}
+
 		Sleep(17);
 	}
 
@@ -1818,7 +1845,9 @@ void STDebugger::ProcessCommand(u8* packet)
 		}
 		PC->Value = *regBuf++;
 		SR->Value = *regBuf++;
-		UpdateRegisters();
+
+		UpdateWindowMask |= UPDATE_REGISTERS_WINDOW;
+//		UpdateRegisters();
 	}
 	break;
 
