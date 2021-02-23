@@ -745,7 +745,7 @@ private: System::Void preferencesToolStripMenuItem_Click(System::Object^ sender,
 		preferencesWindow->SelectedBaudRate = g_STDebugger->GetBaudRate();
 		preferencesWindow->SelectedComPort = ConvertCharToString(g_STDebugger->GetComPortName());
 
-
+		u32 currentPortIndex = 0;
 		DynArray<ComPort*>& comports = g_STDebugger->GetComPortsArray();
 		comportsList->Items->Add("<None>");
 		for (s32 i = 0; i < comports.Count(); i++)
@@ -753,14 +753,18 @@ private: System::Void preferencesToolStripMenuItem_Click(System::Object^ sender,
 			ComPort* port = comports[i];
 			comportsList->Items->Add(ConvertCharToString(port->PortName.GetPtr()));
 			comportsDesc->Text = ConvertCharToString(port->PortDescription.GetPtr());
+
+			if (port->PortName == g_STDebugger->GetComPortName())
+			{
+				currentPortIndex = i;
+			}
 		}
 
 		// skip the <none>
 		if (comports.Count() > 1)
 		{
-			ComPort* firstPort = comports[0];
-			comportsList->SelectedItem = comportsList->Items[1];
-			comportsDesc->Text = ConvertCharToString(firstPort->PortDescription.GetPtr());
+			comportsList->SelectedItem = comportsList->Items[currentPortIndex + 1];
+			comportsDesc->Text = ConvertCharToString(comports[currentPortIndex]->PortDescription.GetPtr());
 		}
 		else
 		{

@@ -152,7 +152,6 @@ void STDebugger::ReadIniFile()
 // write ini file
 void STDebugger::WriteIniFile()
 {
-	char str[100];
 	long n;
 
 	n = ini_puts("Serial Port", "Port", ComPortName.GetPtr(), inifile);
