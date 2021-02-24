@@ -251,10 +251,10 @@ bool STDebugger::SetSerialConfig()
 	COMMTIMEOUTS cto;
 	GetCommTimeouts(SerialPortHandle, &cto);
 	// Set the new timeouts
-	cto.ReadIntervalTimeout = 0;
-	cto.ReadTotalTimeoutConstant = 10;
-	cto.ReadTotalTimeoutMultiplier = 0;
-	SetCommTimeouts(SerialPortHandle, &cto);
+//	cto.ReadIntervalTimeout = MAXDWORD;
+//	cto.ReadTotalTimeoutConstant = 0;
+//	cto.ReadTotalTimeoutMultiplier = 0;
+//	SetCommTimeouts(SerialPortHandle, &cto);
 
 	logString.Set("Set config for Serial port '%s', Baud Rate: %d", ComPortName.GetPtr(), BaudRate);
 	OutputToLog(logString);
@@ -1763,6 +1763,11 @@ void STDebugger::RefreshWindows()
 		UpdateRegisters();
 		UpdateWindowMask = UpdateWindowMask & ~UPDATE_REGISTERS_WINDOW;
 	}
+	if (UpdateWindowMask & UPDATE_MEMORY_WINDOW)
+	{
+		SetupMemory();
+		UpdateWindowMask = UpdateWindowMask & ~UPDATE_MEMORY_WINDOW;
+	}
 }
 
 //////////////////////////////////////////////////////////////
@@ -1802,34 +1807,41 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 	mString			logString;
 	STDebugger*		std = (STDebugger*)lpParameter;
 	u32				numBytesRead = 0;
-	static u8		cmd = DEBUGGER_CMD_NONE;
+	u32				numBytesReceivedTotal = 0;
+	u8				cmd = DEBUGGER_CMD_NONE;
 	u8*				buffer = std->GetReadBuffer();
-	static u8*		dstBuf = buffer;
+	u8*				dstBuf = buffer;
+	u8				ringBuffer[32];
+
+	HANDLE handle = std->GetSerialPortHandle();
 
 	while (!std->TickFunctionExit)
 	{
-		HANDLE handle = std->GetSerialPortHandle();
+		bool result = ReadFile(handle, ringBuffer, 32, &numBytesRead, NULL);
 
-		bool result = ReadFile(handle, dstBuf, MEMORY_BUFFER_SIZE, &numBytesRead, NULL);
 		if (result && numBytesRead != 0 && !std->GetReceiveInProgress())
 		{
 			std->SetReceiveInProgress(true);
-			if (dstBuf == buffer)
-			{
-				cmd = buffer[0];
-			}
+			cmd = ringBuffer[0];
+			numBytesReceivedTotal = numBytesRead;
+			memcpy(dstBuf, ringBuffer, 32);
 			dstBuf += numBytesRead;
 		}
 		else if (std->GetReceiveInProgress() && result && numBytesRead != 0)
 		{
-			int g = 0;
+			memcpy(dstBuf, ringBuffer, 32);
+			dstBuf += numBytesRead;
+			numBytesReceivedTotal += numBytesRead;
 		}
-		else if (!result && std->GetReceiveInProgress() || (numBytesRead == 0 && std->GetReceiveInProgress()))
+		else if (result && std->GetReceiveInProgress() && numBytesRead == 0)
 		{
 			std->SetReceiveInProgress(false);
 			std->ProcessCommand(cmd, buffer);
 			dstBuf = buffer;
 			memset(buffer, 0, MEMORY_BUFFER_SIZE);
+			logString.Set("Received %d bytes from target..", numBytesReceivedTotal);
+			std->OutputToLog(logString);
+			numBytesReceivedTotal = 0;
 		}
 
 		if (std->GetSendInProgress())
@@ -1849,7 +1861,7 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 			}
 		}
 
-		Sleep(17);
+		Sleep(1);
 	}
 
 	DWORD	ExitCode = 0;
@@ -1862,7 +1874,8 @@ void STDebugger::SetCmdInProgress(u8 Cmd)
 {
 	LastCommand = Cmd;
 	SendCmdInProgress = true;
-	SendCmdTimeout = 20 * 5;					// time in seconds
+//	SendCmdTimeout = 20 * 5;					// time in seconds
+	SendCmdTimeout = 1000000000;
 }
 
 // process command from serial port
@@ -1951,12 +1964,14 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 
 	case DEBUGGER_TARGET_RESPONSE_MEMORY:
 	{
-		char* memoryData = (char*)packetData;
-		OutputDebugString(L"Got memory block from Target");
+		char* memoryData = (char*)&packet[4];
+
+		// copy memory to buffer
+		memcpy(MemoryBuffer, memoryData, 4096);
+
+		OutputToLog(mString("Got memory block from Target"));
 		UpdateWindowMask |= UPDATE_MEMORY_WINDOW;
 		SendCmdInProgress = false;
-
-	
 	}
 	break;
 
