@@ -318,7 +318,8 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 		logString.Set("Attempting to connect to target on '%s'...", ComPortName.GetPtr());
 		OutputToLog(logString);
 		SetCmdInProgress(Cmd);
-		SendPacket(packetBuffer, 4);
+		*packetData++ = BaudRate;				// send baud rate
+		SendPacket(packetBuffer, 4 + 4);
 	}
 	break;
 
@@ -332,11 +333,15 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 	break;
 
 	case DEBUGGER_CMD_REQUEST_REGISTERS:
+		logString.Set("Attempting to get registers from target on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
 		SetCmdInProgress(Cmd);
 		SendPacket(packetBuffer, 4);
 		break;
 
 	case DEBUGGER_CMD_REQUEST_MEMORY:
+		logString.Set("Attempting to get memory from target on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
 		SetCmdInProgress(Cmd);
 		*packetData++ = MemoryAddress;
 		*packetData = NumBytes;
