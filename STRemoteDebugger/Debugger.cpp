@@ -96,8 +96,10 @@ void STDebugger::Init(void* formPtr)
 	SetupMemory();
 
 	GetComPortsAvailable();
-
 	ReadIniFile();
+
+	ReadBuffer = new u8[4096];
+//	memset(ReadBuffer, 0, 4096);
 }
 
 // Shutdown
@@ -134,6 +136,11 @@ void STDebugger::Shutdown()
 		delete ComPorts[i];
 	}
 	ComPorts.Reset();
+
+	if (ReadBuffer)
+	{
+		delete[] ReadBuffer;
+	}
 }
 
 // read ini file
@@ -265,6 +272,11 @@ void STDebugger::DisconnectFromTarget()
 	}
 
 	SendCmd(DEBUGGER_CMD_DISCONNECT);
+}
+
+// Disconnect from target complete
+void STDebugger::DisconnectFromTargetComplete()
+{
 	Sleep(100);
 
 	ShutdownThreads();
@@ -278,12 +290,26 @@ void STDebugger::DisconnectFromTarget()
 }
 
 // send commands to serial port
-void STDebugger::SendCmd(u8 Cmd, u32 MemoryAdress, u32 NumBytes)
+void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 {
-	u8 packetBuffer[128] = { 0 };
+	u8 packetBuffer[4096] = { 0 };
 	u32* packetData = (u32*)(packetBuffer + 4);
 
 	packetBuffer[0] = Cmd;		// set cmd
+
+	u32 timeout = 10000;
+	if (SendCmdInProgress)
+	{
+		while (timeout)
+		{
+			if (SendCmdInProgress)
+			{
+				Sleep(1);
+			}
+
+			timeout--;
+		}
+	}
 
 	switch (Cmd)
 	{
@@ -294,84 +320,19 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAdress, u32 NumBytes)
 	case DEBUGGER_CMD_CONNECT:
 	case DEBUGGER_CMD_DISCONNECT:
 	case DEBUGGER_CMD_REQUEST_REGISTERS:
-	case DEBUGGER_CMD_REQUEST_MEMORY:
+		SendCmdInProgress = true;
 		SendPacket(packetBuffer, 4);
 		break;
 
-	// usually on target
-	case DEBUGGER_TARGET_RESPONSE_STEP:
-	{
-		*packetData++ = 0x88888888;				// send back the PC
-		SendPacket(packetBuffer, 4 + 4);
-	}
+	case DEBUGGER_CMD_REQUEST_MEMORY:
+		SendCmdInProgress = true;
+		*packetData++ = MemoryAddress;
+		*packetData = NumBytes;
+		SendPacket(packetBuffer, 4 + 4 + 4);
 		break;
-
-	case DEBUGGER_TARGET_RESPONSE_RUN:
-	{
-		const char* response = "OK";
-		u32 len = strlen(response);
-		strcpy((char*)&packetBuffer[4], response);
-		SendPacket(packetBuffer, 4 + len);
-	}
-	break;
-
-	case DEBUGGER_TARGET_RESPONSE_STOP:
-	{
-		const char* response = "OK";
-		u32 len = strlen(response);
-		strcpy((char*)&packetBuffer[4], response);
-		SendPacket(packetBuffer, 4 + len);
-	}
-	break;
-
-	case DEBUGGER_TARGET_RESPONSE_CONNECTED:
-	{
-		const char* targetName = "Atari ST - Tos 1.04";
-		u32 len = strlen(targetName);
-		strcpy((char*)&packetBuffer[4], targetName);
-		SendPacket(packetBuffer, 4 + len);
-	}
-		break;
-	case DEBUGGER_TARGET_RESPONSE_DISCONNECTED:
-	{
-		const char* targetName = "Atari ST Disconnected";
-		u32 len = strlen(targetName);
-		strcpy((char*)&packetBuffer[4], targetName);
-		SendPacket(packetBuffer, 4 + len);
-	}
-		break;
-	case DEBUGGER_TARGET_RESPONSE_REGISTERS:
-	{
-		// setup registers
-		// d0 - d7
-		u32* regBuf = (u32*)&packetBuffer[4];
-		*regBuf++ = 0x12345678;
-		*regBuf++ = 0x11111111;
-		*regBuf++ = 0x22222222;
-		*regBuf++ = 0x33333333;
-		*regBuf++ = 0x44444444;
-		*regBuf++ = 0x55555555;
-		*regBuf++ = 0x66666666;
-		*regBuf++ = 0x77777777;
-		// a0 - a7
-		*regBuf++ = 0xA2345678;
-		*regBuf++ = 0xA1111111;
-		*regBuf++ = 0xA2222222;
-		*regBuf++ = 0xA3333333;
-		*regBuf++ = 0xA4444444;
-		*regBuf++ = 0xA5555555;
-		*regBuf++ = 0xA6666666;
-		*regBuf++ = 0xA7777777;
-
-		// PC
-		*regBuf++ = 0xCCCCCCCC;
-		// SR
-		*regBuf++ = 0xDDDDDDDD;
-		SendPacket(packetBuffer, 4 + (16 * 4));		// cmd, 
-	}
-
 
 	default:
+		SendCmdInProgress = false;
 		break;
 	}
 }
@@ -411,6 +372,13 @@ bool STDebugger::SendPacket(u8* packet, u32 NumBytes)
 void STDebugger::RequestRegisters()
 {
 	SendCmd(DEBUGGER_CMD_REQUEST_REGISTERS);
+}
+
+// get memory
+void STDebugger::RequestMemory()
+{
+	char* ad = (char*)this;
+	SendCmd(DEBUGGER_CMD_REQUEST_MEMORY, (u32)ad, 1024);
 }
 
 // Get COM ports available
@@ -1763,6 +1731,7 @@ void STDebugger::UpdateLog()
 				logWindow->Text += "\n" + ConvertCharToString(LogQueue[i]->GetPtr());
 			}
 		}
+		logWindow->Select(logWindow->Text->Length, 0);
 	}
 	LogQueue.RemoveAll();
 }
@@ -1813,18 +1782,36 @@ s32 STDebugger::CreateTickThread()
 // tick function
 unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 {
-	STDebugger* std = (STDebugger*)lpParameter;
-	u32			numBytesRead = 0;
+	STDebugger*		std = (STDebugger*)lpParameter;
+	u32				numBytesRead = 0;
+	static u8		cmd = DEBUGGER_CMD_NONE;
+	u8*				buffer = std->GetReadBuffer();
+	static u8*		dstBuf = buffer;
 
 	while (!std->TickFunctionExit)
 	{
 		HANDLE handle = std->GetSerialPortHandle();
 
-		u8 buffer[1024] = { 0 };
-		bool result = ReadFile(handle, buffer, 1024, &numBytesRead, NULL);
-		if (result && numBytesRead != 0)
+		bool result = ReadFile(handle, dstBuf, 4096, &numBytesRead, NULL);
+		if (result && numBytesRead != 0 && !std->GetReceiveInProgress())
 		{
-			std->ProcessCommand(buffer);
+			std->SetReceiveInProgress(true);
+			if (dstBuf == buffer)
+			{
+				cmd = buffer[0];
+			}
+			dstBuf += numBytesRead;
+		}
+		else if (std->GetReceiveInProgress() && result && numBytesRead != 0)
+		{
+			int g = 0;
+		}
+		else if (!result && std->GetReceiveInProgress() || (numBytesRead == 0 && std->GetReceiveInProgress()))
+		{
+			std->SetReceiveInProgress(false);
+			std->ProcessCommand(cmd, buffer);
+			dstBuf = buffer;
+			memset(buffer, 0, 4096);
 		}
 
 		Sleep(17);
@@ -1837,34 +1824,20 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 }
 
 // process command from serial port
-void STDebugger::ProcessCommand(u8* packet)
+void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 {
-	u8 cmd = packet[0];
+	u32* packetData = (u32*)packet;
+
 	mString output;
 
 	switch (cmd)
 	{
-		// on the target usually only
-	case DEBUGGER_CMD_CONNECT:
-		OutputDebugString(L"Got Connect cmd!\n");
-		SendCmd(DEBUGGER_TARGET_RESPONSE_CONNECTED);
-		break;
-
-	case DEBUGGER_CMD_DISCONNECT:
-		OutputDebugString(L"Got Disconnect cmd!\n");
-		SendCmd(DEBUGGER_TARGET_RESPONSE_DISCONNECTED);
-		break;
-
-	case DEBUGGER_CMD_REQUEST_REGISTERS:
-		OutputDebugString(L"Got send registers cmd!\n");
-		SendCmd(DEBUGGER_TARGET_RESPONSE_REGISTERS);
-		break;
-
 		// on the host
 	case DEBUGGER_TARGET_RESPONSE_STEP:
 	{
 		char* response = (char*)&packet[4];
 		// update PC if response we ok
+		SendCmdInProgress = false;
 	}
 	break;
 
@@ -1872,6 +1845,7 @@ void STDebugger::ProcessCommand(u8* packet)
 	{
 		char* response = (char*)&packet[4];
 		// did we stop (set PC)
+		SendCmdInProgress = false;
 	}
 	break;
 
@@ -1879,6 +1853,7 @@ void STDebugger::ProcessCommand(u8* packet)
 	{
 		char* response = (char*)&packet[4];
 		// did we run? set debugger to active
+		SendCmdInProgress = false;
 	}
 	break;
 
@@ -1888,8 +1863,10 @@ void STDebugger::ProcessCommand(u8* packet)
 		output = "Connected to Target: ";
 		output += targetInfo;
 		output += "\n";
+		OutputToLog(mString(output));
 		output.ToWide();
 		OutputDebugString((LPCWSTR)output.GetPtr());
+		SendCmdInProgress = false;
 	}
 	break;
 
@@ -1898,8 +1875,11 @@ void STDebugger::ProcessCommand(u8* packet)
 		char* targetInfo = (char*)&packet[4];
 		output += targetInfo;
 		output += "\n";
+		OutputToLog(mString(output));
 		output.ToWide();
 		OutputDebugString((LPCWSTR)output.GetPtr());
+		SendCmdInProgress = false;
+		DisconnectFromTargetComplete();
 	}
 		break;
 
@@ -1923,7 +1903,18 @@ void STDebugger::ProcessCommand(u8* packet)
 		SR->Value = *regBuf++;
 
 		UpdateWindowMask |= UPDATE_REGISTERS_WINDOW;
-//		UpdateRegisters();
+		SendCmdInProgress = false;
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_MEMORY:
+	{
+		char* memoryData = (char*)packetData;
+		OutputDebugString(L"Got memory block from Target");
+		UpdateWindowMask |= UPDATE_MEMORY_WINDOW;
+		SendCmdInProgress = false;
+
+	
 	}
 	break;
 

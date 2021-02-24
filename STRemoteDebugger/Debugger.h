@@ -11,8 +11,9 @@
 #define MEMORY_WINDOW_BYTES_PER_COLUMN	4
 #define MEMORY_WINDOW_BYTES_PER_LINE	MEMORY_WINDOW_BYTES_PER_COLUMN * MEMORY_WINDOW_COLUMNS				// 4 bytes per entry / 16 columns
 
+// window updates
 #define UPDATE_REGISTERS_WINDOW			0x01
-
+#define UPDATE_MEMORY_WINDOW			0x02
 
 
 class ComPort
@@ -102,7 +103,9 @@ public:
 	// cmds
 	void ConnectToTarget();
 	void DisconnectFromTarget();
+	void DisconnectFromTargetComplete();
 	void RequestRegisters();
+	void RequestMemory();
 
 	u32 GetMemoryWindowFirstCharacterPosition() { return MemoryWindowFirstCharacterPosition; }
 	u32	GetMemoryWindowLineLength() { return MemoryWindowLineLength; }
@@ -122,6 +125,11 @@ public:
 	void SetBaudRate(u32 pBaudRate) { BaudRate = pBaudRate; }
 	u32 GetBaudRate() { return BaudRate;  }
 
+	bool GetReceiveInProgress() { return ReceiveInProgress; }
+	void SetReceiveInProgress(bool pReceiveInProgress) { ReceiveInProgress = pReceiveInProgress; }
+	bool GetSendInProgress() { return SendCmdInProgress; }
+	void SetSendInProgress(bool pSendCmdInProgress) { SendCmdInProgress = pSendCmdInProgress; }
+
 	// clear refs
 	void ClearMainWindowPreferencesReference();
 
@@ -129,6 +137,8 @@ public:
 	void RefreshWindows();
 
 	HANDLE GetSerialPortHandle() { return SerialPortHandle; }
+
+	u8* GetReadBuffer() { return ReadBuffer; };
 
 private:
 	void	GetComPortsAvailable();
@@ -151,8 +161,8 @@ private:
 	// serial 
 	bool	SetSerialConfig();
 	bool	SendPacket(u8* packet, u32 NumBytes = 0);
-	void	SendCmd(u8 Cmd, u32 MemoryAdress = 0, u32 NumBytes = 0);
-	void	ProcessCommand(u8* packet);
+	void	SendCmd(u8 Cmd, u32 MemoryAddress = 0, u32 NumBytes = 0);
+	void	ProcessCommand(u8 Cmd, u8* packet);
 
 	// thread
 	s32		CreateTickThread();
@@ -199,11 +209,16 @@ private:
 	mString				ComPortName = "COM1";
 	u32					BaudRate = 19200;
 	HANDLE				SerialPortHandle = INVALID_HANDLE_VALUE;
+	bool				SendCmdInProgress = false;
+	bool				ReceiveInProgress = false;
 
 	// threads
 	u32					TickThreadHandle = 0;
 	u32					TickThreadID = 0;
 	bool				TickFunctionExit = false;
+
+	// read buffer
+	u8*					ReadBuffer = nullptr;
 
 	// update windows (threading)
 	u32					UpdateWindowMask = 0;
