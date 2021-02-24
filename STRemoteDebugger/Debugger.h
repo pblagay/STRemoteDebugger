@@ -130,6 +130,9 @@ public:
 	bool GetSendInProgress() { return SendCmdInProgress; }
 	void SetSendInProgress(bool pSendCmdInProgress) { SendCmdInProgress = pSendCmdInProgress; }
 
+	void SetSendCmdTimeout(s32 pTimeout) { SendCmdTimeout = pTimeout;  }
+	s32  GetSendCmdTimeout() { return SendCmdTimeout; }
+
 	// clear refs
 	void ClearMainWindowPreferencesReference();
 
@@ -139,6 +142,7 @@ public:
 	HANDLE GetSerialPortHandle() { return SerialPortHandle; }
 
 	u8* GetReadBuffer() { return ReadBuffer; };
+	u8 GetLastCommand() { return LastCommand; }
 
 private:
 	void	GetComPortsAvailable();
@@ -163,6 +167,7 @@ private:
 	bool	SendPacket(u8* packet, u32 NumBytes = 0);
 	void	SendCmd(u8 Cmd, u32 MemoryAddress = 0, u32 NumBytes = 0);
 	void	ProcessCommand(u8 Cmd, u8* packet);
+	void	SetCmdInProgress(u8 Cmd);
 
 	// thread
 	s32		CreateTickThread();
@@ -216,6 +221,8 @@ private:
 	u32					TickThreadHandle = 0;
 	u32					TickThreadID = 0;
 	bool				TickFunctionExit = false;
+	s32					SendCmdTimeout = 0;
+	u8					LastCommand = 0;
 
 	// read buffer
 	u8*					ReadBuffer = nullptr;

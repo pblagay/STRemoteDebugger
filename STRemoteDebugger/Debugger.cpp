@@ -98,8 +98,8 @@ void STDebugger::Init(void* formPtr)
 	GetComPortsAvailable();
 	ReadIniFile();
 
-	ReadBuffer = new u8[4096];
-//	memset(ReadBuffer, 0, 4096);
+	ReadBuffer = new u8[MEMORY_BUFFER_SIZE];
+	memset(ReadBuffer, 0, MEMORY_BUFFER_SIZE);
 }
 
 // Shutdown
@@ -268,6 +268,7 @@ void STDebugger::DisconnectFromTarget()
 	if (SerialPortHandle == INVALID_HANDLE_VALUE)
 	{
 		// not connected, ignore
+		OutputToLog(mString("Target not connected!"));
 		return;
 	}
 
@@ -292,23 +293,18 @@ void STDebugger::DisconnectFromTargetComplete()
 // send commands to serial port
 void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 {
-	u8 packetBuffer[4096] = { 0 };
+	mString logString;
+
+	u8 packetBuffer[MEMORY_BUFFER_SIZE] = { 0 };
 	u32* packetData = (u32*)(packetBuffer + 4);
 
 	packetBuffer[0] = Cmd;		// set cmd
 
-	u32 timeout = 10000;
+	// wait here if a send is already in progress
+	// we may want to just ignore any commands that happen 
 	if (SendCmdInProgress)
 	{
-		while (timeout)
-		{
-			if (SendCmdInProgress)
-			{
-				Sleep(1);
-			}
-
-			timeout--;
-		}
+		Sleep(1);
 	}
 
 	switch (Cmd)
@@ -318,14 +314,30 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 	case DEBUGGER_CMD_RUN:
 	case DEBUGGER_CMD_STOP:
 	case DEBUGGER_CMD_CONNECT:
+	{
+		logString.Set("Attempting to connect to target on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
 	case DEBUGGER_CMD_DISCONNECT:
+	{
+		logString.Set("Attempting to disconnect from target on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
 	case DEBUGGER_CMD_REQUEST_REGISTERS:
-		SendCmdInProgress = true;
+		SetCmdInProgress(Cmd);
 		SendPacket(packetBuffer, 4);
 		break;
 
 	case DEBUGGER_CMD_REQUEST_MEMORY:
-		SendCmdInProgress = true;
+		SetCmdInProgress(Cmd);
 		*packetData++ = MemoryAddress;
 		*packetData = NumBytes;
 		SendPacket(packetBuffer, 4 + 4 + 4);
@@ -1782,6 +1794,7 @@ s32 STDebugger::CreateTickThread()
 // tick function
 unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 {
+	mString			logString;
 	STDebugger*		std = (STDebugger*)lpParameter;
 	u32				numBytesRead = 0;
 	static u8		cmd = DEBUGGER_CMD_NONE;
@@ -1792,7 +1805,7 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 	{
 		HANDLE handle = std->GetSerialPortHandle();
 
-		bool result = ReadFile(handle, dstBuf, 4096, &numBytesRead, NULL);
+		bool result = ReadFile(handle, dstBuf, MEMORY_BUFFER_SIZE, &numBytesRead, NULL);
 		if (result && numBytesRead != 0 && !std->GetReceiveInProgress())
 		{
 			std->SetReceiveInProgress(true);
@@ -1811,7 +1824,24 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 			std->SetReceiveInProgress(false);
 			std->ProcessCommand(cmd, buffer);
 			dstBuf = buffer;
-			memset(buffer, 0, 4096);
+			memset(buffer, 0, MEMORY_BUFFER_SIZE);
+		}
+
+		if (std->GetSendInProgress())
+		{
+			std->SetSendCmdTimeout(std->GetSendCmdTimeout() - 1);
+
+			if (std->GetSendCmdTimeout() <= 0)
+			{
+				std->SetSendInProgress(false);
+				logString.Set("Serial port cmd timed out on '%s'! Cancelling command..", std->GetComPortName());
+				std->OutputToLog(logString);
+
+				if (std->GetLastCommand() == DEBUGGER_CMD_CONNECT || std->GetLastCommand() == DEBUGGER_CMD_DISCONNECT)
+				{
+					std->DisconnectFromTargetComplete();
+				}
+			}
 		}
 
 		Sleep(17);
@@ -1821,6 +1851,13 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 	GetExitCodeThread((HANDLE)std->TickThreadHandle, &ExitCode);
 	_endthreadex(ExitCode);
 	return 0;
+}
+
+void STDebugger::SetCmdInProgress(u8 Cmd)
+{
+	LastCommand = Cmd;
+	SendCmdInProgress = true;
+	SendCmdTimeout = 20 * 5;					// time in seconds
 }
 
 // process command from serial port
