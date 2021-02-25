@@ -609,8 +609,8 @@ void STDebugger::UpdateRegisters()
 		// Data registers
 		for (s32 i = 0; i < DataRegisters.Count(); i++)
 		{
-			RegString += ConvertCharToString(Regs[i]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i]->ValueString.GetPtr()) + "\t" +
-				ConvertCharToString(Regs[i + DataRegisters.Count()]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString.GetPtr());
+			RegString += ConvertCharToString(Regs[i]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i]->ValueString.GetPtr()) + "\t  " +
+						 ConvertCharToString(Regs[i + DataRegisters.Count()]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString.GetPtr());
 
 			RegString += "\r\n";
 		}
@@ -663,15 +663,8 @@ void STDebugger::LoadExecutable(LPCWSTR Filename)
 			else // success
 			{
 				LoadBufferSize = fileSize;
+				DisassembleCode();
 				OutputDebugString(L"Read file succeeded..\n");
-
-				Disasm_SetCPUType(0, 0, false);
-				u32 sizeOfHeader = sizeof(ProgramHeader);
-				u32 codeSize = fileSize - sizeOfHeader;
-				u32 startOfCode = (u32)(LoadBuffer + sizeOfHeader);
-				u32 endOfCode = startOfCode + codeSize;
-				mString DisassemblyText;
-				m68k_disasm(DisassemblyText, startOfCode, endOfCode, 0, 10);
 			}
 		}
 		else
@@ -683,6 +676,34 @@ void STDebugger::LoadExecutable(LPCWSTR Filename)
 	{
 		OutputDebugString(L"Failed to open file for reading..\n");
 	}
+}
+
+// Clears the windows and re draws the code
+void STDebugger::DisassembleCode()
+{
+	if (!LoadBuffer || LoadBufferSize == 0)
+	{
+		return;
+	}
+
+	mString AsmText;
+	mString DisassemblyText;
+
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+
+	System::Windows::Forms::RichTextBox^ codeWindow = mainWindow->GetAssemblyWindow();
+	codeWindow->Clear();
+
+	Disasm_SetCPUType(currentCPUType, 0, false);
+
+	u32 sizeOfHeader = sizeof(ProgramHeader);
+	u32 codeSize = LoadBufferSize - sizeOfHeader;
+	u32 startOfCode = (u32)(LoadBuffer + sizeOfHeader);
+	u32 endOfCode = startOfCode + codeSize;
+	m68k_disasm(AsmText, DisassemblyText, startOfCode, endOfCode, 0, 100);
+
+	codeWindow->Text = ConvertCharToString(AsmText.GetPtr());
 }
 
 // Clear mainWindow reference

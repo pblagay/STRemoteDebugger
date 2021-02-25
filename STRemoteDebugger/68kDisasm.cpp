@@ -106,7 +106,7 @@ typedef struct
 } disStructEntry;
 
 static int				disStructCounts;
-static disStructEntry	*disStructEntries;
+static disStructEntry	*disStructEntries = nullptr;
 
 typedef struct 
 {
@@ -204,7 +204,10 @@ static void	Disass68kLoadStructInfo(const char *filename)
 	if(!lineCount) { if(fbuf) free(fbuf); return; }
 	disStructEntry	*se = NULL;
 	disStructEntries = (disStructEntry*)realloc(disStructEntries, sizeof(disStructEntry) * (disStructCounts + lineCount));
-	if(!disStructEntries) { free(fbuf); return; }
+	if(!disStructEntries) 
+	{ 
+		free(fbuf); return; 
+	}
 	char	*line = fbuf;
 	char	*nextLine;
 	for(int i=0; i<lineCount; line = nextLine, ++i)
@@ -2423,7 +2426,7 @@ static void	Disass68kComposeStr(char *dbuf, const char *str, int position, int m
 }
 
 
-void m68k_disasm (mString& Output, u32 addr, u32 endAddr, u32 *nextpc, int cnt)
+void m68k_disasm (mString& AsmOutput, mString& DisAsmOutput, u32 addr, u32 endAddr, u32 *nextpc, int cnt)
 {
 	static bool	isInit = false;
 	if(!isInit)
@@ -2436,6 +2439,7 @@ void m68k_disasm (mString& Output, u32 addr, u32 endAddr, u32 *nextpc, int cnt)
 	{
 		int		addrWidth = 6;		// 6 on an ST, 8 on a TT
 		char	lineBuffer[1024];
+		char	disAsmBuffer[1024];
 
 		char	addressBuffer[32];
 		char	hexdumpBuffer[256];
@@ -2475,6 +2479,8 @@ void m68k_disasm (mString& Output, u32 addr, u32 endAddr, u32 *nextpc, int cnt)
 		}
 
 		lineBuffer[0] = 0;
+		disAsmBuffer[0] = 0;
+
 		if (optionPosAddress >= 0)
 		{
 			Disass68kComposeStr(lineBuffer, addressBuffer, optionPosAddress, 0);
@@ -2486,33 +2492,38 @@ void m68k_disasm (mString& Output, u32 addr, u32 endAddr, u32 *nextpc, int cnt)
 		if (optionPosLabel >= 0)
 		{
 			Disass68kComposeStr(lineBuffer, labelBuffer, optionPosLabel, 0);
+//			Disass68kComposeStr(disAsmBuffer, labelBuffer, optionPosLabel, 0);
 		}
 		if (optionPosOpcode >= 0)
 		{
-			Disass68kComposeStr(lineBuffer, opcodeBuffer, optionPosOpcode, 0);
+			Disass68kComposeStr(lineBuffer, opcodeBuffer, 0, 0);
 		}
 		if(optionPosOperand >= 0)
 		{
 			size_t	l = strlen(lineBuffer);
 			if(lineBuffer[l-1] != ' ')		// force at least one space between opcode and operand
 			{
-				lineBuffer[l++] = ' ';
+//				lineBuffer[l++] = ' ';
+				lineBuffer[l++] = '\t';
+//				lineBuffer[l++] = '\t';
 				lineBuffer[l] = 0;
 			}
-			Disass68kComposeStr(lineBuffer, operandBuffer, optionPosOperand, 0);
+			Disass68kComposeStr(lineBuffer, operandBuffer, 10, 0);
 		}
 		if(commentBuffer[0] && optionPosComment >= 0)
 		{
 			Disass68kComposeStr(lineBuffer, " ;", optionPosComment, 0);
-			Disass68kComposeStr(lineBuffer, commentBuffer, optionPosComment+3, 0);
+			Disass68kComposeStr(lineBuffer, commentBuffer, 10+3, 0);
 		}
 
 		//		fprintf(f, "%s\n", lineBuffer);
-		mString output = lineBuffer;
-		output += "\n";
-//		output.ToWide();
-//		OutputDebugString((LPCWSTR)output.GetPtr());
-		Output += output;
+		mString asmoutput = lineBuffer;
+		asmoutput += "\n";
+		AsmOutput += asmoutput;
+
+		mString disasmoutput = disAsmBuffer;
+		disasmoutput += "\n";
+		DisAsmOutput += disasmoutput;
 
 //		if(strstr(opcodeBuffer, "RTS") || strstr(opcodeBuffer, "RTE") || strstr(opcodeBuffer, "JMP")
 //		|| strstr(opcodeBuffer, "rts") || strstr(opcodeBuffer, "rte") || strstr(opcodeBuffer, "jmp"))

@@ -92,7 +92,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions);_CRT_SECURE_NO_DEPRECATE;LLT_DX</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4996;4793;4561</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996;4793;4561;6308</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies />

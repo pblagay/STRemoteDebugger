@@ -11,5 +11,5 @@ typedef unsigned int uae_u32;
 typedef unsigned char uae_u8;
 typedef unsigned short uae_u16;
 
-void m68k_disasm(mString& Output,u32 addr, u32 endAddr, u32* nextpc, int cnt);
+void m68k_disasm(mString& AsmOutput, mString& DisAsmOutput, u32 addr, u32 endAddr, u32* nextpc, int cnt);
 void Disasm_SetCPUType(int CPU, int FPU, bool bMMU);

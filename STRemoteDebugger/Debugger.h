@@ -123,6 +123,7 @@ public:
 	void DisconnectFromTargetComplete();
 	void RequestRegisters();
 	void RequestMemory();
+	void DisassembleCode();
 
 	u32 GetMemoryWindowFirstCharacterPosition() { return MemoryWindowFirstCharacterPosition; }
 	u32	GetMemoryWindowLineLength() { return MemoryWindowLineLength; }
@@ -195,13 +196,14 @@ private:
 	bool	rawmode = false;
 
 	// Vars
-	u32								LoadBufferSize = 0;
 	DynArray<OpcodeInstruction*>	Opcodes;			// opcodes for the program
 	DynArray<Register*>				DataRegisters;		// CPU registers
 	DynArray<Register*>				AddressRegisters;	// CPU registers
 	Register*						PC = nullptr;		// Program counter
 	Register*						SR = nullptr;		// Status register
 	u8*								LoadBuffer = nullptr;	// where raw 68K program is loaded
+	u32								LoadBufferSize = 0;		// loaded size of buffer
+	u32								LoadedCodeSize = 0;		// code size minus a header if it exists
 
 	// Memory window
 	u8	*	MemoryBuffer = nullptr;		// memory buffer for memory window
@@ -218,10 +220,11 @@ private:
 	bool	MemoryWindowInAsciiBlock = false;
 
 	// disassembler
-//	Disassembler68K* DisAsm = nullptr;
 	u32 address = 0;
 	u32 programStart = 0;
 	u32 currentWord = 0;
+	u32 currentCPUType = 0;
+	u32 tosVersion = 0x104;
 
 	// form references
 	void* FormWindow = nullptr;
