@@ -1,0 +1,67 @@
+5.5 The program format
+A program file under GEMDOS consists of the following segments:
+
+Header
+TEXT, DATA and BSS segment
+Symbol table (optional)
+Relocation table (optional)
+The header is built up as follows:
+
+typedef struct
+{
+   WORD  ph_branch;        /* Branch to start of the program  */
+                           /* (must be 0x601a!)               */
+
+   LONG  ph_tlen;          /* Length of the TEXT segment      */
+   LONG  ph_dlen;          /* Length of the DATA segment      */
+   LONG  ph_blen;          /* Length of the BSS segment       */
+   LONG  ph_slen;          /* Length of the symbol table      */
+   LONG  ph_res1;          /* Reserved, should be 0;          */
+                           /* Required by PureC               */
+   LONG  ph_prgflags;      /* Program flags                   */
+   WORD  ph_absflag;       /* 0 = Relocation info present     */
+} PH;
+A symbol table in Digital Research format consists of a series of 14 byte long entries, made up of the symbol name (maximum 8 bytes; any shorter names are terminated with a 0!), a 2 byte long symbol type and the actual symbol value (4 bytes). The supported symbol types are summarized in the following table:
+
+Value	Symbol type
+0x0100	In the BSS
+0x0200	In program text
+0x0280	Start of an object module
+0x02c0	Start of a library
+0x0400	In DATA segment
+0x0800	External
+0x1000	Register
+0x2000	Globales Symbol
+0x4000	Equated
+0x8000	Defined
+Many development systems (e.g. Pure-C) however use their own (usually more efficient) symbol format. As programs under TOS may be loaded at any arbitrary location in working memory (and must be capable of running there), a program file normally contains a relocation table, with whose aid the addresses specified in the program code can be recalculated to the segments actually allocated.
+
+Whether relocation information is present or not can be gathered from the element ph_absflag of the program header (see above). Basically only a relocation of 32-bit values (i.e. addresses) is possible; prior to GEMDOS Version 0.15 (or TOS Version 1.04) the relocation information was limited to a maximum of 32 kbytes.
+
+The relocation table itself starts with a 32-bit value which marks the offset of the first value to be relocated relative to the start of the TEXT segment. Single bytes are then used for all following offsets. To be able to handle offsets greater than 255 correctly, one proceeds as follows: If a 1 is found as an offset (this is not possible due to the characteristics of the MC-680x0 processor family) then the value 254 is added automatically to the offset. For very large offsets this procedure can of course be repeated. Incidentally, an empty relocation table is flagged with a LONG value of 0.
+
+See also: Fcntl   ARHEADER   OHEADER   OSHEADER   PSETFLAGS   The program flags
+
+5.5.1 The program flags
+With program flags one is dealing with a bit-vector within the program header, which is built up as follows:
+
+Bits	Meaning
+ 	 
+   0	Fastload flag. If this bit is set, then the stack will not be cleared, but only the BSS segment preinitialized.
+   1	If this bit is set, then the program may be loaded into the fast alternate RAM
+   2	If this bit is set, memory requests via Malloc may be allocated from alternate RAM
+   3	Reserved, should be NULL
+Used for the Shared library.
+ 4-7	Memory protection mode
+0 = Private:	
+Only the process itself, and the operating system, may access the memory
+1 = Global:	
+The memory is completely unprotected and hence all programs can access it
+2 = Super:	
+The memory can be accessed by all processes that run in supervisor-mode
+3 = Read only:	
+Any process can read from the memory; but writing is only permitted by the process itself, as well as the operating system
+8-11	Reserved, should be NULL
+  12	Shared text.If this bit is set, then the TEXT segment of the program may be shared. If such a program is launched three times, for instance, then 3 different DATA and BSS segments exist, but only a common TEXT segment. Warning: The bit should only be set if the program does not perform any absolute accesses to the DATA or BSS segments.
+13-27	Reserved, should be NULL.
+28-31	TPA size field. Here one can specify in steps of 128 kbyte the maximum amount of memory to be allocated to the program from alternate RAM if the computer has more ST-RAM then alternate RAM. The 16 possible value represent allocations between 128 kbyte and 2 Mbyte.

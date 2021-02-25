@@ -12,8 +12,8 @@
 // I need sprintf and va_arg
 #include <stdarg.h>
 #include <stdio.h>
-#include "llttypes.h"
 #include <assert.h>
+#include "llttypes.h"
 
 /////////////////////////////////////////////////////////////
 void String::UnicodeToAscii(const u16* Uni, char* Ascii)

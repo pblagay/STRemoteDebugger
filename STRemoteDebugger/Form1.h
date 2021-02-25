@@ -821,8 +821,8 @@ private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e
 // for testing
 private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) 
 {
-//	g_STDebugger->RequestRegisters();
-	g_STDebugger->RequestMemory();
+	g_STDebugger->RequestRegisters();
+//	g_STDebugger->RequestMemory();
 }
 private: System::Void quitToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
 {

@@ -70,9 +70,6 @@
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Form1.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -97,6 +94,9 @@
     <ClCompile Include="..\..\..\VariousSourceCodes\minIni-master\dev\minIni.c">
       <Filter>Source\IniFile</Filter>
     </ClCompile>
+    <ClCompile Include="68kDisasm.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico">
@@ -105,5 +105,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="AtariStExecutableHeader.txt">
+      <Filter>Source</Filter>
+    </Text>
   </ItemGroup>
 </Project>

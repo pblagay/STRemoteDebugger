@@ -15,6 +15,23 @@
 #define UPDATE_REGISTERS_WINDOW			0x01
 #define UPDATE_MEMORY_WINDOW			0x02
 
+class Disassembler68K;
+
+// Atari ST executable program header
+typedef struct
+{
+	u16  ph_branch;			/* Branch to start of the program  */
+							/* (must be 0x601a!)               */
+
+	u16  ph_tlen[2];        /* Length of the TEXT segment      */
+	u16  ph_dlen[2];        /* Length of the DATA segment      */
+	u16  ph_blen[2];        /* Length of the BSS segment       */
+	u16  ph_slen[2];        /* Length of the symbol table      */
+	u16  ph_res1[2];        /* Reserved, should be 0;          */
+							/* Required by PureC               */
+	u16  ph_prgflags[2];    /* Program flags                   */
+	u16  ph_absflag;		/* 0 = Relocation info present     */
+} ProgramHeader;
 
 class ComPort
 {
@@ -98,7 +115,7 @@ public:
 
 	void LoadExecutable(LPCWSTR Filename);
 	void SetStartingMemoryAddress(u32 Address);
-	void LoadMemory(char* SrcData);
+	void LoadMemory(u8* SrcData);
 
 	// cmds
 	void ConnectToTarget();
@@ -146,7 +163,6 @@ public:
 
 private:
 	void	GetComPortsAvailable();
-	void	ParseProgram();
 	void	SetupRegisters();
 	void	SetupMemory();
 	void	UpdateRegisters();
@@ -185,10 +201,10 @@ private:
 	DynArray<Register*>				AddressRegisters;	// CPU registers
 	Register*						PC = nullptr;		// Program counter
 	Register*						SR = nullptr;		// Status register
-	char*							LoadBuffer = nullptr;	// where raw 68K program is loaded
+	u8*								LoadBuffer = nullptr;	// where raw 68K program is loaded
 
 	// Memory window
-	char*	MemoryBuffer = nullptr;		// memory buffer for memory window
+	u8	*	MemoryBuffer = nullptr;		// memory buffer for memory window
 	u32		MemoryStartAddress = 0;		// Start Address of memory buffer
 	u32		MemoryBytesPerLine = 0;		// Bytes per line
 	u32		MemoryBytesPerColumn = 0;	// Byters per column
@@ -202,6 +218,7 @@ private:
 	bool	MemoryWindowInAsciiBlock = false;
 
 	// disassembler
+//	Disassembler68K* DisAsm = nullptr;
 	u32 address = 0;
 	u32 programStart = 0;
 	u32 currentWord = 0;
@@ -229,4 +246,6 @@ private:
 
 	// update windows (threading)
 	u32					UpdateWindowMask = 0;
+
+
 };
