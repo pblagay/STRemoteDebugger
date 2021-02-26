@@ -1224,8 +1224,23 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 
 	switch (cmd)
 	{
-		// on the host
-	case DEBUGGER_TARGET_RESPONSE_STEP:
+	case DEBUGGER_TARGET_RESPONSE_STEP_OVER:
+	{
+		char* response = (char*)&packet[4];
+		// update PC if response we ok
+		SendCmdInProgress = false;
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_STEP_INTO:
+	{
+		char* response = (char*)&packet[4];
+		// update PC if response we ok
+		SendCmdInProgress = false;
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_STEP_OUT:
 	{
 		char* response = (char*)&packet[4];
 		// update PC if response we ok
@@ -1245,6 +1260,20 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 	{
 		char* response = (char*)&packet[4];
 		// did we run? set debugger to active
+		SendCmdInProgress = false;
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_RUN_TO_CURSOR:
+	{
+		char* response = (char*)&packet[4];
+		SendCmdInProgress = false;
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_SET_PC:
+	{
+		char* response = (char*)&packet[4];
 		SendCmdInProgress = false;
 	}
 	break;
