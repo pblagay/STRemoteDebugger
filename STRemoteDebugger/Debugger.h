@@ -201,6 +201,7 @@ private:
 	DynArray<Register*>				AddressRegisters;	// CPU registers
 	Register*						PC = nullptr;		// Program counter
 	Register*						SR = nullptr;		// Status register
+	Register*						SSP = nullptr;		// SSP
 	u8*								LoadBuffer = nullptr;	// where raw 68K program is loaded
 	u32								LoadBufferSize = 0;		// loaded size of buffer
 	u32								LoadedCodeSize = 0;		// code size minus a header if it exists

@@ -123,8 +123,23 @@ void STDebugger::Shutdown()
 		delete AddressRegisters[i];
 	}
 	AddressRegisters.Reset();
-	PC = nullptr;
-	SR = nullptr;
+	if (PC)
+	{
+		delete PC;
+		PC = nullptr;
+	}
+
+	if (SR)
+	{
+		delete SR;
+		SR = nullptr;
+	}
+
+	if (SSP)
+	{
+		delete SSP;
+		SSP = nullptr;
+	}
 
 	// cleanup opcodes
 	for (s32 i = 0; i < Opcodes.Count(); i++)
@@ -578,6 +593,9 @@ void STDebugger::SetupRegisters()
 
 	// Status
 	SR = new Register(0x00000000, "SR", "");
+
+	// SSP
+	SSP = new Register(0x00000000, "SSP", "");
 	UpdateRegisters();
 }
 
@@ -616,13 +634,13 @@ void STDebugger::UpdateRegisters()
 		}
 
 		RegString += "\r\n";
-		RegString += ConvertCharToString(PC->Label.GetPtr()) + ": " + ConvertCharToString(PC->ValueString.GetPtr()) + "\r\n";
-		RegString += ConvertCharToString(SR->Label.GetPtr()) + ": " + ConvertCharToString(SR->ValueString.GetPtr()) + "\r\n";
+		RegString += ConvertCharToString(PC->Label.GetPtr()) + ":  " + ConvertCharToString(PC->ValueString.GetPtr()) + "\r\n";
+		RegString += ConvertCharToString(SR->Label.GetPtr()) + ":  " + ConvertCharToString(SR->ValueString.GetPtr()) + "\r\n";
+		RegString += ConvertCharToString(SSP->Label.GetPtr()) + ": " + ConvertCharToString(SSP->ValueString.GetPtr()) + "\r\n";
 
 		registerWindow->Text = RegString;
 	}
 }
-
 
 // set starting memory address for memory window
 void STDebugger::SetStartingMemoryAddress(u32 Address)
@@ -949,6 +967,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 		}
 		PC->Value = *regBuf++;
 		SR->Value = *regBuf++;
+		SSP->Value = *regBuf++;
 
 		UpdateWindowMask |= UPDATE_REGISTERS_WINDOW;
 		SendCmdInProgress = false;
