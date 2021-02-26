@@ -94,15 +94,14 @@ void STDebugger::Init(void* formPtr)
 {
 	FormWindow = formPtr;
 	SetupRegisters();
-	DebugMemoryData();
-	//	LoadMemory();
+	CreateMemoryBuffer();
 	SetupMemory();
 
 	GetComPortsAvailable();
 	ReadIniFile();
 
-	ReadBuffer = new u8[MEMORY_BUFFER_SIZE];
-	memset(ReadBuffer, 0, MEMORY_BUFFER_SIZE);
+	ReadBuffer = new u8[MEMORY_BUFFER_SIZE + 32];
+	memset(ReadBuffer, 0, MEMORY_BUFFER_SIZE + 32);
 
 	//char buf[255];
 	//for (int i = 1; i < 255; i++)
@@ -186,9 +185,26 @@ void STDebugger::ReadIniFile()
 
 	n = ini_gets("Serial Port", "Port", "COM1", str, sizearray(str), inifile);
 	ComPortName = str;
-
 	n = ini_getl("Serial Port", "Baud", 19200, inifile);
 	BaudRate = n;
+
+	// computer prefs
+	n = ini_gets("Computer", "Type", "Atari ST", str, sizearray(str), inifile);
+
+	mString computerType = str;
+	if (computerType == "Atari ST")
+		ComputerType = COMPUTER_TYPE_ATARI_ST;
+	else if (computerType == "Atari STe")
+		ComputerType = COMPUTER_TYPE_ATARI_STE;
+	else if (computerType == "Atari TT")
+		ComputerType = COMPUTER_TYPE_ATARI_TT;
+	else if (computerType == "Atari Falcon")
+		ComputerType = COMPUTER_TYPE_ATARI_FALCON;
+
+	n = ini_getl("Computer", "Memory", 512, inifile);
+	SystemMemory = n;
+	n = ini_getl("Computer", "Tos", 104, inifile);
+	TosVersion = n;
 }
 
 // write ini file
@@ -196,8 +212,32 @@ void STDebugger::WriteIniFile()
 {
 	long n;
 
+	// serial
 	n = ini_puts("Serial Port", "Port", ComPortName.GetPtr(), inifile);
 	n = ini_putl("Serial Port", "Baud", BaudRate, inifile);
+
+	// computer prefs
+	char computerType[32] = { 0 };
+	switch (ComputerType)
+	{
+	default:
+	case COMPUTER_TYPE_ATARI_ST:
+		sprintf(computerType, "Atari ST");
+		break;
+	case COMPUTER_TYPE_ATARI_STE:
+		sprintf(computerType, "Atari STe");
+		break;
+	case COMPUTER_TYPE_ATARI_TT:
+		sprintf(computerType, "Atari TT");
+		break;
+	case COMPUTER_TYPE_ATARI_FALCON:
+		sprintf(computerType, "Atari Falcon");
+		break;
+	}
+
+	n = ini_puts("Computer", "Type", computerType, inifile);
+	n = ini_putl("Computer", "Memory", SystemMemory, inifile);
+	n = ini_putl("Computer", "TOS", TosVersion, inifile);
 }
 
 // Connect to target
@@ -330,7 +370,7 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 {
 	mString logString;
 
-	u8 packetBuffer[MEMORY_BUFFER_SIZE] = { 0 };
+	u8 packetBuffer[MEMORY_BUFFER_SIZE + 32] = { 0 };
 	u32* packetData = (u32*)(packetBuffer + 4);
 
 	packetBuffer[0] = Cmd;		// set cmd
@@ -484,31 +524,46 @@ bool STDebugger::SendPacket(u8* packet, u32 NumBytes)
 // update registers
 void STDebugger::RequestRegisters()
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	SendCmd(DEBUGGER_CMD_REQUEST_REGISTERS);
 }
 
 // get memory
-void STDebugger::RequestMemory()
+void STDebugger::RequestMemory(u32 Address, u32 Blocksize)
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	char* ad = (char*)this;
-	SendCmd(DEBUGGER_CMD_REQUEST_MEMORY, (u32)ad, 1024);
+	SendCmd(DEBUGGER_CMD_REQUEST_MEMORY, (u32)ad, Blocksize);
 }
 
 // Run
 void STDebugger::Run()
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	SendCmd(DEBUGGER_CMD_RUN);
 }
 
 // Stop
 void STDebugger::Stop()
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	SendCmd(DEBUGGER_CMD_STOP);
 }
 
 // Step Over
 void STDebugger::StepOver()
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	CurrentLine++;					// debug
 
 	SendCmd(DEBUGGER_CMD_STEP_OVER);
@@ -517,24 +572,36 @@ void STDebugger::StepOver()
 // Step into
 void STDebugger::StepInto()
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	SendCmd(DEBUGGER_CMD_STEP_INTO);
 }
 
 // Step out
 void STDebugger::StepOut()
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	SendCmd(DEBUGGER_CMD_STEP_OUT);
 }
 
 // Run to cursor
 void STDebugger::RunToCursor()
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	SendCmd(DEBUGGER_CMD_RUN_TO_CURSOR);
 }
 
 // Set PC
 void STDebugger::SetPC()
 {
+	if (!GetIsConnectedToTarget())
+		return;
+
 	SendCmd(DEBUGGER_CMD_SET_PC);
 }
 
@@ -716,28 +783,16 @@ void STDebugger::ClearBreakpoints()
 	BreakPoints.RemoveAll();
 }
 
-// debug memory data
-void STDebugger::DebugMemoryData()
-{
-	u8 buf[MEMORY_BUFFER_SIZE];
-	for (s32 k = 0; k < MEMORY_BUFFER_SIZE; k++)
-	{
-		buf[k] = (char)k;
-	}
-	LoadMemory(buf);
-}
-
 // Load memory
-void STDebugger::LoadMemory(u8* SrcData)
+void STDebugger::CreateMemoryBuffer()
 {
 	if (MemoryBuffer)
 	{
 		delete[] MemoryBuffer;
 	}
 
-	MemoryBuffer = new u8[MEMORY_BUFFER_SIZE];
-	memset(MemoryBuffer, 0, MEMORY_BUFFER_SIZE);
-	memcpy(MemoryBuffer, SrcData, MEMORY_BUFFER_SIZE);
+	MemoryBuffer = new u8[ATARI_ST_MAX_MEMORY];
+	memset(MemoryBuffer, 0, ATARI_ST_MAX_MEMORY);
 }
 
 // Setup Memory 
@@ -763,7 +818,7 @@ void STDebugger::SetupMemory()
 		u8* CurrentMemoryBuffer = &MemoryBuffer[CurrentMemoryAddress];
 
 		// number of lines 
-		s32 numLines = 32;
+		s32 numLines = MEMORY_BUFFER_SIZE / MEMORY_WINDOW_BYTES_PER_LINE;		// 128 lines visible on start
 
 		// create a string to show the memory
 		for (s32 i = 0; i < numLines; i++)
@@ -1086,6 +1141,7 @@ void STDebugger::UpdateLog()
 			}
 		}
 		logWindow->Select(logWindow->Text->Length, 0);
+		logWindow->ScrollToCaret();
 	}
 	LogQueue.RemoveAll();
 }
@@ -1175,7 +1231,7 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 			std->SetReceiveInProgress(false);
 			std->ProcessCommand(cmd, buffer);
 			dstBuf = buffer;
-			memset(buffer, 0, MEMORY_BUFFER_SIZE);
+			memset(buffer, 0, MEMORY_BUFFER_SIZE + 32);
 			logString.Set("Received %d bytes from target..", numBytesReceivedTotal);
 			std->OutputToLog(logString);
 			numBytesReceivedTotal = 0;
@@ -1288,6 +1344,9 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 		output.ToWide();
 		OutputDebugString((LPCWSTR)output.GetPtr());
 		SendCmdInProgress = false;
+
+		// kick off a memory request
+		RequestMemory();
 	}
 	break;
 

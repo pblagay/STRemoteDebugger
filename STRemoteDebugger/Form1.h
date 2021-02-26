@@ -534,6 +534,39 @@ private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e)
 }
 private: System::Void MemoryWindow_VScroll(System::Object^ sender, System::EventArgs^ e)
 {
+	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+
+	int index = rtb->GetCharIndexFromPosition(System::Drawing::Point(1, 1));
+	int TopLine = rtb->GetLineFromCharIndex(index);
+
+	LogWindow->Text = ConvertIntToString(TopLine);
+
+	// figure out block we need to load
+	u32 startMemory = 0;
+	u32 blockSize = MEMORY_BUFFER_SIZE;
+	u32 linesPerBlock = blockSize / MEMORY_WINDOW_BYTES_PER_LINE;
+	u32 visibleLines = 8;
+
+	u32 currentVisibleBlock = 0;
+	s32 currentLine = TopLine + 8;
+	while (currentLine >= 0)
+	{
+		if (currentLine - linesPerBlock < 0)
+		{
+			break;
+		}
+		currentLine -= linesPerBlock;
+		currentVisibleBlock++;
+	}
+
+	currentVisibleBlock--;	// fix up block to 0 based
+
+	if (g_STDebugger->GetMemoryBlockIndex() != currentVisibleBlock)
+	{
+		// address of memory block to load
+		u32 newAddress = currentVisibleBlock * blockSize;
+		g_STDebugger->RequestMemory(newAddress, MEMORY_BUFFER_SIZE);
+	}
 }
 
 // Memory address change

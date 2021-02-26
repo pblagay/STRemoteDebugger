@@ -9,7 +9,7 @@
 #define	MEMORY_WINDOW_LINES				10
 #define MEMORY_WINDOW_COLUMNS			8
 #define MEMORY_WINDOW_BYTES_PER_COLUMN	4
-#define MEMORY_WINDOW_BYTES_PER_LINE	MEMORY_WINDOW_BYTES_PER_COLUMN * MEMORY_WINDOW_COLUMNS				// 4 bytes per entry / 16 columns
+#define MEMORY_WINDOW_BYTES_PER_LINE	(MEMORY_WINDOW_BYTES_PER_COLUMN * MEMORY_WINDOW_COLUMNS	)			// 4 bytes per entry / 16 columns
 
 // window updates
 #define UPDATE_REGISTERS_WINDOW			0x01
@@ -19,6 +19,16 @@
 #define ASMWINDOW_LINE_LENGTH			48
 #define ASMWINDOW_BP_LOCATION			20
 #define ASMWINDOW_PC_LOCATION			22
+
+// memory sizes by platform
+#define	ATARI_ST_MAX_MEMORY				(1024 * 1024) * 4			// 4MB max
+#define	ATARI_TT_MAX_MEMORY				(1024 * 1024) * 4			// 4MB max
+#define	ATARI_FALCON_MAX_MEMORY			(1024 * 1024) * 14			// 14MB max
+
+#define COMPUTER_TYPE_ATARI_ST			0
+#define	COMPUTER_TYPE_ATARI_STE			1
+#define COMPUTER_TYPE_ATARI_TT			2
+#define COMPUTER_TYPE_ATARI_FALCON		3
 
 class Disassembler68K;
 
@@ -137,14 +147,15 @@ public:
 
 	void LoadExecutable(LPCWSTR Filename);
 	void SetStartingMemoryAddress(u32 Address);
-	void LoadMemory(u8* SrcData);
+	void CreateMemoryBuffer();
+//	void LoadMemory(u8* SrcData);
 
 	// cmds
 	void ConnectToTarget();
 	void DisconnectFromTarget();
 	void DisconnectFromTargetComplete();
 	void RequestRegisters();
-	void RequestMemory();
+	void RequestMemory(u32 Address = 0, u32 Blocksize = MEMORY_BUFFER_SIZE);		// default to getting 4k blocks
 	void DisassembleCode();
 	void Run();
 	void Stop();
@@ -187,6 +198,7 @@ public:
 	void RefreshWindows();
 
 	HANDLE GetSerialPortHandle() { return SerialPortHandle; }
+	bool GetIsConnectedToTarget() { return (SerialPortHandle != INVALID_HANDLE_VALUE);  }
 
 	u8* GetReadBuffer() { return ReadBuffer; };
 	u8 GetLastCommand() { return LastCommand; }
@@ -201,6 +213,8 @@ public:
 	u32 GetPCRegisterValue(u32 index) { return PC->Value; }
 	u32 GetSRRegisterValue(u32 index) { return SR->Value; }
 	u32 GetSSPRegisterValue(u32 index) { return SSP->Value; }
+
+	u32 GetMemoryBlockIndex() {	return MemoryBlockIndex;  }
 
 private:
 	void	GetComPortsAvailable();
@@ -249,6 +263,7 @@ private:
 	// Memory window
 	u8	*	MemoryBuffer = nullptr;		// memory buffer for memory window
 	u32		MemoryStartAddress = 0;		// Start Address of memory buffer
+	u32		MemoryBlockIndex = 0;		// what block are we in
 	u32		MemoryBytesPerLine = 0;		// Bytes per line
 	u32		MemoryBytesPerColumn = 0;	// Byters per column
 	u32		MemoryWindowFirstCharacterPosition = 11;
@@ -265,7 +280,6 @@ private:
 	u32 programStart = 0;
 	u32 currentWord = 0;
 	u32 currentCPUType = 0;
-	u32 tosVersion = 0x104;
 	u32 NumberOfLinesInProgram = 0;
 	u32 CurrentLine = 0;
 
@@ -297,5 +311,8 @@ private:
 	// update windows (threading)
 	u32					UpdateWindowMask = 0;
 
-
+	// prefs
+	u32					TosVersion = 104;
+	u32					ComputerType = COMPUTER_TYPE_ATARI_ST;
+	u32					SystemMemory = ATARI_ST_MAX_MEMORY;
 };
