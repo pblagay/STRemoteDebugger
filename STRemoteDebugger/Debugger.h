@@ -146,7 +146,14 @@ public:
 	void RequestRegisters();
 	void RequestMemory();
 	void DisassembleCode();
-
+	void Run();
+	void Stop();
+	void StepOver();
+	void StepInto();
+	void StepOut();
+	void RunToCursor();
+	void SetPC();
+	
 	u32 GetMemoryWindowFirstCharacterPosition() { return MemoryWindowFirstCharacterPosition; }
 	u32	GetMemoryWindowLineLength() { return MemoryWindowLineLength; }
 	u32 GetMemoryWindowWrapRight() { return MemoryWindowWrapRight; }

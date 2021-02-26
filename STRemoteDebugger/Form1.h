@@ -79,7 +79,7 @@ namespace CppCLRWinformsSTDebugger
 		~Form1()
 		{
 			g_STDebugger->Shutdown();
-			if (components)
+
 			{
 				delete components;
 			}
@@ -157,7 +157,6 @@ namespace CppCLRWinformsSTDebugger
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->button2 = (gcnew System::Windows::Forms::Button());
 			this->button3 = (gcnew System::Windows::Forms::Button());
-			this->button4 = (gcnew System::Windows::Forms::Button());
 			this->AsmWindowTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
@@ -166,6 +165,7 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// menuStrip1
 			// 
+			this->menuStrip1->GripMargin = System::Windows::Forms::Padding(2, 2, 0, 2);
 			this->menuStrip1->ImageScalingSize = System::Drawing::Size(24, 24);
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
 				this->fileToolStripMenuItem,
@@ -233,6 +233,7 @@ namespace CppCLRWinformsSTDebugger
 			this->stepOverToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F10;
 			this->stepOverToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->stepOverToolStripMenuItem->Text = L"Step Over";
+			this->stepOverToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::stepOverToolStripMenuItem_Click);
 			// 
 			// stepIntoToolStripMenuItem
 			// 
@@ -240,6 +241,7 @@ namespace CppCLRWinformsSTDebugger
 			this->stepIntoToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F11;
 			this->stepIntoToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->stepIntoToolStripMenuItem->Text = L"Step Into";
+			this->stepIntoToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::stepIntoToolStripMenuItem_Click);
 			// 
 			// runUntilToolStripMenuItem
 			// 
@@ -247,6 +249,7 @@ namespace CppCLRWinformsSTDebugger
 			this->runUntilToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Shift | System::Windows::Forms::Keys::F11));
 			this->runUntilToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->runUntilToolStripMenuItem->Text = L"Step Out";
+			this->runUntilToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::runUntilToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator2
 			// 
@@ -258,6 +261,7 @@ namespace CppCLRWinformsSTDebugger
 			this->runToolStripMenuItem->Name = L"runToolStripMenuItem";
 			this->runToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->runToolStripMenuItem->Text = L"Run";
+			this->runToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::runToolStripMenuItem_Click);
 			// 
 			// runToCursorToolStripMenuItem
 			// 
@@ -265,6 +269,7 @@ namespace CppCLRWinformsSTDebugger
 			this->runToCursorToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F10));
 			this->runToCursorToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->runToCursorToolStripMenuItem->Text = L"Run To Cursor";
+			this->runToCursorToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::runToCursorToolStripMenuItem_Click);
 			// 
 			// setPCToCursorToolStripMenuItem
 			// 
@@ -273,6 +278,7 @@ namespace CppCLRWinformsSTDebugger
 				| System::Windows::Forms::Keys::F10));
 			this->setPCToCursorToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->setPCToCursorToolStripMenuItem->Text = L"Set PC to Cursor";
+			this->setPCToCursorToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::setPCToCursorToolStripMenuItem_Click);
 			// 
 			// stopToolStripMenuItem
 			// 
@@ -280,6 +286,7 @@ namespace CppCLRWinformsSTDebugger
 			this->stopToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Shift | System::Windows::Forms::Keys::F5));
 			this->stopToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->stopToolStripMenuItem->Text = L"Stop";
+			this->stopToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::stopToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator3
 			// 
@@ -292,12 +299,14 @@ namespace CppCLRWinformsSTDebugger
 			this->setBreakpointToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F9;
 			this->setBreakpointToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->setBreakpointToolStripMenuItem->Text = L"Set Breakpoint";
+			this->setBreakpointToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::setBreakpointToolStripMenuItem_Click);
 			// 
 			// managerBreakpointsToolStripMenuItem
 			// 
 			this->managerBreakpointsToolStripMenuItem->Name = L"managerBreakpointsToolStripMenuItem";
 			this->managerBreakpointsToolStripMenuItem->Size = System::Drawing::Size(372, 34);
 			this->managerBreakpointsToolStripMenuItem->Text = L"Manage Breakpoints";
+			this->managerBreakpointsToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::managerBreakpointsToolStripMenuItem_Click);
 			// 
 			// label2
 			// 
@@ -468,22 +477,11 @@ namespace CppCLRWinformsSTDebugger
 			this->button3->UseVisualStyleBackColor = true;
 			this->button3->Click += gcnew System::EventHandler(this, &Form1::button3_Click);
 			// 
-			// button4
-			// 
-			this->button4->Location = System::Drawing::Point(512, 33);
-			this->button4->Name = L"button4";
-			this->button4->Size = System::Drawing::Size(75, 23);
-			this->button4->TabIndex = 16;
-			this->button4->Text = L"currentline";
-			this->button4->UseVisualStyleBackColor = true;
-			this->button4->Click += gcnew System::EventHandler(this, &Form1::button4_Click);
-			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1156, 909);
-			this->Controls->Add(this->button4);
 			this->Controls->Add(this->button3);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->button1);
@@ -960,10 +958,6 @@ private: System::Void button3_Click(System::Object^ sender, System::EventArgs^ e
 {
 	g_STDebugger->SetBreakpoint(1);
 }
-private: System::Void button4_Click(System::Object^ sender, System::EventArgs^ e)
-{
-	g_STDebugger->SetCurrentLine(g_STDebugger->GetCurrentLine() + 1);
-}
 
 // determine what text I'm hovering over in the src code window (so we can tooltip the value of registers
 private: System::Void AssemblyWindow_MouseMove(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) 
@@ -1092,6 +1086,50 @@ private: System::Void AssemblyWindow_MouseMove(System::Object^ sender, System::W
 	{
 		AsmWindowTooltip->Hide(rtb);
 	}
+}
+// step over
+private: System::Void stepOverToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->StepOver();
+}
+// step into
+private: System::Void stepIntoToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->StepInto();
+}
+// step out
+private: System::Void runUntilToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->StepOut();
+}
+// run
+private: System::Void runToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->StepOut();
+}
+// run to cursor
+private: System::Void runToCursorToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->RunToCursor();
+}
+// set pc to cursor
+private: System::Void setPCToCursorToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->SetPC();
+}
+// stop 
+private: System::Void stopToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->Stop();
+}
+// set breakpoint
+private: System::Void setBreakpointToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->SetBreakpoint(0);
+}
+// Manage breakpoints
+private: System::Void managerBreakpointsToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+{
 }
 };
 }

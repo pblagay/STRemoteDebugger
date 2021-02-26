@@ -342,12 +342,73 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 		Sleep(1);
 	}
 
+	// request cmds
 	switch (Cmd)
 	{
 	// on host
-	case DEBUGGER_CMD_STEP:
+	case DEBUGGER_CMD_STEP_OVER:
+	{
+		logString.Set("Attempting to step over on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
+	case DEBUGGER_CMD_STEP_INTO:
+	{
+		logString.Set("Attempting to step into on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
+	case DEBUGGER_CMD_STEP_OUT:
+	{
+		logString.Set("Attempting to step out on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
+	case DEBUGGER_CMD_SET_PC:
+	{
+		logString.Set("Attempting to set PC on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
 	case DEBUGGER_CMD_RUN:
+	{
+		logString.Set("Attempting to run on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
+	case DEBUGGER_CMD_RUN_TO_CURSOR:
+	{
+		logString.Set("Attempting to run to cursor '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
 	case DEBUGGER_CMD_STOP:
+	{
+		logString.Set("Attempting to stop on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
+
 	case DEBUGGER_CMD_CONNECT:
 	{
 		logString.Set("Attempting to connect to target on '%s'...", ComPortName.GetPtr());
@@ -431,6 +492,50 @@ void STDebugger::RequestMemory()
 {
 	char* ad = (char*)this;
 	SendCmd(DEBUGGER_CMD_REQUEST_MEMORY, (u32)ad, 1024);
+}
+
+// Run
+void STDebugger::Run()
+{
+	SendCmd(DEBUGGER_CMD_RUN);
+}
+
+// Stop
+void STDebugger::Stop()
+{
+	SendCmd(DEBUGGER_CMD_STOP);
+}
+
+// Step Over
+void STDebugger::StepOver()
+{
+	CurrentLine++;					// debug
+
+	SendCmd(DEBUGGER_CMD_STEP_OVER);
+}
+
+// Step into
+void STDebugger::StepInto()
+{
+	SendCmd(DEBUGGER_CMD_STEP_INTO);
+}
+
+// Step out
+void STDebugger::StepOut()
+{
+	SendCmd(DEBUGGER_CMD_STEP_OUT);
+}
+
+// Run to cursor
+void STDebugger::RunToCursor()
+{
+	SendCmd(DEBUGGER_CMD_RUN_TO_CURSOR);
+}
+
+// Set PC
+void STDebugger::SetPC()
+{
+	SendCmd(DEBUGGER_CMD_SET_PC);
 }
 
 // Get COM ports available
