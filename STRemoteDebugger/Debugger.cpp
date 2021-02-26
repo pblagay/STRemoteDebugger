@@ -104,22 +104,22 @@ void STDebugger::Init(void* formPtr)
 	ReadBuffer = new u8[MEMORY_BUFFER_SIZE];
 	memset(ReadBuffer, 0, MEMORY_BUFFER_SIZE);
 
-	char buf[255];
-	for (int i = 1; i < 255; i++)
-	{
-		buf[i] = i;
-	}
+	//char buf[255];
+	//for (int i = 1; i < 255; i++)
+	//{
+	//	buf[i] = i;
+	//}
 
-	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
-	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+	//System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	//CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
 
-	if (mainWindow != nullptr)
-	{
-		System::Windows::Forms::RichTextBox^ logWindow = mainWindow->GetLogWindow();
+	//if (mainWindow != nullptr)
+	//{
+	//	System::Windows::Forms::RichTextBox^ logWindow = mainWindow->GetLogWindow();
 
-		char* c = buf;
-		logWindow->Text =ConvertCharToString(c);
-	}
+	//	char* c = buf;
+	//	logWindow->Text =ConvertCharToString(c);
+	//}
 }
 
 // Shutdown
@@ -782,8 +782,6 @@ void STDebugger::UpdateRegisters()
 	{
 		registerWindow->Clear();
 
-		System::String^ RegString;
-
 		DynArray<Register*>	Regs;
 		for (s32 i = 0; i < DataRegisters.Count(); i++)
 		{
@@ -797,18 +795,69 @@ void STDebugger::UpdateRegisters()
 		// Data registers
 		for (s32 i = 0; i < DataRegisters.Count(); i++)
 		{
-			RegString += ConvertCharToString(Regs[i]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i]->ValueString.GetPtr()) + "\t  " +
-						 ConvertCharToString(Regs[i + DataRegisters.Count()]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString.GetPtr());
+			bool dataRegChanged = (Regs[i]->Value != Regs[i]->LastValue);
+			bool addressRegChanged = (Regs[i + DataRegisters.Count()]->Value != Regs[i + DataRegisters.Count()]->LastValue);
 
-			RegString += "\r\n";
+			System::String^ dataReg = ConvertCharToString(Regs[i]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i]->ValueString.GetPtr()) + "\t  ";
+			if (dataRegChanged)
+			{
+				registerWindow->SelectionColor = System::Drawing::Color::DarkRed;
+			}
+			else
+			{
+				registerWindow->SelectionColor = System::Drawing::Color::Black;
+			}
+			registerWindow->AppendText(dataReg);
+			System::String^ addressReg = ConvertCharToString(Regs[i + DataRegisters.Count()]->Label.GetPtr()) + ": " + ConvertCharToString(Regs[i + DataRegisters.Count()]->ValueString.GetPtr());
+			addressReg += "\n";
+
+			if (addressRegChanged)
+			{
+				registerWindow->SelectionColor = System::Drawing::Color::DarkRed;
+			}
+			else
+			{
+				registerWindow->SelectionColor = System::Drawing::Color::Black;
+			}
+			registerWindow->AppendText(addressReg);
 		}
+		registerWindow->AppendText("\r\n");
 
-		RegString += "\r\n";
-		RegString += ConvertCharToString(PC->Label.GetPtr()) + ":  " + ConvertCharToString(PC->ValueString.GetPtr()) + "\r\n";
-		RegString += ConvertCharToString(SR->Label.GetPtr()) + ":  " + ConvertCharToString(SR->ValueString.GetPtr()) + "\r\n";
-		RegString += ConvertCharToString(SSP->Label.GetPtr()) + ": " + ConvertCharToString(SSP->ValueString.GetPtr()) + "\r\n";
+		bool didChange = (PC->Value != PC->LastValue);
+		System::String^ PCreg = ConvertCharToString(PC->Label.GetPtr()) + ":  " + ConvertCharToString(PC->ValueString.GetPtr()) + "\r\n";
+		if (didChange)
+		{
+			registerWindow->SelectionColor = System::Drawing::Color::DarkRed;
+		}
+		else
+		{
+			registerWindow->SelectionColor = System::Drawing::Color::Black;
+		}
+		registerWindow->AppendText(PCreg);
 
-		registerWindow->Text = RegString;
+		didChange = (SR->Value != SR->LastValue);
+		PCreg = ConvertCharToString(SR->Label.GetPtr()) + ":  " + ConvertCharToString(SR->ValueString.GetPtr()) + "\r\n";
+		if (didChange)
+		{
+			registerWindow->SelectionColor = System::Drawing::Color::DarkRed;
+		}
+		else
+		{
+			registerWindow->SelectionColor = System::Drawing::Color::Black;
+		}
+		registerWindow->AppendText(PCreg);
+
+		didChange = (SSP->Value != SSP->LastValue);
+		PCreg = ConvertCharToString(SSP->Label.GetPtr()) + ": " + ConvertCharToString(SSP->ValueString.GetPtr()) + "\r\n";
+		if (didChange)
+		{
+			registerWindow->SelectionColor = System::Drawing::Color::DarkRed;
+		}
+		else
+		{
+			registerWindow->SelectionColor = System::Drawing::Color::Black;
+		}
+		registerWindow->AppendText(PCreg);
 	}
 }
 
@@ -1137,9 +1186,9 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 			Register* reg = AddressRegisters[i];
 			reg->SetValue(*regBuf++);
 		}
-		PC->Value = *regBuf++;
-		SR->Value = *regBuf++;
-		SSP->Value = *regBuf++;
+		PC->SetValue(*regBuf++);
+		SR->SetValue(*regBuf++);
+		SSP->SetValue(*regBuf++);
 
 		UpdateWindowMask |= UPDATE_REGISTERS_WINDOW;
 		SendCmdInProgress = false;

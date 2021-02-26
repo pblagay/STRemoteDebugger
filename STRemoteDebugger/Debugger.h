@@ -108,10 +108,12 @@ public:
 
 	void SetValue(u32 pValue)
 	{
+		LastValue = Value;
 		Value = pValue;
 		ValueString.Set("0x%08x", pValue);
 	}
 
+	u32		LastValue = 0;			// last val (used to change register color if changed)
 	u32		Value = 0;				// register value
 	mString Label;
 	mString Comment;
