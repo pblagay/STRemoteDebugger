@@ -37,12 +37,8 @@ namespace CppCLRWinformsSTDebugger
 			TickTimer->Enabled = true;
 		}
 
-		System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
-	private: System::Windows::Forms::Button^ button3;
-	private: System::Windows::Forms::ToolTip^ AsmWindowTooltip;
-
-	private: System::Windows::Forms::Button^ button4;
 	public:
+		System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
 		System::Windows::Forms::RichTextBox^ GetAssemblyWindow() { return AssemblyWindow; }
 //		System::Windows::Forms::RichTextBox^ GetSourceWindow() { return SourceCodeWindow; }
 		System::Windows::Forms::RichTextBox^ GetMemoryWindow() { return MemoryWindow; }
@@ -81,6 +77,9 @@ namespace CppCLRWinformsSTDebugger
 	private: System::Windows::Forms::ToolStripMenuItem^ quitToolStripMenuItem;
 
 	private: System::Windows::Forms::MenuStrip^ menuStrip1;
+	private: System::Windows::Forms::Button^ button3;
+	private: System::Windows::Forms::ToolTip^ AsmWindowTooltip;
+	private: System::Windows::Forms::Button^ button4;
 
 	private: System::Windows::Forms::Label^ label2;
 	private: System::Windows::Forms::RichTextBox^ RegisterWindow;
@@ -871,7 +870,6 @@ private: System::Void AssemblyWindow_MouseMove(System::Object^ sender, System::W
 		}
 
 		System::String^ subString = rtb->Text->Substring(positionToSearch, endOfSearch);
-//		LogWindow->Text = subString;
 
 		u32		regVal = 0;
 		char	regStringBuf[20];
@@ -979,9 +977,8 @@ private: System::Void AssemblyWindow_MouseMove(System::Object^ sender, System::W
 	}
 	else
 	{
-//	AsmWindowTooltip->Hide(rtb);
+		AsmWindowTooltip->Hide(rtb);
 	}
-
 }
 };
 }
