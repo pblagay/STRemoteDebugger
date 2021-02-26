@@ -38,7 +38,7 @@ namespace CppCLRWinformsSTDebugger
 		}
 
 	public:
-		System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
+				   System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
 		System::Windows::Forms::RichTextBox^ GetAssemblyWindow() { return AssemblyWindow; }
 //		System::Windows::Forms::RichTextBox^ GetSourceWindow() { return SourceCodeWindow; }
 		System::Windows::Forms::RichTextBox^ GetMemoryWindow() { return MemoryWindow; }
@@ -46,6 +46,20 @@ namespace CppCLRWinformsSTDebugger
 		System::Windows::Forms::Form^ GetMainWindow() { return this; }
 		Preferences^ GetPreferencesWindow() { return preferencesWindow; }
 		void SetPreferencesWindow(Preferences^ pWindow) { preferencesWindow = pWindow; }
+
+	private: System::Windows::Forms::ToolStripMenuItem^ debugToolStripMenuItem;
+	public:
+	private: System::Windows::Forms::ToolStripMenuItem^ stepOverToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^ stepIntoToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^ runUntilToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripSeparator^ toolStripSeparator2;
+	private: System::Windows::Forms::ToolStripMenuItem^ runToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^ runToCursorToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^ setPCToCursorToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^ stopToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripSeparator^ toolStripSeparator3;
+	private: System::Windows::Forms::ToolStripMenuItem^ setBreakpointToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^ managerBreakpointsToolStripMenuItem;
 		Preferences^ preferencesWindow = nullptr;
 		
 	// do GUI related updates
@@ -115,6 +129,18 @@ namespace CppCLRWinformsSTDebugger
 			this->preferencesToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolStripSeparator1 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->quitToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->debugToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->stepOverToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->stepIntoToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->runUntilToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->toolStripSeparator2 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->runToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->runToCursorToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->setPCToCursorToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->stopToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->toolStripSeparator3 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->setBreakpointToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->managerBreakpointsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->RegisterWindow = (gcnew System::Windows::Forms::RichTextBox());
 			this->label3 = (gcnew System::Windows::Forms::Label());
@@ -140,9 +166,11 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// menuStrip1
 			// 
-			this->menuStrip1->GripMargin = System::Windows::Forms::Padding(2, 2, 0, 2);
 			this->menuStrip1->ImageScalingSize = System::Drawing::Size(24, 24);
-			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fileToolStripMenuItem });
+			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
+				this->fileToolStripMenuItem,
+					this->debugToolStripMenuItem
+			});
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
 			this->menuStrip1->Padding = System::Windows::Forms::Padding(4, 2, 0, 2);
@@ -185,6 +213,91 @@ namespace CppCLRWinformsSTDebugger
 			this->quitToolStripMenuItem->Size = System::Drawing::Size(204, 34);
 			this->quitToolStripMenuItem->Text = L"Quit";
 			this->quitToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::quitToolStripMenuItem_Click);
+			// 
+			// debugToolStripMenuItem
+			// 
+			this->debugToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(11) {
+				this->stepOverToolStripMenuItem,
+					this->stepIntoToolStripMenuItem, this->runUntilToolStripMenuItem, this->toolStripSeparator2, this->runToolStripMenuItem, this->runToCursorToolStripMenuItem,
+					this->setPCToCursorToolStripMenuItem, this->stopToolStripMenuItem, this->toolStripSeparator3, this->setBreakpointToolStripMenuItem,
+					this->managerBreakpointsToolStripMenuItem
+			});
+			this->debugToolStripMenuItem->Name = L"debugToolStripMenuItem";
+			this->debugToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F5;
+			this->debugToolStripMenuItem->Size = System::Drawing::Size(82, 29);
+			this->debugToolStripMenuItem->Text = L"Debug";
+			// 
+			// stepOverToolStripMenuItem
+			// 
+			this->stepOverToolStripMenuItem->Name = L"stepOverToolStripMenuItem";
+			this->stepOverToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F10;
+			this->stepOverToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->stepOverToolStripMenuItem->Text = L"Step Over";
+			// 
+			// stepIntoToolStripMenuItem
+			// 
+			this->stepIntoToolStripMenuItem->Name = L"stepIntoToolStripMenuItem";
+			this->stepIntoToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F11;
+			this->stepIntoToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->stepIntoToolStripMenuItem->Text = L"Step Into";
+			// 
+			// runUntilToolStripMenuItem
+			// 
+			this->runUntilToolStripMenuItem->Name = L"runUntilToolStripMenuItem";
+			this->runUntilToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Shift | System::Windows::Forms::Keys::F11));
+			this->runUntilToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->runUntilToolStripMenuItem->Text = L"Step Out";
+			// 
+			// toolStripSeparator2
+			// 
+			this->toolStripSeparator2->Name = L"toolStripSeparator2";
+			this->toolStripSeparator2->Size = System::Drawing::Size(369, 6);
+			// 
+			// runToolStripMenuItem
+			// 
+			this->runToolStripMenuItem->Name = L"runToolStripMenuItem";
+			this->runToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->runToolStripMenuItem->Text = L"Run";
+			// 
+			// runToCursorToolStripMenuItem
+			// 
+			this->runToCursorToolStripMenuItem->Name = L"runToCursorToolStripMenuItem";
+			this->runToCursorToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F10));
+			this->runToCursorToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->runToCursorToolStripMenuItem->Text = L"Run To Cursor";
+			// 
+			// setPCToCursorToolStripMenuItem
+			// 
+			this->setPCToCursorToolStripMenuItem->Name = L"setPCToCursorToolStripMenuItem";
+			this->setPCToCursorToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>(((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Shift)
+				| System::Windows::Forms::Keys::F10));
+			this->setPCToCursorToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->setPCToCursorToolStripMenuItem->Text = L"Set PC to Cursor";
+			// 
+			// stopToolStripMenuItem
+			// 
+			this->stopToolStripMenuItem->Name = L"stopToolStripMenuItem";
+			this->stopToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Shift | System::Windows::Forms::Keys::F5));
+			this->stopToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->stopToolStripMenuItem->Text = L"Stop";
+			// 
+			// toolStripSeparator3
+			// 
+			this->toolStripSeparator3->Name = L"toolStripSeparator3";
+			this->toolStripSeparator3->Size = System::Drawing::Size(369, 6);
+			// 
+			// setBreakpointToolStripMenuItem
+			// 
+			this->setBreakpointToolStripMenuItem->Name = L"setBreakpointToolStripMenuItem";
+			this->setBreakpointToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F9;
+			this->setBreakpointToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->setBreakpointToolStripMenuItem->Text = L"Set Breakpoint";
+			// 
+			// managerBreakpointsToolStripMenuItem
+			// 
+			this->managerBreakpointsToolStripMenuItem->Name = L"managerBreakpointsToolStripMenuItem";
+			this->managerBreakpointsToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->managerBreakpointsToolStripMenuItem->Text = L"Manage Breakpoints";
 			// 
 			// label2
 			// 

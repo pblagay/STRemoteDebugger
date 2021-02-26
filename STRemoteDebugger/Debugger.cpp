@@ -951,7 +951,7 @@ void STDebugger::ClearMainWindowPreferencesReference()
 	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
 	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
 
-	mainWindow->preferencesWindow = nullptr;
+	mainWindow->SetPreferencesWindow(nullptr);
 }
 
 //////////////////////////////////////////////////////////////
