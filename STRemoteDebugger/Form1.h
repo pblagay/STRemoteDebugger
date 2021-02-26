@@ -39,6 +39,8 @@ namespace CppCLRWinformsSTDebugger
 
 		System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
 	private: System::Windows::Forms::Button^ button3;
+	private: System::Windows::Forms::ToolTip^ AsmWindowTooltip;
+
 	private: System::Windows::Forms::Button^ button4;
 	public:
 		System::Windows::Forms::RichTextBox^ GetAssemblyWindow() { return AssemblyWindow; }
@@ -131,6 +133,7 @@ namespace CppCLRWinformsSTDebugger
 			this->button2 = (gcnew System::Windows::Forms::Button());
 			this->button3 = (gcnew System::Windows::Forms::Button());
 			this->button4 = (gcnew System::Windows::Forms::Button());
+			this->AsmWindowTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
@@ -155,7 +158,7 @@ namespace CppCLRWinformsSTDebugger
 					this->preferencesToolStripMenuItem, this->toolStripSeparator1, this->quitToolStripMenuItem
 			});
 			this->fileToolStripMenuItem->Name = L"fileToolStripMenuItem";
-			this->fileToolStripMenuItem->Size = System::Drawing::Size(54, 32);
+			this->fileToolStripMenuItem->Size = System::Drawing::Size(54, 29);
 			this->fileToolStripMenuItem->Text = L"File";
 			// 
 			// openToolStripMenuItem
@@ -266,6 +269,7 @@ namespace CppCLRWinformsSTDebugger
 			this->AssemblyWindow->Size = System::Drawing::Size(750, 418);
 			this->AssemblyWindow->TabIndex = 8;
 			this->AssemblyWindow->Text = L"";
+			this->AssemblyWindow->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::AssemblyWindow_MouseMove);
 			// 
 			// label4
 			// 
@@ -847,6 +851,137 @@ private: System::Void button3_Click(System::Object^ sender, System::EventArgs^ e
 private: System::Void button4_Click(System::Object^ sender, System::EventArgs^ e)
 {
 	g_STDebugger->SetCurrentLine(g_STDebugger->GetCurrentLine() + 1);
+}
+
+// determine what text I'm hovering over in the src code window (so we can tooltip the value of registers
+private: System::Void AssemblyWindow_MouseMove(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) 
+{
+	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+
+	System::Drawing::Point mouseLocation = e->Location;
+	
+	int positionToSearch = rtb->GetCharIndexFromPosition(mouseLocation) - 1;
+
+	if (positionToSearch >= 0)
+	{
+		int endOfSearch = 3;
+		if (positionToSearch + 3 > rtb->Text->Length)
+		{
+			endOfSearch = rtb->Text->Length - positionToSearch;
+		}
+
+		System::String^ subString = rtb->Text->Substring(positionToSearch, endOfSearch);
+//		LogWindow->Text = subString;
+
+		u32		regVal = 0;
+		char	regStringBuf[20];
+
+		if ( subString->Contains("d0") || subString->Contains("D0") )
+		{
+			regVal = g_STDebugger->GetDataRegisterValue(0);
+			sprintf(regStringBuf, "d0 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("d1") || subString->Contains("D1"))
+		{
+			regVal = g_STDebugger->GetDataRegisterValue(1);
+			sprintf(regStringBuf, "d1 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("d2") || subString->Contains("D2"))
+		{
+			regVal = g_STDebugger->GetDataRegisterValue(2);
+			sprintf(regStringBuf, "d2 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("d3") || subString->Contains("D3"))
+		{
+			regVal = g_STDebugger->GetDataRegisterValue(3);
+			sprintf(regStringBuf, "d3 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("d4") || subString->Contains("D4"))
+		{
+			regVal = g_STDebugger->GetDataRegisterValue(4);
+			sprintf(regStringBuf, "d4 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("d5") || subString->Contains("D5"))
+		{
+			regVal = g_STDebugger->GetDataRegisterValue(5);
+			sprintf(regStringBuf, "d5 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("d6") || subString->Contains("D6"))
+		{
+			regVal = g_STDebugger->GetDataRegisterValue(6);
+			sprintf(regStringBuf, "d6 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("d7") || subString->Contains("D7"))
+		{
+			regVal = g_STDebugger->GetDataRegisterValue(7);
+			sprintf(regStringBuf, "d7 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("a0") || subString->Contains("a0"))
+		{
+			regVal = g_STDebugger->GetAddressRegisterValue(0);
+			sprintf(regStringBuf, "a0 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("a1") || subString->Contains("a1"))
+		{
+			regVal = g_STDebugger->GetAddressRegisterValue(1);
+			sprintf(regStringBuf, "a1 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("a2") || subString->Contains("a2"))
+		{
+			regVal = g_STDebugger->GetAddressRegisterValue(2);
+			sprintf(regStringBuf, "a2 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("a3") || subString->Contains("a3"))
+		{
+			regVal = g_STDebugger->GetAddressRegisterValue(3);
+			sprintf(regStringBuf, "a3 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("a4") || subString->Contains("a4"))
+		{
+			regVal = g_STDebugger->GetAddressRegisterValue(4);
+			sprintf(regStringBuf, "a4 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("a5") || subString->Contains("a5"))
+		{
+			regVal = g_STDebugger->GetAddressRegisterValue(5);
+			sprintf(regStringBuf, "a5 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("a6") || subString->Contains("a6"))
+		{
+			regVal = g_STDebugger->GetAddressRegisterValue(6);
+			sprintf(regStringBuf, "a6 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else if (subString->Contains("a7") || subString->Contains("a7"))
+		{
+			regVal = g_STDebugger->GetAddressRegisterValue(7);
+			sprintf(regStringBuf, "a7 = 0x%08x", regVal);
+			AsmWindowTooltip->Show(ConvertCharToString(regStringBuf), rtb);
+		}
+		else
+		{
+			AsmWindowTooltip->Hide(rtb);
+		}
+	}
+	else
+	{
+//	AsmWindowTooltip->Hide(rtb);
+	}
+
 }
 };
 }

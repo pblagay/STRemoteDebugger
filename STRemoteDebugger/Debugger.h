@@ -189,6 +189,12 @@ public:
 	u32	 GetCurrentLine() { return CurrentLine; }
 	void SetCurrentLine(u32 LineNumber);
 
+	u32 GetDataRegisterValue(u32 index) { return DataRegisters[index]->Value; }
+	u32 GetAddressRegisterValue(u32 index) { return AddressRegisters[index]->Value; }
+	u32 GetPCRegisterValue(u32 index) { return PC->Value; }
+	u32 GetSRRegisterValue(u32 index) { return SR->Value; }
+	u32 GetSSPRegisterValue(u32 index) { return SSP->Value; }
+
 private:
 	void	GetComPortsAvailable();
 	void	SetupRegisters();
