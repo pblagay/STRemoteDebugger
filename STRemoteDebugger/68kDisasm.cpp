@@ -2426,7 +2426,7 @@ static void	Disass68kComposeStr(char *dbuf, const char *str, int position, int m
 }
 
 
-void m68k_disasm (mString& AsmOutput, mString& DisAsmOutput, u32 addr, u32 endAddr, u32 *nextpc, int cnt)
+void m68k_disasm (mString& AsmOutput, mString& DisAsmOutput, u32 addr, u32 endAddr, u32 *nextpc, int cnt, u32& LineCount)
 {
 	static bool	isInit = false;
 	if(!isInit)
@@ -2529,6 +2529,7 @@ void m68k_disasm (mString& AsmOutput, mString& DisAsmOutput, u32 addr, u32 endAd
 //		|| strstr(opcodeBuffer, "rts") || strstr(opcodeBuffer, "rte") || strstr(opcodeBuffer, "jmp"))
 //			fprintf(f, "\n");
 		addr += len;
+		LineCount++;
     }
 	if (nextpc)
 	{

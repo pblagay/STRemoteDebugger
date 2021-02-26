@@ -1,4 +1,4 @@
-//******************************************************//
+﻿//******************************************************//
 // ST Remote Debugger									//
 // 														//
 // Author: Paul Blagay									//
@@ -95,7 +95,7 @@ void STDebugger::Init(void* formPtr)
 	FormWindow = formPtr;
 	SetupRegisters();
 	DebugMemoryData();
-//	LoadMemory();
+	//	LoadMemory();
 	SetupMemory();
 
 	GetComPortsAvailable();
@@ -103,6 +103,23 @@ void STDebugger::Init(void* formPtr)
 
 	ReadBuffer = new u8[MEMORY_BUFFER_SIZE];
 	memset(ReadBuffer, 0, MEMORY_BUFFER_SIZE);
+
+	char buf[255];
+	for (int i = 1; i < 255; i++)
+	{
+		buf[i] = i;
+	}
+
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+
+	if (mainWindow != nullptr)
+	{
+		System::Windows::Forms::RichTextBox^ logWindow = mainWindow->GetLogWindow();
+
+		char* c = buf;
+		logWindow->Text =ConvertCharToString(c);
+	}
 }
 
 // Shutdown
@@ -441,6 +458,159 @@ void STDebugger::GetComPortsAvailable()
 	}
 }
 
+// Set current execution line
+void STDebugger::SetCurrentLine(u32 LineNumber)
+{
+	// show character in the disassembly output
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+
+	System::Windows::Forms::RichTextBox^ codeWindow = mainWindow->GetAssemblyWindow();
+
+	// remove the previous line items
+	u32 position = (CurrentLine * ASMWINDOW_LINE_LENGTH);
+	codeWindow->SelectionStart = position;
+	codeWindow->SelectionLength = ASMWINDOW_LINE_LENGTH;
+	codeWindow->SelectionBackColor = System::Drawing::SystemColors::GradientInactiveCaption;
+
+	position = (CurrentLine * ASMWINDOW_LINE_LENGTH) + ASMWINDOW_PC_LOCATION;
+	codeWindow->SelectionStart = position;
+	codeWindow->SelectionLength = 2;
+	codeWindow->SelectionFont = (gcnew System::Drawing::Font(L"Courier New", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
+	codeWindow->SelectedText = ConvertCharToString("  ");
+
+	// highlight line
+	position = (LineNumber * ASMWINDOW_LINE_LENGTH);
+	codeWindow->SelectionStart = position;
+	codeWindow->SelectionLength = ASMWINDOW_LINE_LENGTH;
+	codeWindow->SelectionBackColor = System::Drawing::Color::Yellow;
+	codeWindow->Select(0, 0);
+
+	// show PC cursor
+	position = (LineNumber * ASMWINDOW_LINE_LENGTH) + ASMWINDOW_PC_LOCATION;
+	codeWindow->SelectionStart = position;
+	codeWindow->SelectionLength = 2;
+	codeWindow->SelectionFont = (gcnew System::Drawing::Font(L"Courier New", 10, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,static_cast<System::Byte>(0)));
+	codeWindow->SelectedText = ConvertCharToString("=>");
+
+	// re draw the breakpoints
+	RedrawBreakpoints();
+
+	CurrentLine = LineNumber;
+}
+
+// Redraw breakpoints
+void STDebugger::RedrawBreakpoints()
+{
+	// show character in the disassembly output
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+
+	System::Windows::Forms::RichTextBox^ codeWindow = mainWindow->GetAssemblyWindow();
+
+	for (s32 i = 0; i < BreakPoints.Count(); i++)
+	{
+		BreakPoint* BP = BreakPoints[i];
+
+		// little circle
+		u8 buf[2] = { 0 };
+		buf[0] = 149;
+
+		// figure out the location to show the BP
+		u32 position = (BP->LineNumber * ASMWINDOW_LINE_LENGTH) + ASMWINDOW_BP_LOCATION;
+		codeWindow->SelectionStart = position;
+		codeWindow->SelectionLength = 1;
+		codeWindow->SelectionColor = System::Drawing::Color::Red;
+		codeWindow->SelectionBackColor = System::Drawing::Color::DarkRed;
+		codeWindow->SelectedText = ConvertCharToString((char*)buf);
+	}
+}
+
+// Place breakpoint
+void STDebugger::SetBreakpoint(u32 LineNumber)
+{
+	if (!LoadBuffer)
+		return;
+
+	// show character in the disassembly output
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+
+	System::Windows::Forms::RichTextBox^ codeWindow = mainWindow->GetAssemblyWindow();
+
+	// do we have a BP at this line number already?
+	for (s32 i = 0; i < BreakPoints.Count(); i++)
+	{
+		if (BreakPoints[i]->LineNumber == LineNumber)
+		{
+			u32 position = (LineNumber * ASMWINDOW_LINE_LENGTH) + ASMWINDOW_BP_LOCATION;
+			codeWindow->SelectionStart = position;
+			codeWindow->SelectionLength = 1;
+			codeWindow->SelectionColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			codeWindow->SelectionBackColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			codeWindow->SelectedText = ConvertCharToString(" ");
+			BreakPoints.Delete(i);
+			return;
+		}
+	}
+
+	BreakPoint* bp = new BreakPoint;
+	bp->LineNumber = LineNumber;
+	bp->Enabled = true;
+	BreakPoints.Add(bp);
+
+	// little circle
+	u8 buf[2] = { 0 }; 
+	buf[0] = 149;
+
+	// figure out the location to show the BP
+	u32 position = (LineNumber * ASMWINDOW_LINE_LENGTH) + ASMWINDOW_BP_LOCATION;
+	codeWindow->SelectionStart = position;
+	codeWindow->SelectionLength = 1;
+	codeWindow->SelectionColor = System::Drawing::Color::Red;
+	codeWindow->SelectionBackColor = System::Drawing::Color::DarkRed;
+	codeWindow->SelectedText = ConvertCharToString((char*)buf);
+}
+
+// Remove breakpoint
+void STDebugger::RemoveBreakpoint(u32 LineNumber)
+{
+	if (!LoadBuffer)
+		return;
+
+	// show character in the disassembly output
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+
+	System::Windows::Forms::RichTextBox^ codeWindow = mainWindow->GetAssemblyWindow();
+
+	// do we have a BP at this line number already?
+	for (s32 i = 0; i < BreakPoints.Count(); i++)
+	{
+		if (BreakPoints[i]->LineNumber == LineNumber)
+		{
+			u32 position = (LineNumber * ASMWINDOW_LINE_LENGTH) + ASMWINDOW_BP_LOCATION;
+			codeWindow->SelectionStart = position;
+			codeWindow->SelectionLength = 1;
+			codeWindow->SelectionColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			codeWindow->SelectionBackColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			codeWindow->SelectedText = ConvertCharToString(" ");
+			BreakPoints.Delete(i);
+			return;
+		}
+	}
+}
+
+// Clear breakpoints
+void STDebugger::ClearBreakpoints()
+{
+	for (s32 i = 0; i < BreakPoints.Count(); i++)
+	{
+		delete BreakPoints[i];
+	}
+	BreakPoints.RemoveAll();
+}
+
 // debug memory data
 void STDebugger::DebugMemoryData()
 {
@@ -658,6 +828,7 @@ void STDebugger::LoadExecutable(LPCWSTR Filename)
 		delete[] LoadBuffer;
 		LoadBuffer = nullptr;
 	}
+	ClearBreakpoints();
 
 	// open / read the file into memory
 	HANDLE hFile = INVALID_HANDLE_VALUE;
@@ -719,9 +890,10 @@ void STDebugger::DisassembleCode()
 	u32 codeSize = LoadBufferSize - sizeOfHeader;
 	u32 startOfCode = (u32)(LoadBuffer + sizeOfHeader);
 	u32 endOfCode = startOfCode + codeSize;
-	m68k_disasm(AsmText, DisassemblyText, startOfCode, endOfCode, 0, 100);
+	m68k_disasm(AsmText, DisassemblyText, startOfCode, endOfCode, 0, 100, NumberOfLinesInProgram);
 
 	codeWindow->Text = ConvertCharToString(AsmText.GetPtr());
+	SetCurrentLine(0);
 }
 
 // Clear mainWindow reference

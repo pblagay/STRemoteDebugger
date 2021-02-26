@@ -15,6 +15,11 @@
 #define UPDATE_REGISTERS_WINDOW			0x01
 #define UPDATE_MEMORY_WINDOW			0x02
 
+// line lengths etc
+#define ASMWINDOW_LINE_LENGTH			48
+#define ASMWINDOW_BP_LOCATION			20
+#define ASMWINDOW_PC_LOCATION			22
+
 class Disassembler68K;
 
 // Atari ST executable program header
@@ -32,6 +37,21 @@ typedef struct
 	u16  ph_prgflags[2];    /* Program flags                   */
 	u16  ph_absflag;		/* 0 = Relocation info present     */
 } ProgramHeader;
+
+class BreakPoint
+{
+public:
+	BreakPoint()
+	{
+	}
+
+	~BreakPoint()
+	{
+	}
+
+	u32		LineNumber = 0;
+	bool	Enabled = false;
+};
 
 class ComPort
 {
@@ -162,15 +182,20 @@ public:
 	u8* GetReadBuffer() { return ReadBuffer; };
 	u8 GetLastCommand() { return LastCommand; }
 
+	void SetBreakpoint(u32 LineNumber);
+	void RemoveBreakpoint(u32 LineNumber);
+	u32	 GetCurrentLine() { return CurrentLine; }
+	void SetCurrentLine(u32 LineNumber);
+
 private:
 	void	GetComPortsAvailable();
 	void	SetupRegisters();
 	void	SetupMemory();
 	void	UpdateRegisters();
 	void	UpdateLog();
+	void	RedrawBreakpoints();
 
 	// log
-
 	void	OutputToLog(mString Text);
 	DynArray<mString*>	LogQueue;
 
@@ -226,6 +251,12 @@ private:
 	u32 currentWord = 0;
 	u32 currentCPUType = 0;
 	u32 tosVersion = 0x104;
+	u32 NumberOfLinesInProgram = 0;
+	u32 CurrentLine = 0;
+
+	// Breakpoints
+	void ClearBreakpoints();
+	DynArray<BreakPoint*> BreakPoints;
 
 	// form references
 	void* FormWindow = nullptr;

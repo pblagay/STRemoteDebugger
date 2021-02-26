@@ -38,6 +38,9 @@ namespace CppCLRWinformsSTDebugger
 		}
 
 		System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
+	private: System::Windows::Forms::Button^ button3;
+	private: System::Windows::Forms::Button^ button4;
+	public:
 		System::Windows::Forms::RichTextBox^ GetAssemblyWindow() { return AssemblyWindow; }
 //		System::Windows::Forms::RichTextBox^ GetSourceWindow() { return SourceCodeWindow; }
 		System::Windows::Forms::RichTextBox^ GetMemoryWindow() { return MemoryWindow; }
@@ -126,6 +129,8 @@ namespace CppCLRWinformsSTDebugger
 			this->LogLabel = (gcnew System::Windows::Forms::Label());
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->button2 = (gcnew System::Windows::Forms::Button());
+			this->button3 = (gcnew System::Windows::Forms::Button());
+			this->button4 = (gcnew System::Windows::Forms::Button());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
@@ -293,7 +298,7 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// LogWindow
 			// 
-			this->LogWindow->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->LogWindow->Font = (gcnew System::Drawing::Font(L"Courier New", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->LogWindow->Location = System::Drawing::Point(18, 783);
 			this->LogWindow->Margin = System::Windows::Forms::Padding(2);
@@ -337,11 +342,33 @@ namespace CppCLRWinformsSTDebugger
 			this->button2->UseVisualStyleBackColor = true;
 			this->button2->Click += gcnew System::EventHandler(this, &Form1::button2_Click);
 			// 
+			// button3
+			// 
+			this->button3->Location = System::Drawing::Point(417, 34);
+			this->button3->Name = L"button3";
+			this->button3->Size = System::Drawing::Size(75, 23);
+			this->button3->TabIndex = 15;
+			this->button3->Text = L"BP test";
+			this->button3->UseVisualStyleBackColor = true;
+			this->button3->Click += gcnew System::EventHandler(this, &Form1::button3_Click);
+			// 
+			// button4
+			// 
+			this->button4->Location = System::Drawing::Point(512, 33);
+			this->button4->Name = L"button4";
+			this->button4->Size = System::Drawing::Size(75, 23);
+			this->button4->TabIndex = 16;
+			this->button4->Text = L"currentline";
+			this->button4->UseVisualStyleBackColor = true;
+			this->button4->Click += gcnew System::EventHandler(this, &Form1::button4_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1156, 909);
+			this->Controls->Add(this->button4);
+			this->Controls->Add(this->button3);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->LogLabel);
@@ -812,6 +839,14 @@ private: System::Void quitToolStripMenuItem_Click(System::Object^ sender, System
 	Close();
 }
 private: System::Void label3_Click(System::Object^ sender, System::EventArgs^ e) {
+}
+private: System::Void button3_Click(System::Object^ sender, System::EventArgs^ e) 
+{
+	g_STDebugger->SetBreakpoint(1);
+}
+private: System::Void button4_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	g_STDebugger->SetCurrentLine(g_STDebugger->GetCurrentLine() + 1);
 }
 };
 }
