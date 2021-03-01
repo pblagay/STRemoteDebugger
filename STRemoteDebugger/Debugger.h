@@ -221,8 +221,11 @@ public:
 	u32 GetMemoryBlockIndex() {	return MemoryBlockIndex;  }
 
 	u32	GetTosVersion() { return TosVersion; }
+	void SetTosVersion(u32 pTosVersion) { TosVersion = pTosVersion; }
 	u32	GetComputerType() { return ComputerType; }
+	void SetComputerType(u32 pComputerType) { ComputerType = pComputerType; }
 	u32	GetSystemMemory() { return SystemMemory; }
+	void SetSystemMemory(u32 pSystemMemory) { SystemMemory = pSystemMemory; }
 
 private:
 	void	GetComPortsAvailable();

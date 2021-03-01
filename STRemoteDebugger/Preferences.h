@@ -420,15 +420,124 @@ private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e
 // computer type
 private: System::Void ComputerType_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
 {
+	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
+	System::String^ computerType = cb->SelectedItem->ToString();
+	SelectedComputerType = computerType;
+
+	if (computerType == "Atari ST / Mega ST")
+	{
+		g_STDebugger->SetComputerType(COMPUTER_TYPE_ATARI_ST);
+	}
+	else if (computerType == "Atari STe")
+	{
+		g_STDebugger->SetComputerType(COMPUTER_TYPE_ATARI_STE);
+	}
+	else if (computerType == "Atari TT")
+	{
+		g_STDebugger->SetComputerType(COMPUTER_TYPE_ATARI_TT);
+	}
+	else if (computerType == "Atari Falcon")
+	{
+		g_STDebugger->SetComputerType(COMPUTER_TYPE_ATARI_FALCON);
+	}
 }
 // system memory
 private: System::Void SystemMemory_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
 {
+	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
+	System::String^ memSelected = cb->SelectedItem->ToString();
+
+	if (memSelected == "512 KB")
+	{
+		SelectedMemoryAmount = ATARI_520ST_MEMORY;
+	}
+	else if (memSelected == "1 MB")
+	{
+		SelectedMemoryAmount = ATARI_1040ST_MEMORY;
+	}
+	else if (memSelected == "2.5 MB")
+	{
+		SelectedMemoryAmount = ATARI_ST_MID_MEMORY;
+	}
+	else if (memSelected == "4 MB")
+	{
+		SelectedMemoryAmount = ATARI_ST_MAX_MEMORY;
+	}
+	else if (memSelected == "14 MB")
+	{
+		SelectedMemoryAmount = ATARI_FALCON_MAX_MEMORY;
+	}
+	g_STDebugger->SetSystemMemory(SelectedMemoryAmount);
 }
 
 // tos version
 private: System::Void TOSVersion_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
 {
+	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
+	System::String^ tosVersion = cb->SelectedItem->ToString();
+
+	if (tosVersion == "Tos 1.0")
+	{
+		SelectedTos = 100;
+	}
+	else if (tosVersion == "Tos 1.02")
+	{
+		SelectedTos = 102;
+	}
+	else if (tosVersion == "Tos 1.04")
+	{
+		SelectedTos = 104;
+	}
+	else if (tosVersion == "Tos 1.06")
+	{
+		SelectedTos = 106;
+	}
+	else if (tosVersion == "Tos 1.62")
+	{
+		SelectedTos = 162;
+	}
+	else if (tosVersion == "Tos 2.05")
+	{
+		SelectedTos = 205;
+	}
+	else if (tosVersion == "Tos 2.06")
+	{
+		SelectedTos = 206;
+	}
+	else if (tosVersion == "Tos 3.00")
+	{
+		SelectedTos = 300;
+	}
+	else if (tosVersion == "Tos 3.01")
+	{
+		SelectedTos = 301;
+	}
+	else if (tosVersion == "Tos 3.05")
+	{
+		SelectedTos = 305;
+	}
+	else if (tosVersion == "Tos 3.06")
+	{
+		SelectedTos = 306;
+	}
+	else if (tosVersion == "Tos 4.00")
+	{
+		SelectedTos = 400;
+	}
+	else if (tosVersion == "Tos 4.01")
+	{
+		SelectedTos = 401;
+	}
+	else if (tosVersion == "Tos 4.02")
+	{
+		SelectedTos = 402;
+	}
+	else if (tosVersion == "Tos 4.04")
+	{
+		SelectedTos = 404;
+	}
+
+	g_STDebugger->SetTosVersion(SelectedTos);
 }
 };
 }
