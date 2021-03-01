@@ -152,6 +152,8 @@ public:
 	void LoadExecutable(LPCWSTR Filename);
 	void SetStartingMemoryAddress(u32 Address);
 	void CreateMemoryBuffer();
+	void SetupMemory();
+
 //	void LoadMemory(u8* SrcData);
 
 	// cmds
@@ -220,17 +222,19 @@ public:
 
 	u32 GetMemoryBlockIndex() {	return MemoryBlockIndex;  }
 
-	u32	GetTosVersion() { return TosVersion; }
+	u32	 GetTosVersion() { return TosVersion; }
 	void SetTosVersion(u32 pTosVersion) { TosVersion = pTosVersion; }
-	u32	GetComputerType() { return ComputerType; }
+	u32	 GetComputerType() { return ComputerType; }
 	void SetComputerType(u32 pComputerType) { ComputerType = pComputerType; }
-	u32	GetSystemMemory() { return SystemMemory; }
+	u32	 GetSystemMemory() { return SystemMemory; }
 	void SetSystemMemory(u32 pSystemMemory) { SystemMemory = pSystemMemory; }
+
+	void SetMemoryViewSize(u32 pMemoryViewSize) { MemoryViewSize = pMemoryViewSize; }
+	u32  GetMemoryViewSize() { return MemoryViewSize; }
 
 private:
 	void	GetComPortsAvailable();
 	void	SetupRegisters();
-	void	SetupMemory();
 	void	UpdateRegisters();
 	void	UpdateLog();
 	void	RedrawBreakpoints();
@@ -285,6 +289,7 @@ private:
 	u32		MemoryWindowWrapRight = 12;
 	bool	MemoryAddressChanged = false;
 	bool	MemoryWindowInAsciiBlock = false;
+	u32		MemoryViewSize = 0;			// 4 byte / 2 byte / 1 byte view
 
 	// disassembler
 	u32 address = 0;

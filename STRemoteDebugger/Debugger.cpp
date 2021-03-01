@@ -205,6 +205,10 @@ void STDebugger::ReadIniFile()
 	SystemMemory = n;
 	n = ini_getl("Computer", "Tos", 104, inifile);
 	TosVersion = n;
+
+	// other prefs
+	n = ini_getl("View", "MemorySize", 0, inifile);
+	MemoryViewSize = n;
 }
 
 // write ini file
@@ -238,6 +242,7 @@ void STDebugger::WriteIniFile()
 	n = ini_puts("Computer", "Type", computerType, inifile);
 	n = ini_putl("Computer", "Memory", SystemMemory, inifile);
 	n = ini_putl("Computer", "TOS", TosVersion, inifile);
+	n = ini_putl("View", "MemorySize", MemoryViewSize, inifile);
 }
 
 // Connect to target
@@ -798,8 +803,20 @@ void STDebugger::CreateMemoryBuffer()
 // Setup Memory 
 void STDebugger::SetupMemory()
 {
-	MemoryBytesPerLine = MEMORY_WINDOW_BYTES_PER_LINE;
-	MemoryBytesPerColumn = MEMORY_WINDOW_BYTES_PER_COLUMN;
+	if (MemoryViewSize == 0)
+	{
+		MemoryBytesPerColumn = 4;
+	}
+	else if (MemoryViewSize == 1)
+	{
+		MemoryBytesPerColumn = 2;
+	}
+	else
+	{
+		MemoryBytesPerColumn = 1;
+	}
+
+	MemoryBytesPerLine = MemoryBytesPerColumn * MEMORY_WINDOW_COLUMNS;
 
 	// get form
 	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
@@ -835,7 +852,7 @@ void STDebugger::SetupMemory()
 			{
 				// now show the bytes
 				char MemDword[MEMORY_WINDOW_BYTES_PER_COLUMN] = { 0 };
-				for (u32 bytes = 0; bytes < MemoryBytesPerColumn; bytes++)
+				for (u32 bytes = 0; bytes < MemoryBytesPerColumn ; bytes++)
 				{
 					char mv = *CurrentMemoryBuffer++;
 					MemDword[bytes] = mv;
@@ -872,12 +889,22 @@ void STDebugger::SetupMemory()
 					}
 					break;
 				case 2:
-					MemoryString += ConvertIntToString(MemDword[0]);
-					MemoryString += ConvertIntToString(MemDword[1]);
+					{
+						u8 c = MemDword[0];
+						sprintf(MemValue1, "%02x", c);
+						MemoryString += ConvertCharToString(MemValue1);
+						c = MemDword[1];
+						sprintf(MemValue2, "%02x", c);
+						MemoryString += ConvertCharToString(MemValue2);
+					}
 					break;
 				case 1:
 				default:
-					MemoryString += ConvertIntToString(MemDword[0]);
+					{
+						u8 c = MemDword[0];
+						sprintf(MemValue1, "%02x", c);
+						MemoryString += ConvertCharToString(MemValue1);
+					}
 					break;
 				}
 

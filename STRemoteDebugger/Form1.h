@@ -35,10 +35,11 @@ namespace CppCLRWinformsSTDebugger
 
 			// Enable timer.  
 			TickTimer->Enabled = true;
+			MemorySize->SelectedItem = MemorySize->Items[g_STDebugger->GetMemoryViewSize()];
 		}
 
 	public:
-				   System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
+	   System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
 		System::Windows::Forms::RichTextBox^ GetAssemblyWindow() { return AssemblyWindow; }
 //		System::Windows::Forms::RichTextBox^ GetSourceWindow() { return SourceCodeWindow; }
 		System::Windows::Forms::RichTextBox^ GetMemoryWindow() { return MemoryWindow; }
@@ -47,6 +48,7 @@ namespace CppCLRWinformsSTDebugger
 		Preferences^ GetPreferencesWindow() { return preferencesWindow; }
 		void SetPreferencesWindow(Preferences^ pWindow) { preferencesWindow = pWindow; }
 
+	private: System::Windows::Forms::ComboBox^ MemorySize;
 	private: System::Windows::Forms::ToolStripMenuItem^ debugToolStripMenuItem;
 	public:
 	private: System::Windows::Forms::ToolStripMenuItem^ stepOverToolStripMenuItem;
@@ -158,6 +160,7 @@ namespace CppCLRWinformsSTDebugger
 			this->button2 = (gcnew System::Windows::Forms::Button());
 			this->button3 = (gcnew System::Windows::Forms::Button());
 			this->AsmWindowTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
+			this->MemorySize = (gcnew System::Windows::Forms::ComboBox());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
@@ -477,11 +480,23 @@ namespace CppCLRWinformsSTDebugger
 			this->button3->UseVisualStyleBackColor = true;
 			this->button3->Click += gcnew System::EventHandler(this, &Form1::button3_Click);
 			// 
+			// MemorySize
+			// 
+			this->MemorySize->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->MemorySize->FormattingEnabled = true;
+			this->MemorySize->Items->AddRange(gcnew cli::array< System::Object^  >(3) { L"4 byte", L"2 byte", L"1 byte" });
+			this->MemorySize->Location = System::Drawing::Point(1056, 574);
+			this->MemorySize->Name = L"MemorySize";
+			this->MemorySize->Size = System::Drawing::Size(80, 21);
+			this->MemorySize->TabIndex = 16;
+			this->MemorySize->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::MemorySize_SelectedIndexChanged);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1156, 909);
+			this->Controls->Add(this->MemorySize);
 			this->Controls->Add(this->button3);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->button1);
@@ -1258,6 +1273,31 @@ private: System::Void setBreakpointToolStripMenuItem_Click(System::Object^ sende
 // Manage breakpoints
 private: System::Void managerBreakpointsToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
 {
+}
+private: System::Void MemorySize_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
+{
+	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
+	System::String^ memoryViewSize = cb->SelectedItem->ToString();
+
+	u32 newMemViewSize = 0;
+	if (memoryViewSize == "4 byte")
+	{
+		newMemViewSize = 0;
+	}
+	else if (memoryViewSize == "2 byte")
+	{
+		newMemViewSize = 1;
+	}
+	else if (memoryViewSize == "1 byte")
+	{
+		newMemViewSize = 2;
+	}
+	
+	if (newMemViewSize != g_STDebugger->GetMemoryViewSize())
+	{
+		g_STDebugger->SetMemoryViewSize(newMemViewSize);
+		g_STDebugger->SetupMemory();
+	}
 }
 };
 }
