@@ -899,6 +899,9 @@ private: System::Void preferencesToolStripMenuItem_Click(System::Object^ sender,
 		System::Windows::Forms::ComboBox^ comportsList = preferencesWindow->GetComportsList();
 		System::Windows::Forms::RichTextBox^ comportsDesc = preferencesWindow->GetSerialPortDescBox();
 		System::Windows::Forms::ComboBox^ baudRateList = preferencesWindow->GetBaudRateList();
+		System::Windows::Forms::ComboBox^ computerTypeList = preferencesWindow->GetComputerTypeList();
+		System::Windows::Forms::ComboBox^ systemMemoryList = preferencesWindow->GetSystemMemoryList();
+		System::Windows::Forms::ComboBox^ tosVersionList = preferencesWindow->GetTosVersionList();
 
 		preferencesWindow->SelectedBaudRate = g_STDebugger->GetBaudRate();
 		preferencesWindow->SelectedComPort = ConvertCharToString(g_STDebugger->GetComPortName());
@@ -959,6 +962,98 @@ private: System::Void preferencesToolStripMenuItem_Click(System::Object^ sender,
 		}
 
 		baudRateList->SelectedItem = baudRateList->Items[index];	// set to ST max as default
+
+		// set up the computer type etc
+		preferencesWindow->SelectedMemoryAmount = g_STDebugger->GetSystemMemory();
+		preferencesWindow->SelectedTos = g_STDebugger->GetTosVersion();
+
+		// computer type
+		System::String^ computerTypeString = "Atari ST";
+		switch (g_STDebugger->GetComputerType())
+		{
+		case COMPUTER_TYPE_ATARI_ST:
+			computerTypeString = "Atari ST";
+			break;
+		case COMPUTER_TYPE_ATARI_STE:
+			computerTypeString = "Atari STe";
+			break;
+		case COMPUTER_TYPE_ATARI_TT:
+			computerTypeString = "Atari TT";
+			break;
+		case COMPUTER_TYPE_ATARI_FALCON:
+			computerTypeString = "Atari Falcon";
+			break;
+		}
+		preferencesWindow->SelectedComputerType = computerTypeString;
+
+		computerTypeList->SelectedItem = computerTypeList->Items[g_STDebugger->GetComputerType()];
+		switch (g_STDebugger->GetSystemMemory())
+		{
+		case ATARI_520ST_MEMORY:
+			systemMemoryList->SelectedItem = systemMemoryList->Items[0];
+			break;
+		case ATARI_1040ST_MEMORY:
+			systemMemoryList->SelectedItem = systemMemoryList->Items[1];
+			break;
+		case ATARI_ST_MID_MEMORY:
+			systemMemoryList->SelectedItem = systemMemoryList->Items[2];
+			break;
+		case ATARI_ST_MAX_MEMORY:
+			systemMemoryList->SelectedItem = systemMemoryList->Items[3];
+			break;
+		case ATARI_FALCON_MAX_MEMORY:
+			systemMemoryList->SelectedItem = systemMemoryList->Items[4];
+			break;
+		default:
+			break;
+		}
+
+		switch(g_STDebugger->GetTosVersion())
+		{
+		case 100:
+			tosVersionList->SelectedItem = tosVersionList->Items[0];
+			break;
+		case 102:
+			tosVersionList->SelectedItem = tosVersionList->Items[1];
+			break;
+		case 104:
+			tosVersionList->SelectedItem = tosVersionList->Items[2];
+			break;
+		case 106:
+			tosVersionList->SelectedItem = tosVersionList->Items[3];
+			break;
+		case 162:
+			tosVersionList->SelectedItem = tosVersionList->Items[4];
+			break;
+		case 205:
+			tosVersionList->SelectedItem = tosVersionList->Items[5];
+			break;
+		case 206:
+			tosVersionList->SelectedItem = tosVersionList->Items[6];
+			break;
+		case 301:
+			tosVersionList->SelectedItem = tosVersionList->Items[7];
+			break;
+		case 305:
+			tosVersionList->SelectedItem = tosVersionList->Items[8];
+			break;
+		case 306:
+			tosVersionList->SelectedItem = tosVersionList->Items[90];
+			break;
+		case 400:
+			tosVersionList->SelectedItem = tosVersionList->Items[10];
+			break;
+		case 401:
+			tosVersionList->SelectedItem = tosVersionList->Items[11];
+			break;
+		case 402:
+			tosVersionList->SelectedItem = tosVersionList->Items[12];
+			break;
+		case 404:
+			tosVersionList->SelectedItem = tosVersionList->Items[13];
+			break;
+		}
+
 		preferencesWindow->Show();
 	}
 }

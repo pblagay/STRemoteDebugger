@@ -21,10 +21,14 @@
 #define ASMWINDOW_PC_LOCATION			22
 
 // memory sizes by platform
-#define	ATARI_ST_MAX_MEMORY				(1024 * 1024) * 4			// 4MB max
-#define	ATARI_TT_MAX_MEMORY				(1024 * 1024) * 4			// 4MB max
-#define	ATARI_FALCON_MAX_MEMORY			(1024 * 1024) * 14			// 14MB max
+#define	ATARI_520ST_MEMORY				(1024 * 512)							// 512 K
+#define	ATARI_1040ST_MEMORY				(1024 * 1024)							// 1 MB
+#define	ATARI_ST_MID_MEMORY				((1024 * 1024 ) * 2) + (512 * 1024)		// 2.5MB
+#define	ATARI_ST_MAX_MEMORY				(1024 * 1024) * 4						// 4MB max
+#define	ATARI_TT_MAX_MEMORY				(1024 * 1024) * 4						// 4MB max
+#define	ATARI_FALCON_MAX_MEMORY			(1024 * 1024) * 14						// 14MB max
 
+// computer type
 #define COMPUTER_TYPE_ATARI_ST			0
 #define	COMPUTER_TYPE_ATARI_STE			1
 #define COMPUTER_TYPE_ATARI_TT			2
@@ -215,6 +219,10 @@ public:
 	u32 GetSSPRegisterValue(u32 index) { return SSP->Value; }
 
 	u32 GetMemoryBlockIndex() {	return MemoryBlockIndex;  }
+
+	u32	GetTosVersion() { return TosVersion; }
+	u32	GetComputerType() { return ComputerType; }
+	u32	GetSystemMemory() { return SystemMemory; }
 
 private:
 	void	GetComPortsAvailable();

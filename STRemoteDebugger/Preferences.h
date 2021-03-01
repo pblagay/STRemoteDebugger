@@ -47,6 +47,14 @@ namespace CppCLRWinformsSTDebugger
 	System::Windows::Forms::ComboBox^ GetComportsList() { return ComPorts; }
 	System::Windows::Forms::RichTextBox^ GetSerialPortDescBox() { return SerialPortDesc; }
 	System::Windows::Forms::ComboBox^ GetBaudRateList() { return BaudRate; }
+	System::Windows::Forms::ComboBox^ GetComputerTypeList() { return ComputerType; }
+	System::Windows::Forms::ComboBox^ GetSystemMemoryList() { return SystemMemory; }
+	System::Windows::Forms::ComboBox^ GetTosVersionList() { return TOSVersion; }
+
+	u32 SelectedMemoryAmount;
+	u32 SelectedTos;
+	System::String^ SelectedComputerType;
+
 	u32 SelectedBaudRate;
 	System::String^ SelectedComPort;
 
@@ -244,9 +252,10 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->TOSVersion->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->TOSVersion->FormattingEnabled = true;
-			this->TOSVersion->Items->AddRange(gcnew cli::array< System::Object^  >(7) {
-				L"Tos 1.0", L"Tos 1.02", L"Tos 1.04", L"Tos 1.62",
-					L"Tos 2.06", L"Tos 3.03", L"Tos 4.04"
+			this->TOSVersion->Items->AddRange(gcnew cli::array< System::Object^  >(15) {
+				L"Tos 1.0", L"Tos 1.02", L"Tos 1.04", L"Tos 1.06",
+					L"Tos 1.62", L"Tos 2.05", L"Tos 2.06", L"Tos 3.00", L"Tos 3.01", L"Tos 3.05", L"Tos 3.06", L"Tos 4.00", L"Tos 4.01", L"Tos 4.02",
+					L"Tos 4.04"
 			});
 			this->TOSVersion->Location = System::Drawing::Point(22, 93);
 			this->TOSVersion->Name = L"TOSVersion";

@@ -201,7 +201,7 @@ void STDebugger::ReadIniFile()
 	else if (computerType == "Atari Falcon")
 		ComputerType = COMPUTER_TYPE_ATARI_FALCON;
 
-	n = ini_getl("Computer", "Memory", 512, inifile);
+	n = ini_getl("Computer", "Memory", ATARI_520ST_MEMORY, inifile);
 	SystemMemory = n;
 	n = ini_getl("Computer", "Tos", 104, inifile);
 	TosVersion = n;
