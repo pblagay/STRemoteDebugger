@@ -524,7 +524,7 @@ bool STDebugger::SendPacket(u8* packet, u32 NumBytes)
 // update registers
 void STDebugger::RequestRegisters()
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	SendCmd(DEBUGGER_CMD_REQUEST_REGISTERS);
@@ -533,7 +533,7 @@ void STDebugger::RequestRegisters()
 // get memory
 void STDebugger::RequestMemory(u32 Address, u32 Blocksize)
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	char* ad = (char*)this;
@@ -543,7 +543,7 @@ void STDebugger::RequestMemory(u32 Address, u32 Blocksize)
 // Run
 void STDebugger::Run()
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	SendCmd(DEBUGGER_CMD_RUN);
@@ -552,7 +552,7 @@ void STDebugger::Run()
 // Stop
 void STDebugger::Stop()
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	SendCmd(DEBUGGER_CMD_STOP);
@@ -561,7 +561,7 @@ void STDebugger::Stop()
 // Step Over
 void STDebugger::StepOver()
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	CurrentLine++;					// debug
@@ -572,7 +572,7 @@ void STDebugger::StepOver()
 // Step into
 void STDebugger::StepInto()
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	SendCmd(DEBUGGER_CMD_STEP_INTO);
@@ -581,7 +581,7 @@ void STDebugger::StepInto()
 // Step out
 void STDebugger::StepOut()
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	SendCmd(DEBUGGER_CMD_STEP_OUT);
@@ -590,7 +590,7 @@ void STDebugger::StepOut()
 // Run to cursor
 void STDebugger::RunToCursor()
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	SendCmd(DEBUGGER_CMD_RUN_TO_CURSOR);
@@ -599,7 +599,7 @@ void STDebugger::RunToCursor()
 // Set PC
 void STDebugger::SetPC()
 {
-	if (!GetIsConnectedToTarget())
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
 		return;
 
 	SendCmd(DEBUGGER_CMD_SET_PC);
@@ -1212,8 +1212,16 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 	{
 		bool result = ReadFile(handle, ringBuffer, 32, &numBytesRead, NULL);
 
+		if (numBytesReceivedTotal > (MEMORY_BUFFER_SIZE + 32) || ( (u32)buffer + numBytesRead >= (u32)buffer + (MEMORY_BUFFER_SIZE + 32)) )
+		{
+			assert(false);
+		}
+
 		if (result && numBytesRead != 0 && !std->GetReceiveInProgress())
 		{
+			memcpy(dstBuf, ringBuffer, 32);
+			dstBuf += numBytesRead;
+			numBytesReceivedTotal += numBytesRead;
 			std->SetReceiveInProgress(true);
 			cmd = ringBuffer[0];
 			numBytesReceivedTotal = numBytesRead;

@@ -539,7 +539,7 @@ private: System::Void MemoryWindow_VScroll(System::Object^ sender, System::Event
 	int index = rtb->GetCharIndexFromPosition(System::Drawing::Point(1, 1));
 	int TopLine = rtb->GetLineFromCharIndex(index);
 
-	LogWindow->Text = ConvertIntToString(TopLine);
+	LogWindow->Text += ConvertIntToString(TopLine);
 
 	// figure out block we need to load
 	u32 startMemory = 0;
