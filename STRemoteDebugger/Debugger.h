@@ -241,6 +241,9 @@ public:
 	void SetMemoryViewSelectedColumnIndex(u32 pMemoryViewSelectedColumnIndex) { MemoryViewSelectedColumnIndex = pMemoryViewSelectedColumnIndex; }
 	u32  GetMemoryViewSelectedColumnIndex() { return MemoryViewSelectedColumnIndex; }
 
+	bool GetSendCmdInProgress() { return SendCmdInProgress;	}
+	bool GetReceiveCmdInProgress() { return ReceiveInProgress; }
+
 private:
 	void	GetComPortsAvailable();
 	void	SetupRegisters();
@@ -263,6 +266,7 @@ private:
 	void	SendCmd(u8 Cmd, u32 MemoryAddress = 0, u32 NumBytes = 0);
 	void	ProcessCommand(u8 Cmd, u8* packet);
 	void	SetCmdInProgress(u8 Cmd);
+	void	ClearCmdInProgress();
 
 	// thread
 	s32		CreateTickThread();

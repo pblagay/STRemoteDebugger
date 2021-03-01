@@ -593,7 +593,7 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 	break;
 
 	default:
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 		break;
 	}
 }
@@ -1304,6 +1304,9 @@ void STDebugger::UpdateLog()
 //////////////////////////////////////////////////////////////
 void STDebugger::RefreshWindows()
 {
+	if (g_STDebugger->GetSendCmdInProgress() || g_STDebugger->GetReceiveCmdInProgress())
+		return;
+
 	UpdateLog();
 
 	if (UpdateWindowMask & UPDATE_REGISTERS_WINDOW)
@@ -1428,10 +1431,23 @@ unsigned int __stdcall STDebugger::TickThread(void* lpParameter)
 
 void STDebugger::SetCmdInProgress(u8 Cmd)
 {
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+	mainWindow->UseWaitCursor = true;
+
 	LastCommand = Cmd;
 	SendCmdInProgress = true;
 //	SendCmdTimeout = 20 * 5;					// time in seconds
 	SendCmdTimeout = 1000000000;
+}
+
+void STDebugger::ClearCmdInProgress()
+{
+	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
+	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
+	mainWindow->UseWaitCursor = false;
+
+	SendCmdInProgress = false;
 }
 
 // process command from serial port
@@ -1447,7 +1463,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 	{
 		char* response = (char*)&packet[4];
 		// update PC if response we ok
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
@@ -1455,7 +1471,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 	{
 		char* response = (char*)&packet[4];
 		// update PC if response we ok
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
@@ -1463,7 +1479,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 	{
 		char* response = (char*)&packet[4];
 		// update PC if response we ok
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
@@ -1471,7 +1487,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 	{
 		char* response = (char*)&packet[4];
 		// did we stop (set PC)
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
@@ -1479,21 +1495,21 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 	{
 		char* response = (char*)&packet[4];
 		// did we run? set debugger to active
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
 	case DEBUGGER_TARGET_RESPONSE_RUN_TO_CURSOR:
 	{
 		char* response = (char*)&packet[4];
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
 	case DEBUGGER_TARGET_RESPONSE_SET_PC:
 	{
 		char* response = (char*)&packet[4];
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
@@ -1506,7 +1522,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 		OutputToLog(mString(output));
 		output.ToWide();
 		OutputDebugString((LPCWSTR)output.GetPtr());
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 
 		// kick off a memory request
 		RequestMemory();
@@ -1521,7 +1537,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 		OutputToLog(mString(output));
 		output.ToWide();
 		OutputDebugString((LPCWSTR)output.GetPtr());
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 		DisconnectFromTargetComplete();
 	}
 		break;
@@ -1547,7 +1563,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 		SSP->SetValue(*regBuf++);
 
 		UpdateWindowMask |= UPDATE_REGISTERS_WINDOW;
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
@@ -1560,7 +1576,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 
 		OutputToLog(mString("Got memory block from Target"));
 		UpdateWindowMask |= UPDATE_MEMORY_WINDOW;
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 
@@ -1571,7 +1587,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 		FreeMemoryOnTarget = *upacketPtr;
 		ExecutableLoadBufferOnTarget = uploadAddress;
 		OutputToLog(mString("Got executable load buffer address from Target"));
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 
 		UploadExecutableToTarget();
 	}
@@ -1580,7 +1596,7 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 	case DEBUGGER_TARGET_RESPONSE_UPLOAD_EXECUTABLE:
 	{
 		OutputToLog(mString("Executable uploaded to Target"));
-		SendCmdInProgress = false;
+		ClearCmdInProgress();
 	}
 	break;
 

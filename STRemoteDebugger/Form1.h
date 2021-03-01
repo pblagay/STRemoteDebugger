@@ -566,6 +566,9 @@ namespace CppCLRWinformsSTDebugger
 #pragma endregion
 	private: System::Void openToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e)
 	{
+		if (g_STDebugger->GetSendCmdInProgress() || g_STDebugger->GetReceiveCmdInProgress())
+			return;
+
 		// show file dialog
 		openFileDialog1->Title = "Load ST Executable";
 		openFileDialog1->Filter = "ST files (*.prg;*.acc)|*.prg;*.acc";
@@ -588,6 +591,9 @@ private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e)
 }
 private: System::Void MemoryWindow_VScroll(System::Object^ sender, System::EventArgs^ e)
 {
+	if (g_STDebugger->GetSendCmdInProgress() || g_STDebugger->GetReceiveCmdInProgress())
+		return;
+
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
 
 	int index = rtb->GetCharIndexFromPosition(System::Drawing::Point(1, 1));
@@ -943,6 +949,9 @@ private: System::Void MemoryWindow_Enter(System::Object^ sender, System::EventAr
 
 private: System::Void preferencesToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e)
 {
+	if (g_STDebugger->GetSendCmdInProgress() || g_STDebugger->GetReceiveCmdInProgress())
+		return;
+
 	// open preferences window
 	if (preferencesWindow == nullptr)
 	{
