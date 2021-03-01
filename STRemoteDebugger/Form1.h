@@ -1345,6 +1345,9 @@ private: System::Void comboBox1_SelectedIndexChanged(System::Object^ sender, Sys
 	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
 	System::String^ columns = cb->SelectedItem->ToString();
 
+	u32 selectedIndex = cb->SelectedIndex;
+	g_STDebugger->SetMemoryViewSelectedColumnIndex(selectedIndex);
+
 	u32 numColumns = atoi(ConvertStringToChar(columns));
 	g_STDebugger->SetMemoryWindowNumberOfColumns(numColumns);
 	g_STDebugger->SetupMemory();

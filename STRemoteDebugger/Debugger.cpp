@@ -18,6 +18,72 @@
 #define sizearray(a)  (sizeof(a) / sizeof((a)[0]))
 const char inifile[] = "STRemoteDebugger.ini";
 
+// Memory window position control
+u8 MemWindowFirstCharacterPositionTable[] =
+{
+	11,			// 1
+	11,			// 2
+	11,			// 4
+	11,			// 8
+	11,			// 16
+	11,			// 32
+	11,			// 64
+};
+
+u8 MemWindowLastCharacterOfFirstLineTable[] =
+{
+	88,			// 1
+	88,			// 2
+	88,			// 4
+	88,			// 8
+	88,			// 16
+	88,			// 32
+	88,			// 64
+};
+
+u8 MemWindowFirstCharacterPositionOfFirstLineOfAsciiTable[] =
+{
+	92,			// 1
+	92,			// 2
+	92,			// 4
+	92,			// 8
+	92,			// 16
+	92,			// 32
+	92,			// 64
+};
+
+u8 MemWindowLastCharacterOfFirstLineAsciiTable[] =
+{
+	123,			// 1
+	123,			// 2
+	123,			// 4
+	123,			// 8
+	123,			// 16
+	123,			// 32
+	123,			// 64
+};
+
+u8 MemWindowLineLengthTable[] =
+{
+	125,			// 1
+	125,			// 2
+	125,			// 4
+	125,			// 8
+	125,			// 16
+	125,			// 32
+	125,			// 64
+};
+
+u8 MemWindowWrapRightTable[] =
+{
+	12,			// 1
+	12,			// 2
+	12,			// 4
+	12,			// 8
+	12,			// 16
+	12,			// 32
+	12,			// 64
+};
 
 
 using namespace System;
@@ -1458,4 +1524,29 @@ void STDebugger::ShutdownThreads()
 	CloseHandle((HANDLE)TickThreadHandle);
 
 	TickThreadHandle = 0;
+}
+
+u32 STDebugger::GetMemoryWindowFirstCharacterPosition()
+{
+	return MemWindowFirstCharacterPositionTable[MemoryViewSelectedColumnIndex];
+}
+u32	STDebugger::GetMemoryWindowLineLength()
+{
+	return MemWindowLineLengthTable[MemoryViewSelectedColumnIndex];
+}
+u32 STDebugger::GetMemoryWindowWrapRight()
+{
+	return MemWindowWrapRightTable[MemoryViewSelectedColumnIndex];
+}
+u32 STDebugger::GetMemoryWindowLastCharacterOfFirstLine()
+{
+	return MemWindowLastCharacterOfFirstLineTable[MemoryViewSelectedColumnIndex];
+}
+u32 STDebugger::GetMemoryWindowLastCharacterOfFirstLineAscii()
+{
+	return MemWindowLastCharacterOfFirstLineAsciiTable[MemoryViewSelectedColumnIndex];
+}
+u32 STDebugger::GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()
+{
+	return MemWindowFirstCharacterPositionOfFirstLineOfAsciiTable[MemoryViewSelectedColumnIndex];
 }

@@ -171,12 +171,12 @@ public:
 	void RunToCursor();
 	void SetPC();
 	
-	u32 GetMemoryWindowFirstCharacterPosition() { return MemoryWindowFirstCharacterPosition; }
-	u32	GetMemoryWindowLineLength() { return MemoryWindowLineLength; }
-	u32 GetMemoryWindowWrapRight() { return MemoryWindowWrapRight; }
-	u32 GetMemoryWindowLastCharacterOfFirstLine() { return MemoryWindowLastCharacterOfFirstLine; }
-	u32 GetMemoryWindowLastCharacterOfFirstLineAscii() { return MemoryWindowLastCharacterOfFirstLineAscii; }
-	u32 GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii() { return MemoryWindowFirstCharacterPositionOfFirstLineOfAscii; }
+	u32 GetMemoryWindowFirstCharacterPosition();
+	u32	GetMemoryWindowLineLength();
+	u32 GetMemoryWindowWrapRight();
+	u32 GetMemoryWindowLastCharacterOfFirstLine();
+	u32 GetMemoryWindowLastCharacterOfFirstLineAscii();
+	u32 GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
 
 	bool GetMemoryAddressChanged() { return MemoryAddressChanged; }
 	void SetMemoryAddressChanged(bool pMemoryAddressChanged) { MemoryAddressChanged = pMemoryAddressChanged; }
@@ -235,6 +235,9 @@ public:
 	void SetMemoryWindowNumberOfColumns(u32 pMemoryWindowNumberOfColumns) { MemoryWindowNumberOfColumns = pMemoryWindowNumberOfColumns; }
 	u32  GetMemoryWindowNumberOfColumns() { return MemoryWindowNumberOfColumns; }
 
+	void SetMemoryViewSelectedColumnIndex(u32 pMemoryViewSelectedColumnIndex) { MemoryViewSelectedColumnIndex = pMemoryViewSelectedColumnIndex; }
+	u32  GetMemoryViewSelectedColumnIndex() { return MemoryViewSelectedColumnIndex; }
+
 private:
 	void	GetComPortsAvailable();
 	void	SetupRegisters();
@@ -285,15 +288,19 @@ private:
 	u32		MemoryBytesPerLine = 0;		// Bytes per line
 	u32		MemoryBytesPerColumn = 0;	// Byter per column
 	u32		MemoryWindowNumberOfColumns = 8; 
+
+	// need to be adjusted depending on view
 	u32		MemoryWindowFirstCharacterPosition = 11;
 	u32		MemoryWindowLastCharacterOfFirstLine = 88;
 	u32		MemoryWindowFirstCharacterPositionOfFirstLineOfAscii = 92;
 	u32		MemoryWindowLastCharacterOfFirstLineAscii = 123;
 	u32		MemoryWindowLineLength = 125;
 	u32		MemoryWindowWrapRight = 12;
+
 	bool	MemoryAddressChanged = false;
 	bool	MemoryWindowInAsciiBlock = false;
 	u32		MemoryViewSize = 0;			// 4 byte / 2 byte / 1 byte view
+	u32		MemoryViewSelectedColumnIndex = 3;
 
 	// disassembler
 	u32 address = 0;
