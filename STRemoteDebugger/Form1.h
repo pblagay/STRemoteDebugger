@@ -25,7 +25,7 @@ namespace CppCLRWinformsSTDebugger
 		Form1(void)
 		{
 			InitializeComponent();
-			void* thisPtr = System::Runtime::InteropServices::GCHandle::ToIntPtr(System::Runtime::InteropServices::GCHandle::Alloc(this)).ToPointer();
+		   void* thisPtr = System::Runtime::InteropServices::GCHandle::ToIntPtr(System::Runtime::InteropServices::GCHandle::Alloc(this)).ToPointer();
 			g_STDebugger->Init(thisPtr);
 
 			// set up tick function
@@ -36,6 +36,7 @@ namespace CppCLRWinformsSTDebugger
 			// Enable timer.  
 			TickTimer->Enabled = true;
 			MemorySize->SelectedItem = MemorySize->Items[g_STDebugger->GetMemoryViewSize()];
+			NumColumns->SelectedItem = NumColumns->Items[3];
 		}
 
 	public:
@@ -48,6 +49,10 @@ namespace CppCLRWinformsSTDebugger
 		Preferences^ GetPreferencesWindow() { return preferencesWindow; }
 		void SetPreferencesWindow(Preferences^ pWindow) { preferencesWindow = pWindow; }
 
+	private: System::Windows::Forms::Label^ label5;
+	private: System::Windows::Forms::Label^ label1;
+	private: System::Windows::Forms::ComboBox^ NumColumns;
+//	private: System::Windows::Forms::ComboBox^ comboBox1;
 	private: System::Windows::Forms::ComboBox^ MemorySize;
 	private: System::Windows::Forms::ToolStripMenuItem^ debugToolStripMenuItem;
 	public:
@@ -161,6 +166,9 @@ namespace CppCLRWinformsSTDebugger
 			this->button3 = (gcnew System::Windows::Forms::Button());
 			this->AsmWindowTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->MemorySize = (gcnew System::Windows::Forms::ComboBox());
+			this->NumColumns = (gcnew System::Windows::Forms::ComboBox());
+			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
@@ -168,7 +176,6 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// menuStrip1
 			// 
-			this->menuStrip1->GripMargin = System::Windows::Forms::Padding(2, 2, 0, 2);
 			this->menuStrip1->ImageScalingSize = System::Drawing::Size(24, 24);
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
 				this->fileToolStripMenuItem,
@@ -177,7 +184,7 @@ namespace CppCLRWinformsSTDebugger
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
 			this->menuStrip1->Padding = System::Windows::Forms::Padding(4, 2, 0, 2);
-			this->menuStrip1->Size = System::Drawing::Size(1156, 33);
+			this->menuStrip1->Size = System::Drawing::Size(1156, 24);
 			this->menuStrip1->TabIndex = 0;
 			this->menuStrip1->Text = L"menuStrip1";
 			// 
@@ -188,32 +195,32 @@ namespace CppCLRWinformsSTDebugger
 					this->preferencesToolStripMenuItem, this->toolStripSeparator1, this->quitToolStripMenuItem
 			});
 			this->fileToolStripMenuItem->Name = L"fileToolStripMenuItem";
-			this->fileToolStripMenuItem->Size = System::Drawing::Size(54, 29);
+			this->fileToolStripMenuItem->Size = System::Drawing::Size(37, 20);
 			this->fileToolStripMenuItem->Text = L"File";
 			// 
 			// openToolStripMenuItem
 			// 
 			this->openToolStripMenuItem->Name = L"openToolStripMenuItem";
-			this->openToolStripMenuItem->Size = System::Drawing::Size(204, 34);
+			this->openToolStripMenuItem->Size = System::Drawing::Size(135, 22);
 			this->openToolStripMenuItem->Text = L"Open";
 			this->openToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::openToolStripMenuItem_Click);
 			// 
 			// preferencesToolStripMenuItem
 			// 
 			this->preferencesToolStripMenuItem->Name = L"preferencesToolStripMenuItem";
-			this->preferencesToolStripMenuItem->Size = System::Drawing::Size(204, 34);
+			this->preferencesToolStripMenuItem->Size = System::Drawing::Size(135, 22);
 			this->preferencesToolStripMenuItem->Text = L"Preferences";
 			this->preferencesToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::preferencesToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this->toolStripSeparator1->Name = L"toolStripSeparator1";
-			this->toolStripSeparator1->Size = System::Drawing::Size(201, 6);
+			this->toolStripSeparator1->Size = System::Drawing::Size(132, 6);
 			// 
 			// quitToolStripMenuItem
 			// 
 			this->quitToolStripMenuItem->Name = L"quitToolStripMenuItem";
-			this->quitToolStripMenuItem->Size = System::Drawing::Size(204, 34);
+			this->quitToolStripMenuItem->Size = System::Drawing::Size(135, 22);
 			this->quitToolStripMenuItem->Text = L"Quit";
 			this->quitToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::quitToolStripMenuItem_Click);
 			// 
@@ -227,14 +234,14 @@ namespace CppCLRWinformsSTDebugger
 			});
 			this->debugToolStripMenuItem->Name = L"debugToolStripMenuItem";
 			this->debugToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F5;
-			this->debugToolStripMenuItem->Size = System::Drawing::Size(82, 29);
+			this->debugToolStripMenuItem->Size = System::Drawing::Size(54, 20);
 			this->debugToolStripMenuItem->Text = L"Debug";
 			// 
 			// stepOverToolStripMenuItem
 			// 
 			this->stepOverToolStripMenuItem->Name = L"stepOverToolStripMenuItem";
 			this->stepOverToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F10;
-			this->stepOverToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->stepOverToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->stepOverToolStripMenuItem->Text = L"Step Over";
 			this->stepOverToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::stepOverToolStripMenuItem_Click);
 			// 
@@ -242,7 +249,7 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->stepIntoToolStripMenuItem->Name = L"stepIntoToolStripMenuItem";
 			this->stepIntoToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F11;
-			this->stepIntoToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->stepIntoToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->stepIntoToolStripMenuItem->Text = L"Step Into";
 			this->stepIntoToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::stepIntoToolStripMenuItem_Click);
 			// 
@@ -250,19 +257,19 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->runUntilToolStripMenuItem->Name = L"runUntilToolStripMenuItem";
 			this->runUntilToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Shift | System::Windows::Forms::Keys::F11));
-			this->runUntilToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->runUntilToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->runUntilToolStripMenuItem->Text = L"Step Out";
 			this->runUntilToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::runUntilToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator2
 			// 
 			this->toolStripSeparator2->Name = L"toolStripSeparator2";
-			this->toolStripSeparator2->Size = System::Drawing::Size(369, 6);
+			this->toolStripSeparator2->Size = System::Drawing::Size(241, 6);
 			// 
 			// runToolStripMenuItem
 			// 
 			this->runToolStripMenuItem->Name = L"runToolStripMenuItem";
-			this->runToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->runToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->runToolStripMenuItem->Text = L"Run";
 			this->runToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::runToolStripMenuItem_Click);
 			// 
@@ -270,7 +277,7 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->runToCursorToolStripMenuItem->Name = L"runToCursorToolStripMenuItem";
 			this->runToCursorToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F10));
-			this->runToCursorToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->runToCursorToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->runToCursorToolStripMenuItem->Text = L"Run To Cursor";
 			this->runToCursorToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::runToCursorToolStripMenuItem_Click);
 			// 
@@ -279,7 +286,7 @@ namespace CppCLRWinformsSTDebugger
 			this->setPCToCursorToolStripMenuItem->Name = L"setPCToCursorToolStripMenuItem";
 			this->setPCToCursorToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>(((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Shift)
 				| System::Windows::Forms::Keys::F10));
-			this->setPCToCursorToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->setPCToCursorToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->setPCToCursorToolStripMenuItem->Text = L"Set PC to Cursor";
 			this->setPCToCursorToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::setPCToCursorToolStripMenuItem_Click);
 			// 
@@ -287,27 +294,27 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->stopToolStripMenuItem->Name = L"stopToolStripMenuItem";
 			this->stopToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Shift | System::Windows::Forms::Keys::F5));
-			this->stopToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->stopToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->stopToolStripMenuItem->Text = L"Stop";
 			this->stopToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::stopToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator3
 			// 
 			this->toolStripSeparator3->Name = L"toolStripSeparator3";
-			this->toolStripSeparator3->Size = System::Drawing::Size(369, 6);
+			this->toolStripSeparator3->Size = System::Drawing::Size(241, 6);
 			// 
 			// setBreakpointToolStripMenuItem
 			// 
 			this->setBreakpointToolStripMenuItem->Name = L"setBreakpointToolStripMenuItem";
 			this->setBreakpointToolStripMenuItem->ShortcutKeys = System::Windows::Forms::Keys::F9;
-			this->setBreakpointToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->setBreakpointToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->setBreakpointToolStripMenuItem->Text = L"Set Breakpoint";
 			this->setBreakpointToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::setBreakpointToolStripMenuItem_Click);
 			// 
 			// managerBreakpointsToolStripMenuItem
 			// 
 			this->managerBreakpointsToolStripMenuItem->Name = L"managerBreakpointsToolStripMenuItem";
-			this->managerBreakpointsToolStripMenuItem->Size = System::Drawing::Size(372, 34);
+			this->managerBreakpointsToolStripMenuItem->Size = System::Drawing::Size(244, 22);
 			this->managerBreakpointsToolStripMenuItem->Text = L"Manage Breakpoints";
 			this->managerBreakpointsToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::managerBreakpointsToolStripMenuItem_Click);
 			// 
@@ -318,7 +325,7 @@ namespace CppCLRWinformsSTDebugger
 				static_cast<System::Byte>(0)));
 			this->label2->Location = System::Drawing::Point(787, 93);
 			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(93, 25);
+			this->label2->Size = System::Drawing::Size(68, 17);
 			this->label2->TabIndex = 3;
 			this->label2->Text = L"Registers";
 			this->label2->Click += gcnew System::EventHandler(this, &Form1::label2_Click);
@@ -342,7 +349,7 @@ namespace CppCLRWinformsSTDebugger
 				static_cast<System::Byte>(0)));
 			this->label3->Location = System::Drawing::Point(16, 546);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(83, 25);
+			this->label3->Size = System::Drawing::Size(58, 17);
 			this->label3->TabIndex = 5;
 			this->label3->Text = L"Memory";
 			this->label3->Click += gcnew System::EventHandler(this, &Form1::label3_Click);
@@ -402,7 +409,7 @@ namespace CppCLRWinformsSTDebugger
 				static_cast<System::Byte>(0)));
 			this->label4->Location = System::Drawing::Point(18, 93);
 			this->label4->Name = L"label4";
-			this->label4->Size = System::Drawing::Size(98, 25);
+			this->label4->Size = System::Drawing::Size(68, 17);
 			this->label4->TabIndex = 9;
 			this->label4->Text = L"Assembly";
 			// 
@@ -444,7 +451,7 @@ namespace CppCLRWinformsSTDebugger
 			this->LogLabel->Location = System::Drawing::Point(13, 756);
 			this->LogLabel->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
 			this->LogLabel->Name = L"LogLabel";
-			this->LogLabel->Size = System::Drawing::Size(130, 25);
+			this->LogLabel->Size = System::Drawing::Size(85, 17);
 			this->LogLabel->TabIndex = 12;
 			this->LogLabel->Text = L"Log Window";
 			// 
@@ -491,11 +498,43 @@ namespace CppCLRWinformsSTDebugger
 			this->MemorySize->TabIndex = 16;
 			this->MemorySize->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::MemorySize_SelectedIndexChanged);
 			// 
+			// NumColumns
+			// 
+			this->NumColumns->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->NumColumns->FormattingEnabled = true;
+			this->NumColumns->Items->AddRange(gcnew cli::array< System::Object^  >(7) { L"1", L"2", L"4", L"8", L"16", L"32", L"64" });
+			this->NumColumns->Location = System::Drawing::Point(919, 574);
+			this->NumColumns->Name = L"comboBox1";
+			this->NumColumns->Size = System::Drawing::Size(121, 21);
+			this->NumColumns->TabIndex = 17;
+			this->NumColumns->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::comboBox1_SelectedIndexChanged);
+			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->Location = System::Drawing::Point(916, 558);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(72, 13);
+			this->label1->TabIndex = 18;
+			this->label1->Text = L"Num Columns";
+			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->Location = System::Drawing::Point(1056, 557);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(33, 13);
+			this->label5->TabIndex = 19;
+			this->label5->Text = L"Bytes";
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1156, 909);
+			this->Controls->Add(this->label5);
+			this->Controls->Add(this->label1);
+			this->Controls->Add(this->NumColumns);
 			this->Controls->Add(this->MemorySize);
 			this->Controls->Add(this->button3);
 			this->Controls->Add(this->button2);
@@ -1298,6 +1337,17 @@ private: System::Void MemorySize_SelectedIndexChanged(System::Object^ sender, Sy
 		g_STDebugger->SetMemoryViewSize(newMemViewSize);
 		g_STDebugger->SetupMemory();
 	}
+}
+
+// Columns changed
+private: System::Void comboBox1_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
+{
+	System::Windows::Forms::ComboBox^ cb = (System::Windows::Forms::ComboBox^)sender;
+	System::String^ columns = cb->SelectedItem->ToString();
+
+	u32 numColumns = atoi(ConvertStringToChar(columns));
+	g_STDebugger->SetMemoryWindowNumberOfColumns(numColumns);
+	g_STDebugger->SetupMemory();
 }
 };
 }

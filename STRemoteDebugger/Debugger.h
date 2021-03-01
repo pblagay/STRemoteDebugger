@@ -232,6 +232,9 @@ public:
 	void SetMemoryViewSize(u32 pMemoryViewSize) { MemoryViewSize = pMemoryViewSize; }
 	u32  GetMemoryViewSize() { return MemoryViewSize; }
 
+	void SetMemoryWindowNumberOfColumns(u32 pMemoryWindowNumberOfColumns) { MemoryWindowNumberOfColumns = pMemoryWindowNumberOfColumns; }
+	u32  GetMemoryWindowNumberOfColumns() { return MemoryWindowNumberOfColumns; }
+
 private:
 	void	GetComPortsAvailable();
 	void	SetupRegisters();
@@ -280,7 +283,8 @@ private:
 	u32		MemoryStartAddress = 0;		// Start Address of memory buffer
 	u32		MemoryBlockIndex = 0;		// what block are we in
 	u32		MemoryBytesPerLine = 0;		// Bytes per line
-	u32		MemoryBytesPerColumn = 0;	// Byters per column
+	u32		MemoryBytesPerColumn = 0;	// Byter per column
+	u32		MemoryWindowNumberOfColumns = 8; 
 	u32		MemoryWindowFirstCharacterPosition = 11;
 	u32		MemoryWindowLastCharacterOfFirstLine = 88;
 	u32		MemoryWindowFirstCharacterPositionOfFirstLineOfAscii = 92;

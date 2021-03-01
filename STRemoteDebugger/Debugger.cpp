@@ -209,6 +209,8 @@ void STDebugger::ReadIniFile()
 	// other prefs
 	n = ini_getl("View", "MemorySize", 0, inifile);
 	MemoryViewSize = n;
+	n = ini_getl("View", "NumColumms", 8, inifile);
+	MemoryWindowNumberOfColumns = n;
 }
 
 // write ini file
@@ -243,6 +245,7 @@ void STDebugger::WriteIniFile()
 	n = ini_putl("Computer", "Memory", SystemMemory, inifile);
 	n = ini_putl("Computer", "TOS", TosVersion, inifile);
 	n = ini_putl("View", "MemorySize", MemoryViewSize, inifile);
+	n = ini_putl("View", "NumColumms", MemoryWindowNumberOfColumns, inifile);
 }
 
 // Connect to target
@@ -816,7 +819,11 @@ void STDebugger::SetupMemory()
 		MemoryBytesPerColumn = 1;
 	}
 
-	MemoryBytesPerLine = MemoryBytesPerColumn * MEMORY_WINDOW_COLUMNS;
+	// sanity check
+	if (MemoryWindowNumberOfColumns == 0)
+		MemoryWindowNumberOfColumns = 8;
+
+	MemoryBytesPerLine = MemoryBytesPerColumn * MemoryWindowNumberOfColumns;
 
 	// get form
 	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
@@ -835,7 +842,7 @@ void STDebugger::SetupMemory()
 		u8* CurrentMemoryBuffer = &MemoryBuffer[CurrentMemoryAddress];
 
 		// number of lines 
-		s32 numLines = MEMORY_BUFFER_SIZE / MEMORY_WINDOW_BYTES_PER_LINE;		// 128 lines visible on start
+		s32 numLines = MEMORY_BUFFER_SIZE / MemoryBytesPerLine;				// 128 lines visible on start
 
 		// create a string to show the memory
 		for (s32 i = 0; i < numLines; i++)
@@ -848,7 +855,7 @@ void STDebugger::SetupMemory()
 			AsciiString = "";
 
 			// loop over columns
-			for (s32 columns = 0; columns < MEMORY_WINDOW_COLUMNS; columns++)
+			for (s32 columns = 0; columns < (s32)MemoryWindowNumberOfColumns; columns++)
 			{
 				// now show the bytes
 				char MemDword[MEMORY_WINDOW_BYTES_PER_COLUMN] = { 0 };
