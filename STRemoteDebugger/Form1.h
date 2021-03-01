@@ -825,10 +825,10 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 	{
 		if (rtb->Text[position] == ' ')
 		{
-			u32 gapValue = 1;
+			u32 gapValue = g_STDebugger->GetMemoryWindowGapValue();
 			if (rtb->Text[position + 1] == ' ')
 			{
-				gapValue = 2;
+				gapValue = g_STDebugger->GetMemoryWindowGapValue() + 1;
 			}
 
 			if (position > g_STDebugger->GetMemoryWindowLastCharacterOfFirstLine())

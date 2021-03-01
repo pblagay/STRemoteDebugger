@@ -170,6 +170,8 @@ public:
 	void StepOut();
 	void RunToCursor();
 	void SetPC();
+	void UploadExecutableToTarget();
+	void GetExecutableLoadAddress();
 	
 	u32 GetMemoryWindowFirstCharacterPosition();
 	u32	GetMemoryWindowLineLength();
@@ -177,6 +179,7 @@ public:
 	u32 GetMemoryWindowLastCharacterOfFirstLine();
 	u32 GetMemoryWindowLastCharacterOfFirstLineAscii();
 	u32 GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii();
+	u32 GetMemoryWindowGapValue();
 
 	bool GetMemoryAddressChanged() { return MemoryAddressChanged; }
 	void SetMemoryAddressChanged(bool pMemoryAddressChanged) { MemoryAddressChanged = pMemoryAddressChanged; }
@@ -266,9 +269,13 @@ private:
 	void	ShutdownThreads();
 	static unsigned int __stdcall TickThread(void* lpParameter);
 
+	bool	rawmode = false;
+
+	// buffers
 //	u32		TickThread(void* lpParameter);
 	u8*		LoadBufferPtr = nullptr;
-	bool	rawmode = false;
+	u8*		ExecutableLoadBufferOnTarget = nullptr;
+	u32		FreeMemoryOnTarget = 0;
 
 	// Vars
 	DynArray<OpcodeInstruction*>	Opcodes;			// opcodes for the program

@@ -32,7 +32,7 @@ u8 MemWindowFirstCharacterPositionTable[] =
 
 u8 MemWindowLastCharacterOfFirstLineTable[] =
 {
-	88,			// 1
+	22,			// 1
 	88,			// 2
 	88,			// 4
 	88,			// 8
@@ -43,7 +43,7 @@ u8 MemWindowLastCharacterOfFirstLineTable[] =
 
 u8 MemWindowFirstCharacterPositionOfFirstLineOfAsciiTable[] =
 {
-	92,			// 1
+	49,			// 1
 	92,			// 2
 	92,			// 4
 	92,			// 8
@@ -83,6 +83,17 @@ u8 MemWindowWrapRightTable[] =
 	12,			// 16
 	12,			// 32
 	12,			// 64
+};
+
+u8 MemWindowGapValueTable[] =
+{
+	2,			// 1
+	1,			// 2
+	1,			// 4
+	1,			// 8
+	1,			// 16
+	1,			// 32
+	1,			// 64
 };
 
 
@@ -529,7 +540,7 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 		OutputToLog(logString);
 		SetCmdInProgress(Cmd);
 		*packetData++ = BaudRate;				// send baud rate
-		SendPacket(packetBuffer, 4 + 4);
+		SendPacket(packetBuffer, 8);
 	}
 	break;
 
@@ -555,8 +566,31 @@ void STDebugger::SendCmd(u8 Cmd, u32 MemoryAddress, u32 NumBytes)
 		SetCmdInProgress(Cmd);
 		*packetData++ = MemoryAddress;
 		*packetData = NumBytes;
-		SendPacket(packetBuffer, 4 + 4 + 4);
+		SendPacket(packetBuffer, 12);
 		break;
+
+	case DEBUGGER_CMD_UPLOAD_EXECUTABLE:
+	{
+		logString.Set("Attempting to send executable to target on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+
+		u32* LB = (u32*)LoadBuffer;
+		LB[0] = DEBUGGER_CMD_UPLOAD_EXECUTABLE;
+		LB[1] = (u32)ExecutableLoadBufferOnTarget;
+		LB[2] = LoadBufferSize;
+		SendPacket(LoadBuffer, LoadBufferSize + 32);		
+	}
+	break;
+
+	case DEBUGGER_CMD_GET_EXECUTABLE_LOAD_ADDRESS:
+	{
+		logString.Set("Attempting to get executable load address on target on '%s'...", ComPortName.GetPtr());
+		OutputToLog(logString);
+		SetCmdInProgress(Cmd);
+		SendPacket(packetBuffer, 4);
+	}
+	break;
 
 	default:
 		SendCmdInProgress = false;
@@ -593,6 +627,24 @@ bool STDebugger::SendPacket(u8* packet, u32 NumBytes)
 	}
 
 	return result;
+}
+
+// get executable load address
+void STDebugger::GetExecutableLoadAddress()
+{
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
+		return;
+
+	SendCmd(DEBUGGER_CMD_GET_EXECUTABLE_LOAD_ADDRESS);
+}
+
+// upload executable
+void STDebugger::UploadExecutableToTarget()
+{
+	if (!GetIsConnectedToTarget() || SendCmdInProgress)
+		return;
+
+	SendCmd(DEBUGGER_CMD_UPLOAD_EXECUTABLE);
 }
 
 // update registers
@@ -1149,9 +1201,9 @@ void STDebugger::LoadExecutable(LPCWSTR Filename)
 		DWORD fileSize = GetFileSize(hFile, highFileSize);
 		if (fileSize != 0)
 		{
-			LoadBuffer = new u8[fileSize + 2];
-			memset(LoadBuffer, 0, fileSize + 2);
-			BOOL result = ReadFile(hFile, LoadBuffer, fileSize, bytesRead, NULL);
+			LoadBuffer = new u8[fileSize + 32];
+			memset(LoadBuffer, 0, fileSize + 32);
+			BOOL result = ReadFile(hFile, (LoadBuffer + 32), fileSize, bytesRead, NULL);			// offset load by 8 so we can set packet info before it
 			if (!result)
 			{
 				OutputDebugString(L"Read file failed..\n");
@@ -1163,6 +1215,9 @@ void STDebugger::LoadExecutable(LPCWSTR Filename)
 				LoadBufferSize = fileSize;
 				DisassembleCode();
 				OutputDebugString(L"Read file succeeded..\n");
+
+				// upload the executable to the target
+				GetExecutableLoadAddress();
 			}
 		}
 		else
@@ -1197,7 +1252,7 @@ void STDebugger::DisassembleCode()
 
 	u32 sizeOfHeader = sizeof(ProgramHeader);
 	u32 codeSize = LoadBufferSize - sizeOfHeader;
-	u32 startOfCode = (u32)(LoadBuffer + sizeOfHeader);
+	u32 startOfCode = (u32)(LoadBuffer + sizeOfHeader + 32); // 32 offset for additional packet info
 	u32 endOfCode = startOfCode + codeSize;
 	m68k_disasm(AsmText, DisassemblyText, startOfCode, endOfCode, 0, 100, NumberOfLinesInProgram);
 
@@ -1509,6 +1564,25 @@ void STDebugger::ProcessCommand(u8 cmd, u8* packet)
 	}
 	break;
 
+	case DEBUGGER_TARGET_RESPONSE_GET_EXECUTABLE_LOAD_ADDRESS:
+	{
+		u8* uploadAddress = (u8*)&packet[4];
+		u32* upacketPtr = (u32*)&packet[8];
+		FreeMemoryOnTarget = *upacketPtr;
+		ExecutableLoadBufferOnTarget = uploadAddress;
+		OutputToLog(mString("Got executable load buffer address from Target"));
+		SendCmdInProgress = false;
+
+		UploadExecutableToTarget();
+	}
+	break;
+
+	case DEBUGGER_TARGET_RESPONSE_UPLOAD_EXECUTABLE:
+	{
+		OutputToLog(mString("Executable uploaded to Target"));
+		SendCmdInProgress = false;
+	}
+	break;
 
 	default:
 		break;
@@ -1550,3 +1624,9 @@ u32 STDebugger::GetMemoryWindowFirstCharacterPositionOfFirstLineOfAscii()
 {
 	return MemWindowFirstCharacterPositionOfFirstLineOfAsciiTable[MemoryViewSelectedColumnIndex];
 }
+u32 STDebugger::GetMemoryWindowGapValue()
+{
+	return MemWindowGapValueTable[MemoryViewSelectedColumnIndex];
+}
+
+
