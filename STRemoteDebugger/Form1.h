@@ -3,6 +3,7 @@
 #include "Debugger.h"
 #include "Helpers.h"
 #include "Preferences.h"
+#include "DialogTextInput.h"
 
 extern STDebugger* g_STDebugger;
 
@@ -38,7 +39,7 @@ namespace CppCLRWinformsSTDebugger
 			MemorySize->SelectedItem = MemorySize->Items[g_STDebugger->GetMemoryViewSize()];
 			NumColumns->SelectedItem = NumColumns->Items[3];
 		}
-
+	public: void SetDialogTextInputWindow(DialogTextInput^ pWindow) { dialogTextInput = pWindow; }
 	public:
 	   System::Windows::Forms::RichTextBox^ GetRegisterWindow() { return RegisterWindow; }
 		System::Windows::Forms::RichTextBox^ GetAssemblyWindow() { return AssemblyWindow; }
@@ -48,6 +49,7 @@ namespace CppCLRWinformsSTDebugger
 		System::Windows::Forms::Form^ GetMainWindow() { return this; }
 		Preferences^ GetPreferencesWindow() { return preferencesWindow; }
 		void SetPreferencesWindow(Preferences^ pWindow) { preferencesWindow = pWindow; }
+		DialogTextInput^ GetDialogTextInputWindow() { return dialogTextInput; }
 
 	private: System::Windows::Forms::Label^ label5;
 	private: System::Windows::Forms::Label^ label1;
@@ -68,6 +70,9 @@ namespace CppCLRWinformsSTDebugger
 	private: System::Windows::Forms::ToolStripMenuItem^ setBreakpointToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^ managerBreakpointsToolStripMenuItem;
 		Preferences^ preferencesWindow = nullptr;
+		DialogTextInput^ dialogTextInput = nullptr;
+		u32 findStartIndex = 0;
+		System::String^ searchField = nullptr;
 		
 	// do GUI related updates
 	private: System::Void TickFunction(System::Object^ sender, System::EventArgs^ e)
@@ -120,7 +125,6 @@ namespace CppCLRWinformsSTDebugger
 	private: System::Windows::Forms::RichTextBox^ LogWindow;
 	private: System::Windows::Forms::ErrorProvider^ errorProvider1;
 	private: System::ComponentModel::IContainer^ components;
-		    
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -371,6 +375,7 @@ namespace CppCLRWinformsSTDebugger
 			this->MemoryWindow->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::MemoryWindow_KeyDown);
 			this->MemoryWindow->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::MemoryWindow_KeyPress);
 			this->MemoryWindow->Leave += gcnew System::EventHandler(this, &Form1::MemoryWindow_Leave);
+			this->MemoryWindow->PreviewKeyDown += gcnew System::Windows::Forms::PreviewKeyDownEventHandler(this, &Form1::MemoryWindow_PreviewKeyDown);
 			// 
 			// openFileDialog1
 			// 
@@ -504,7 +509,7 @@ namespace CppCLRWinformsSTDebugger
 			this->NumColumns->FormattingEnabled = true;
 			this->NumColumns->Items->AddRange(gcnew cli::array< System::Object^  >(7) { L"1", L"2", L"4", L"8", L"16", L"32", L"64" });
 			this->NumColumns->Location = System::Drawing::Point(919, 574);
-			this->NumColumns->Name = L"comboBox1";
+			this->NumColumns->Name = L"NumColumns";
 			this->NumColumns->Size = System::Drawing::Size(121, 21);
 			this->NumColumns->TabIndex = 17;
 			this->NumColumns->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::comboBox1_SelectedIndexChanged);
@@ -644,6 +649,51 @@ private: System::Void richTextBox1_TextChanged(System::Object^ sender, System::E
 private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e)
 {
 	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+
+	if (e->Control && e->KeyCode == Keys::F)
+	{
+		// open text dialog window
+		if (dialogTextInput == nullptr)
+		{
+			dialogTextInput = gcnew DialogTextInput();
+			dialogTextInput->mainWindow = this;
+			dialogTextInput->memoryWindow = MemoryWindow;
+			dialogTextInput->TextBoxTitle->Text = "Find";
+			dialogTextInput->Text = "Find In Memory";
+			dialogTextInput->TabIndex = 2;
+
+			// TODO fix the starting position for the position in the window
+			findStartIndex = 0;
+			s32 index = rtb->GetCharIndexFromPosition(rtb->Cursor->Position);
+			if (index != -1)
+				findStartIndex = index;
+
+			searchField = nullptr;
+			dialogTextInput->startIndex = 0;
+
+			if (dialogTextInput->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+			{
+				MemoryWindow->Select();
+				findStartIndex = dialogTextInput->startIndex;
+				searchField = dialogTextInput->TextInputField->Text;
+			}
+			dialogTextInput = nullptr;
+		}
+		e->Handled = true;
+	}
+	else if (e->KeyCode == Keys::F3)			// search again
+	{
+		if (findStartIndex != 0)
+		{
+			s32 index = MemoryWindow->Find(searchField, findStartIndex, 4096, System::Windows::Forms::RichTextBoxFinds::None);
+			if (index != -1)
+			{
+				MemoryWindow->Select(index, searchField->Length);
+				findStartIndex = index + searchField->Length;
+			}
+		}
+	}
+
 	u32 position = rtb->SelectionStart;
 
 	// determine if we are in ascii or not
@@ -1360,6 +1410,11 @@ private: System::Void comboBox1_SelectedIndexChanged(System::Object^ sender, Sys
 	u32 numColumns = atoi(ConvertStringToChar(columns));
 	g_STDebugger->SetMemoryWindowNumberOfColumns(numColumns);
 	g_STDebugger->SetupMemory();
+}
+
+// preview key down for the memory window
+private: System::Void MemoryWindow_PreviewKeyDown(System::Object^ sender, System::Windows::Forms::PreviewKeyDownEventArgs^ e) 
+{
 }
 };
 }

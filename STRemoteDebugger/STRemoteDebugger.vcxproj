@@ -161,6 +161,9 @@
     <ClInclude Include="Preferences.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="DialogTextInput.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -183,6 +186,7 @@
     </ClCompile>
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="Preferences.cpp" />
+    <ClCompile Include="DialogTextInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
@@ -200,6 +204,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Preferences.resx">
       <DependentUpon>Preferences.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DialogTextInput.resx">
+      <DependentUpon>DialogTextInput.h</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
