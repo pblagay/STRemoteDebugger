@@ -34,7 +34,7 @@ namespace CppCLRWinformsSTDebugger
 
 	public:
 	System::Windows::Forms::Form^ mainWindow = nullptr;
-	System::Windows::Forms::RichTextBox^ memoryWindow = nullptr;
+	System::Windows::Forms::RichTextBox^ searchWindow = nullptr;
 	u32 startIndex = 0;
 	u32 endIndex = 0;
 //	private: System::Void DoSearch();
@@ -144,15 +144,15 @@ private: System::Void DialogTextInput_Shown(System::Object^ sender, System::Even
 {
 	TextInputField->Select();
 	startIndex = 0;
-	endIndex = memoryWindow->Text->Length;
+	endIndex = searchWindow->Text->Length;
 }
 
 private: System::Void DoSearch(System::Object^ sender, System::EventArgs^ e)
 {
-	s32 index = memoryWindow->Find(TextInputField->Text, startIndex, endIndex, System::Windows::Forms::RichTextBoxFinds::None);
+	s32 index = searchWindow->Find(TextInputField->Text, startIndex, endIndex, System::Windows::Forms::RichTextBoxFinds::None);
 	if (index != -1)
 	{
-		memoryWindow->Select(index, TextInputField->TextLength);
+		searchWindow->Select(index, TextInputField->TextLength);
 		startIndex = index;
 	}
 	DialogResult = System::Windows::Forms::DialogResult::OK;
