@@ -50,7 +50,6 @@ namespace CppCLRWinformsSTDebugger
 		Preferences^ GetPreferencesWindow() { return preferencesWindow; }
 		void SetPreferencesWindow(Preferences^ pWindow) { preferencesWindow = pWindow; }
 		DialogTextInput^ GetDialogTextInputWindow() { return dialogTextInput; }
-
 	private: System::Windows::Forms::Label^ label5;
 	private: System::Windows::Forms::Label^ label1;
 	private: System::Windows::Forms::ComboBox^ NumColumns;
@@ -73,6 +72,8 @@ namespace CppCLRWinformsSTDebugger
 		DialogTextInput^ dialogTextInput = nullptr;
 		u32 findStartIndex = 0;
 		System::String^ searchField = nullptr;
+		RichTextBox^ FlashBox = nullptr;
+		System::Drawing::Color originalBackColor;
 		
 	// do GUI related updates
 	private: System::Void TickFunction(System::Object^ sender, System::EventArgs^ e)
@@ -81,6 +82,7 @@ namespace CppCLRWinformsSTDebugger
 		}
 
 	private: System::Windows::Forms::Timer^ TickTimer;
+	private: System::Windows::Forms::Timer^ FlashTimer = nullptr;
 	public:
 		bool	MemoryWindowInsertModeOn = false;
 
@@ -702,8 +704,7 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 			}
 			else // end of search
 			{
-				// flash window or sound
-
+				FlashWindow(rtb);
 			}
 		}
 	}
@@ -1475,7 +1476,7 @@ private: System::Void AssemblyWindow_KeyDown(System::Object^ sender, System::Win
 			else // end of search
 			{
 				// flash window or sound
-
+				FlashWindow(rtb);
 			}
 		}
 	}
@@ -1525,10 +1526,39 @@ private: System::Void LogWindow_KeyDown(System::Object^ sender, System::Windows:
 			else // end of search
 			{
 				// flash window or sound
-
+				FlashWindow(rtb);
 			}
 		}
 	}
 }
+
+private: System::Void FlashWindow(System::Windows::Forms::RichTextBox^ boxToFlash)
+{
+	if (FlashTimer != nullptr)
+		return;
+
+	FlashBox = boxToFlash;
+	originalBackColor = boxToFlash->BackColor;
+	boxToFlash->BackColor = System::Drawing::Color::Red;
+
+	// set up tick function
+	FlashTimer = (gcnew System::Windows::Forms::Timer(this->components));
+	FlashTimer->Interval = 50;
+	FlashTimer->Tick += gcnew System::EventHandler(this, &Form1::FlashTimerFunction);
+	FlashTimer->Enabled = true;
+}
+
+private: System::Void FlashTimerFunction(System::Object^ sender, System::EventArgs^ e)
+{
+	if (FlashBox != nullptr)
+	{
+		FlashBox->BackColor = originalBackColor;
+	}
+
+	FlashTimer->Tick -= gcnew System::EventHandler(this, &Form1::FlashTimerFunction);
+	FlashTimer = nullptr;
+	FlashBox = nullptr;
+}
+
 };
 }

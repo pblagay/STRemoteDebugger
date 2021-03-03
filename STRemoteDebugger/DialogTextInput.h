@@ -37,8 +37,10 @@ namespace CppCLRWinformsSTDebugger
 	System::Windows::Forms::RichTextBox^ searchWindow = nullptr;
 	u32 startIndex = 0;
 	u32 endIndex = 0;
-//	private: System::Void DoSearch();
-	
+	RichTextBox^ FlashBox = nullptr;
+	System::Drawing::Color originalBackColor;
+	private: System::Windows::Forms::Timer^ FlashTimer = nullptr;
+
 	protected:
 		/// <summary>
 		/// Verwendete Ressourcen bereinigen.
@@ -155,6 +157,10 @@ private: System::Void DoSearch(System::Object^ sender, System::EventArgs^ e)
 		searchWindow->Select(index, TextInputField->TextLength);
 		startIndex = index;
 	}
+	else
+	{
+		FlashWindow();
+	}
 	DialogResult = System::Windows::Forms::DialogResult::OK;
 	Close();
 }
@@ -163,8 +169,36 @@ private: System::Void TextInputField_KeyDown(System::Object^ sender, System::Win
 {
 	if (e->KeyCode == Keys::Enter)
 	{
-		DoSearch(nullptr, nullptr);
+		DoSearch(sender, e);
 	}
+}
+
+private: System::Void FlashWindow()
+{
+	if (FlashTimer != nullptr)
+		return;
+
+	FlashBox = searchWindow;
+	originalBackColor = searchWindow->BackColor;
+	searchWindow->BackColor = System::Drawing::Color::Red;
+
+	// set up tick function
+	FlashTimer = (gcnew System::Windows::Forms::Timer(this->components));
+	FlashTimer->Interval = 50;
+	FlashTimer->Tick += gcnew System::EventHandler(this, &DialogTextInput::FlashTimerFunction);
+	FlashTimer->Enabled = true;
+}
+
+private: System::Void FlashTimerFunction(System::Object^ sender, System::EventArgs^ e)
+{
+	if (FlashBox != nullptr)
+	{
+		FlashBox->BackColor = originalBackColor;
+	}
+
+	FlashTimer->Tick -= gcnew System::EventHandler(this, &DialogTextInput::FlashTimerFunction);
+	FlashTimer = nullptr;
+	FlashBox = nullptr;
 }
 };
 }
