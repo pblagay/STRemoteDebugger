@@ -917,8 +917,8 @@ void STDebugger::CreateMemoryBuffer()
 		delete[] MemoryBuffer;
 	}
 
-	MemoryBuffer = new u8[ATARI_ST_MAX_MEMORY];
-	memset(MemoryBuffer, 0, ATARI_ST_MAX_MEMORY);
+	MemoryBuffer = new u8[ATARI_FALCON_MAX_MEMORY];
+	memset(MemoryBuffer, 0, ATARI_FALCON_MAX_MEMORY);
 }
 
 // Setup Memory 
@@ -1212,6 +1212,8 @@ void STDebugger::LoadExecutable(LPCWSTR Filename)
 			}
 			else // success
 			{
+				CloseHandle(hFile);
+
 				LoadBufferSize = fileSize;
 				DisassembleCode();
 				OutputDebugString(L"Read file succeeded..\n");
@@ -1228,6 +1230,58 @@ void STDebugger::LoadExecutable(LPCWSTR Filename)
 	else
 	{
 		OutputDebugString(L"Failed to open file for reading..\n");
+	}
+}
+
+// Save text file
+void STDebugger::SaveTextFile(LPCWSTR Filename, char* textBuffer, u32 size)
+{
+	// open / read the file into memory
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	hFile = CreateFile(Filename, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		LPDWORD bytesWritten = 0;
+		BOOL result = WriteFile(hFile, textBuffer, size, bytesWritten, NULL);
+		if (!result)
+		{
+			OutputDebugString(L"Writing log file failed..\n");
+		}
+		else // success
+		{
+			CloseHandle(hFile);
+			OutputDebugString(L"Writing log file succeeded..\n");
+		}
+	}
+	else
+	{
+		OutputDebugString(L"Failed to open log file for writing..\n");
+	}
+}
+
+// Save memory binary file (highlighted size)
+void STDebugger::SaveMemoryBinary(LPCWSTR Filename, u32 StartOffset, u32 Size)
+{
+	// open / read the file into memory
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	hFile = CreateFile(Filename, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		LPDWORD bytesWritten = 0;
+		BOOL result = WriteFile(hFile, MemoryBuffer + StartOffset, Size, bytesWritten, NULL);
+		if (!result)
+		{
+			OutputDebugString(L"Writing memory binary file failed..\n");
+		}
+		else // success
+		{
+			CloseHandle(hFile);
+			OutputDebugString(L"Writing memory binary file succeeded..\n");
+		}
+	}
+	else
+	{
+		OutputDebugString(L"Failed to open memory binary file for writing..\n");
 	}
 }
 

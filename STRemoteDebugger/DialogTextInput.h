@@ -184,7 +184,7 @@ private: System::Void FlashWindow()
 
 	// set up tick function
 	FlashTimer = (gcnew System::Windows::Forms::Timer(this->components));
-	FlashTimer->Interval = 50;
+	FlashTimer->Interval = 20;
 	FlashTimer->Tick += gcnew System::EventHandler(this, &DialogTextInput::FlashTimerFunction);
 	FlashTimer->Enabled = true;
 }

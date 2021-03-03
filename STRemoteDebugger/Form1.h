@@ -50,6 +50,7 @@ namespace CppCLRWinformsSTDebugger
 		Preferences^ GetPreferencesWindow() { return preferencesWindow; }
 		void SetPreferencesWindow(Preferences^ pWindow) { preferencesWindow = pWindow; }
 		DialogTextInput^ GetDialogTextInputWindow() { return dialogTextInput; }
+
 	private: System::Windows::Forms::Label^ label5;
 	private: System::Windows::Forms::Label^ label1;
 	private: System::Windows::Forms::ComboBox^ NumColumns;
@@ -126,6 +127,7 @@ namespace CppCLRWinformsSTDebugger
 	private: System::Windows::Forms::Button^ button1;
 	private: System::Windows::Forms::RichTextBox^ LogWindow;
 	private: System::Windows::Forms::ErrorProvider^ errorProvider1;
+private: System::Windows::Forms::SaveFileDialog^ saveFileDialog1;
 	private: System::ComponentModel::IContainer^ components;
 
 #pragma region Windows Form Designer generated code
@@ -175,6 +177,7 @@ namespace CppCLRWinformsSTDebugger
 			this->NumColumns = (gcnew System::Windows::Forms::ComboBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->saveFileDialog1 = (gcnew System::Windows::Forms::SaveFileDialog());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->errorProvider2))->BeginInit();
@@ -378,10 +381,12 @@ namespace CppCLRWinformsSTDebugger
 			this->MemoryWindow->Text = L"";
 			this->MemoryWindow->WordWrap = false;
 			this->MemoryWindow->VScroll += gcnew System::EventHandler(this, &Form1::MemoryWindow_VScroll);
+			this->MemoryWindow->MouseClick += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::MemoryWindow_MouseClick);
 			this->MemoryWindow->Enter += gcnew System::EventHandler(this, &Form1::MemoryWindow_Enter);
 			this->MemoryWindow->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::MemoryWindow_KeyDown);
 			this->MemoryWindow->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::MemoryWindow_KeyPress);
 			this->MemoryWindow->Leave += gcnew System::EventHandler(this, &Form1::MemoryWindow_Leave);
+			this->MemoryWindow->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::MemoryWindow_MouseDown);
 			this->MemoryWindow->PreviewKeyDown += gcnew System::Windows::Forms::PreviewKeyDownEventHandler(this, &Form1::MemoryWindow_PreviewKeyDown);
 			// 
 			// openFileDialog1
@@ -458,7 +463,9 @@ namespace CppCLRWinformsSTDebugger
 			this->LogWindow->Size = System::Drawing::Size(1675, 175);
 			this->LogWindow->TabIndex = 11;
 			this->LogWindow->Text = L"";
+			this->LogWindow->MouseClick += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::LogWindow_MouseClick);
 			this->LogWindow->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::LogWindow_KeyDown);
+			this->LogWindow->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &Form1::LogWindow_MouseDown);
 			// 
 			// LogLabel
 			// 
@@ -1543,7 +1550,7 @@ private: System::Void FlashWindow(System::Windows::Forms::RichTextBox^ boxToFlas
 
 	// set up tick function
 	FlashTimer = (gcnew System::Windows::Forms::Timer(this->components));
-	FlashTimer->Interval = 50;
+	FlashTimer->Interval = 20;
 	FlashTimer->Tick += gcnew System::EventHandler(this, &Form1::FlashTimerFunction);
 	FlashTimer->Enabled = true;
 }
@@ -1558,6 +1565,120 @@ private: System::Void FlashTimerFunction(System::Object^ sender, System::EventAr
 	FlashTimer->Tick -= gcnew System::EventHandler(this, &Form1::FlashTimerFunction);
 	FlashTimer = nullptr;
 	FlashBox = nullptr;
+}
+
+// log window mouse click
+private: System::Void LogWindow_MouseClick(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) 
+{
+	if (e->Button == System::Windows::Forms::MouseButtons::Left)
+	{
+		int g = 0;
+	}
+}
+
+// memory window mouse click
+private: System::Void MemoryWindow_MouseClick(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) 
+{
+	if (e->Button == System::Windows::Forms::MouseButtons::Right)
+	{
+		int g = 0;
+	}
+}
+
+// log mouse down
+private: System::Void LogWindow_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) 
+{
+	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+
+	if (e->Button == System::Windows::Forms::MouseButtons::Right)
+	{
+		System::Windows::Forms::ContextMenu^ cm = (gcnew System::Windows::Forms::ContextMenu());
+		System::Windows::Forms::MenuItem^ item = (gcnew System::Windows::Forms::MenuItem());
+		item->Text = "Save To Text File";
+		item->Click += gcnew System::EventHandler(this, &Form1::LogWindowSaveToTextFile);
+		cm->MenuItems->Add(item);
+		cm->Show(LogWindow, e->Location);
+	}
+}
+
+// Save to Text FIle
+private: System::Void LogWindowSaveToTextFile(System::Object^ sender, System::EventArgs^ e)
+{
+	// show file dialog
+	saveFileDialog1->Title = "Save log to text file";
+	saveFileDialog1->Filter = "Log files (*.log)|*.log;";
+	saveFileDialog1->FilterIndex = 1;
+	saveFileDialog1->FileName = L"";
+	saveFileDialog1->InitialDirectory = L"";	// ConvertCharToString(g_Editor->m_IniSettings.m_ScenePath.Get());
+
+	if (saveFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+	{
+		int FilenameLength = saveFileDialog1->FileName->Length + 2;
+		WCHAR* filenameBuffer = new WCHAR[FilenameLength];
+		memset(filenameBuffer, 0, FilenameLength);
+		ConvertStringToLChar(saveFileDialog1->FileName, *filenameBuffer);
+		g_STDebugger->SaveTextFile(filenameBuffer, ConvertStringToChar(LogWindow->Text), LogWindow->Text->Length);
+	}
+}
+
+// mouse down for memory window
+private: System::Void MemoryWindow_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) 
+{
+	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+
+	if (e->Button == System::Windows::Forms::MouseButtons::Right)
+	{
+		System::Windows::Forms::ContextMenu^ cm = (gcnew System::Windows::Forms::ContextMenu());
+		System::Windows::Forms::MenuItem^ item = (gcnew System::Windows::Forms::MenuItem());
+		item->Text = "Save To Text File";
+		item->Click += gcnew System::EventHandler(this, &Form1::MemoryWindowSaveToTextFile);
+		cm->MenuItems->Add(item);
+		item = (gcnew System::Windows::Forms::MenuItem());
+		item->Text = "Save To Binary File";
+		item->Click += gcnew System::EventHandler(this, &Form1::MemoryWindowSaveToBinaryFile);
+		cm->MenuItems->Add(item);
+		cm->Show(MemoryWindow, e->Location);
+	}
+}
+
+// Save to Text FIle
+private: System::Void MemoryWindowSaveToTextFile(System::Object^ sender, System::EventArgs^ e)
+{
+	// show file dialog
+	saveFileDialog1->Title = "Save memory to text file";
+	saveFileDialog1->Filter = "Memory files (*.txt)|*.txt;";
+	saveFileDialog1->FilterIndex = 1;
+	saveFileDialog1->FileName = L"";
+	saveFileDialog1->InitialDirectory = L"";	// ConvertCharToString(g_Editor->m_IniSettings.m_ScenePath.Get());
+
+	if (saveFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+	{
+		int FilenameLength = saveFileDialog1->FileName->Length + 2;
+		WCHAR* filenameBuffer = new WCHAR[FilenameLength];
+		memset(filenameBuffer, 0, FilenameLength);
+		ConvertStringToLChar(saveFileDialog1->FileName, *filenameBuffer);
+		g_STDebugger->SaveTextFile(filenameBuffer, ConvertStringToChar(MemoryWindow->Text), MemoryWindow->Text->Length);
+	}
+}
+
+// Save to Binary FIle
+private: System::Void MemoryWindowSaveToBinaryFile(System::Object^ sender, System::EventArgs^ e)
+{
+	// show file dialog
+	saveFileDialog1->Title = "Save memory to binary file";
+	saveFileDialog1->Filter = "Memory binary files (*.bin)|*.bin;";
+	saveFileDialog1->FilterIndex = 1;
+	saveFileDialog1->FileName = L"";
+	saveFileDialog1->InitialDirectory = L"";	// ConvertCharToString(g_Editor->m_IniSettings.m_ScenePath.Get());
+
+	if (saveFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+	{
+		int FilenameLength = saveFileDialog1->FileName->Length + 2;
+		WCHAR* filenameBuffer = new WCHAR[FilenameLength];
+		memset(filenameBuffer, 0, FilenameLength);
+		ConvertStringToLChar(saveFileDialog1->FileName, *filenameBuffer);
+		g_STDebugger->SaveMemoryBinary(filenameBuffer, 0, MEMORY_BUFFER_SIZE);		// TODO allow size to save (or highlighted block)
+	}
 }
 
 };

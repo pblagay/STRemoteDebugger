@@ -150,6 +150,8 @@ public:
 	void WriteIniFile();
 
 	void LoadExecutable(LPCWSTR Filename);
+	void SaveTextFile(LPCWSTR Filename, char* textBuffer, u32 size);
+	void SaveMemoryBinary(LPCWSTR Filename, u32 StartOffset, u32 Size);
 	void SetStartingMemoryAddress(u32 Address);
 	void CreateMemoryBuffer();
 	void SetupMemory();
@@ -293,7 +295,7 @@ private:
 	u32								LoadedCodeSize = 0;		// code size minus a header if it exists
 
 	// Memory window
-	u8	*	MemoryBuffer = nullptr;		// memory buffer for memory window
+	u8*		MemoryBuffer = nullptr;		// memory buffer for memory window
 	u32		MemoryStartAddress = 0;		// Start Address of memory buffer
 	u32		MemoryBlockIndex = 0;		// what block are we in
 	u32		MemoryBytesPerLine = 0;		// Bytes per line
