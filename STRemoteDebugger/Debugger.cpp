@@ -1047,6 +1047,13 @@ void STDebugger::SetupMemory()
 	}
 }
 
+// Fill memory
+void STDebugger::FillMemoryBuffer(u32 StartAddress, u32 Value, u32 Size)
+{
+
+
+}
+
 // Setup Registers
 void STDebugger::SetupRegisters()
 {

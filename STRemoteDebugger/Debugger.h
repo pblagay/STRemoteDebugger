@@ -155,6 +155,7 @@ public:
 	void SetStartingMemoryAddress(u32 Address);
 	void CreateMemoryBuffer();
 	void SetupMemory();
+	void FillMemoryBuffer(u32 StartAddress, u32 Value, u32 Size);
 
 //	void LoadMemory(u8* SrcData);
 

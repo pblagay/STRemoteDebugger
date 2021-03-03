@@ -4,6 +4,7 @@
 #include "Helpers.h"
 #include "Preferences.h"
 #include "DialogTextInput.h"
+#include "DialogAddressTextInput.h"
 
 extern STDebugger* g_STDebugger;
 
@@ -71,6 +72,7 @@ namespace CppCLRWinformsSTDebugger
 	private: System::Windows::Forms::ToolStripMenuItem^ managerBreakpointsToolStripMenuItem;
 		Preferences^ preferencesWindow = nullptr;
 		DialogTextInput^ dialogTextInput = nullptr;
+		DialogAddressTextInput^ dialogAddressTextInput = nullptr;
 		u32 findStartIndex = 0;
 		System::String^ searchField = nullptr;
 		RichTextBox^ FlashBox = nullptr;
@@ -1658,6 +1660,10 @@ private: System::Void MemoryWindow_MouseDown(System::Object^ sender, System::Win
 		item->Text = "Save To Binary File";
 		item->Click += gcnew System::EventHandler(this, &Form1::MemoryWindowSaveToBinaryFile);
 		cm->MenuItems->Add(item);
+		item = (gcnew System::Windows::Forms::MenuItem());
+		item->Text = "Fill Memory";
+		item->Click += gcnew System::EventHandler(this, &Form1::MemoryWindowFillMemory);
+		cm->MenuItems->Add(item);
 		cm->Show(MemoryWindow, e->Location);
 	}
 }
@@ -1721,6 +1727,149 @@ private: System::Void MemoryWindowSaveToBinaryFile(System::Object^ sender, Syste
 		g_STDebugger->SetLastDrivePath(usedDrivePath);
 	}
 }
+
+// Fill memory
+private: System::Void MemoryWindowFillMemory(System::Object^ sender, System::EventArgs^ e)
+{
+	// open text dialog window
+	if (dialogAddressTextInput == nullptr)
+	{
+		dialogAddressTextInput = gcnew DialogAddressTextInput();
+		dialogAddressTextInput->mainWindow = this;
+		dialogAddressTextInput->searchWindow = LogWindow;
+		dialogAddressTextInput->TextBoxTitle->Text = "Fill Value";
+		dialogAddressTextInput->Text = "Fill Memory";
+		dialogAddressTextInput->TabIndex = 2;
+		dialogAddressTextInput->button1->Text = "Fill";
+		dialogAddressTextInput->TextInputField->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::DialogTextInputKeyPress);
+		dialogAddressTextInput->TextInputField->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::DialogTextInputKeyDown);
+		dialogAddressTextInput->AddressInputField->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::DialogAddressInputKeyPress);
+		dialogAddressTextInput->SizeInputField->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &Form1::DialogAddressInputKeyPress);
+
+		if (dialogAddressTextInput->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+		{
+			MemoryWindow->Select();
+			searchField = dialogAddressTextInput->TextInputField->Text;
+			u32 fillSizeInChars = dialogAddressTextInput->TextInputField->TextLength;
+			u32 FillSizeInBytes = 0;
+
+			if (fillSizeInChars == 0)
+			{
+				return;
+			}
+
+			if (fillSizeInChars == 1 || fillSizeInChars == 2)
+			{
+				FillSizeInBytes = 1;
+			}
+			else if (fillSizeInChars >= 3 || fillSizeInChars <= 6)
+			{
+				FillSizeInBytes = 2;
+			}
+			else if (fillSizeInChars >= 7 || fillSizeInChars <= 8)
+			{
+				FillSizeInBytes = 4;
+			}
+
+			// figure out the memory to fill
+			u32 address = atoi(ConvertStringToChar(dialogAddressTextInput->AddressInputField->Text));
+			u32 value = atoi(ConvertStringToChar(dialogAddressTextInput->TextInputField->Text));
+			u32 size = atoi(ConvertStringToChar(dialogAddressTextInput->SizeInputField->Text));
+
+			g_STDebugger->FillMemoryBuffer(address, value, size);
+
+		}
+		dialogAddressTextInput = nullptr;
+	}
+}
+
+// dialog text input key press
+private: System::Void DialogTextInputKeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e)
+{
+	if (dialogAddressTextInput->TextInputField->TextLength >= 8)	// allow up to 8 characters (for a long word)
+	{
+		e->Handled = true;
+		return;
+	}
+
+	if (e->KeyChar == 8)		// allow delete
+	{
+		return;
+	}
+
+	// ignore anything but 0 / alphanumeric and arrows
+	if (!System::Char::IsDigit(e->KeyChar) &&
+		!System::Char::IsLetter(e->KeyChar))
+	{
+  		e->Handled = true;
+		return;
+	}
+
+	String^ letter = System::Char::ToString(e->KeyChar);
+	char* cl = ConvertStringToChar(letter);
+	int lk = *cl;
+
+	bool keyAllowed = false;
+	if ((lk >= 'A' && lk <= 'F') ||
+		(lk >= 'a' && lk <= 'f') ||
+		(lk >= '0' && lk <= '9'))
+	{
+		keyAllowed = true;
+	}
+
+	if (!keyAllowed)
+	{
+		e->Handled = true;
+		return;
+	}
+}
+
+// dialog text input key down
+private: System::Void DialogTextInputKeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e)
+{
+}
+
+// dialog text input key press
+private: System::Void DialogAddressInputKeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e)
+{
+	if (dialogAddressTextInput->AddressInputField->TextLength >= 8)	// allow up to 8 characters (for a long word)
+	{
+		e->Handled = true;
+		return;
+	}
+
+	if (e->KeyChar == 8)		// allow delete
+	{
+		return;
+	}
+
+	// ignore anything but 0 / alphanumeric and arrows
+	if (!System::Char::IsDigit(e->KeyChar) &&
+		!System::Char::IsLetter(e->KeyChar))
+	{
+		e->Handled = true;
+		return;
+	}
+
+	String^ letter = System::Char::ToString(e->KeyChar);
+	char* cl = ConvertStringToChar(letter);
+	int lk = *cl;
+
+	bool keyAllowed = false;
+	if ((lk >= 'A' && lk <= 'F') ||
+		(lk >= 'a' && lk <= 'f') ||
+		(lk >= '0' && lk <= '9'))
+	{
+		keyAllowed = true;
+	}
+
+	if (!keyAllowed)
+	{
+		e->Handled = true;
+		return;
+	}
+}
+
 
 };
 }

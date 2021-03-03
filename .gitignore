@@ -72,3 +72,5 @@
 /STRemoteDebugger/mem.bin
 /STRemoteDebugger/mem.txt
 /STRemoteDebugger/test.log
+/.vs/STRemoteDebugger/v16/ipch/AutoPCH/6fad38131f5284de/DIALOGADDRESSTEXTINPUT.ipch
+/STRemoteDebugger/Debug/STRemoteDebugger.DialogAddressTextInput.resources
