@@ -456,6 +456,7 @@ namespace CppCLRWinformsSTDebugger
 			this->LogWindow->Size = System::Drawing::Size(1675, 175);
 			this->LogWindow->TabIndex = 11;
 			this->LogWindow->Text = L"";
+			this->LogWindow->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::LogWindow_KeyDown);
 			// 
 			// LogLabel
 			// 
@@ -1469,6 +1470,56 @@ private: System::Void AssemblyWindow_KeyDown(System::Object^ sender, System::Win
 			if (index != -1)
 			{
 				AssemblyWindow->Select(index, searchField->Length);
+				findStartIndex = index + searchField->Length;
+			}
+			else // end of search
+			{
+				// flash window or sound
+
+			}
+		}
+	}
+}
+// key down for log window
+private: System::Void LogWindow_KeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e) 
+{
+	System::Windows::Forms::RichTextBox^ rtb = (System::Windows::Forms::RichTextBox^)sender;
+
+	if (e->Control && e->KeyCode == Keys::F)
+	{
+		// open text dialog window
+		if (dialogTextInput == nullptr)
+		{
+			dialogTextInput = gcnew DialogTextInput();
+			dialogTextInput->mainWindow = this;
+			dialogTextInput->searchWindow = LogWindow;
+			dialogTextInput->TextBoxTitle->Text = "Find";
+			dialogTextInput->Text = "Find In Log";
+			dialogTextInput->TabIndex = 2;
+
+			// TODO fix the starting position for the position in the window
+			findStartIndex = rtb->SelectionStart;
+			searchField = nullptr;
+			dialogTextInput->startIndex = 0;
+
+			if (dialogTextInput->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+			{
+				LogWindow->Select();
+				findStartIndex = dialogTextInput->startIndex;
+				searchField = dialogTextInput->TextInputField->Text;
+			}
+			dialogTextInput = nullptr;
+		}
+		e->Handled = true;
+	}
+	else if (e->KeyCode == Keys::F3)			// search again
+	{
+		if (findStartIndex != 0)
+		{
+			s32 index = LogWindow->Find(searchField, findStartIndex, 4096, System::Windows::Forms::RichTextBoxFinds::None);
+			if (index != -1)
+			{
+				LogWindow->Select(index, searchField->Length);
 				findStartIndex = index + searchField->Length;
 			}
 			else // end of search
