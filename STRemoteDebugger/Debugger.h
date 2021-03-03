@@ -246,6 +246,10 @@ public:
 	bool GetSendCmdInProgress() { return SendCmdInProgress;	}
 	bool GetReceiveCmdInProgress() { return ReceiveInProgress; }
 
+	mString	GetDefaultDrivePath() { return DefaultDrivePath; }
+	mString GetLastDrivePath() { return LastDrivePath; }
+	void SetLastDrivePath(mString DrivePath) { LastDrivePath = DrivePath; }
+
 private:
 	void	GetComPortsAvailable();
 	void	SetupRegisters();
@@ -276,6 +280,9 @@ private:
 	static unsigned int __stdcall TickThread(void* lpParameter);
 
 	bool	rawmode = false;
+
+	mString	DefaultDrivePath;					// base path for FileIO
+	mString LastDrivePath;
 
 	// buffers
 //	u32		TickThread(void* lpParameter);

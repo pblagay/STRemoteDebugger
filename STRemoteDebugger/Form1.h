@@ -596,13 +596,19 @@ private: System::Windows::Forms::SaveFileDialog^ saveFileDialog1;
 		if (g_STDebugger->GetSendCmdInProgress() || g_STDebugger->GetReceiveCmdInProgress())
 			return;
 
+		mString drivePath = g_STDebugger->GetLastDrivePath();
+		if (drivePath.Empty())
+		{
+			drivePath = g_STDebugger->GetDefaultDrivePath();
+		}
+
 		// show file dialog
 		openFileDialog1->Title = "Load ST Executable";
 		openFileDialog1->Filter = "ST files (*.prg;*.acc)|*.prg;*.acc";
 		openFileDialog1->FilterIndex = 1;
 		openFileDialog1->FileName = L"";
 		openFileDialog1->Multiselect = false;
-		openFileDialog1->InitialDirectory = L"";	// ConvertCharToString(g_Editor->m_IniSettings.m_ScenePath.Get());
+		openFileDialog1->InitialDirectory = ConvertCharToString(drivePath.GetPtr());
 
 		if (openFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 		{
@@ -611,6 +617,11 @@ private: System::Windows::Forms::SaveFileDialog^ saveFileDialog1;
 			memset(filenameBuffer, 0, FilenameLength);
 			ConvertStringToLChar(openFileDialog1->FileName, *filenameBuffer);
 			g_STDebugger->LoadExecutable(filenameBuffer);
+
+			mString usedDrivePath = (u16*)filenameBuffer;
+			usedDrivePath.ToChar();
+			usedDrivePath.GetPath();
+			g_STDebugger->SetLastDrivePath(usedDrivePath);
 		}
 	}
 private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e)
@@ -1604,12 +1615,18 @@ private: System::Void LogWindow_MouseDown(System::Object^ sender, System::Window
 // Save to Text FIle
 private: System::Void LogWindowSaveToTextFile(System::Object^ sender, System::EventArgs^ e)
 {
+	mString drivePath = g_STDebugger->GetLastDrivePath();
+	if (drivePath.Empty())
+	{
+		drivePath = g_STDebugger->GetDefaultDrivePath();
+	}
+
 	// show file dialog
 	saveFileDialog1->Title = "Save log to text file";
 	saveFileDialog1->Filter = "Log files (*.log)|*.log;";
 	saveFileDialog1->FilterIndex = 1;
 	saveFileDialog1->FileName = L"";
-	saveFileDialog1->InitialDirectory = L"";	// ConvertCharToString(g_Editor->m_IniSettings.m_ScenePath.Get());
+	saveFileDialog1->InitialDirectory = ConvertCharToString(drivePath.GetPtr());
 
 	if (saveFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 	{
@@ -1618,6 +1635,10 @@ private: System::Void LogWindowSaveToTextFile(System::Object^ sender, System::Ev
 		memset(filenameBuffer, 0, FilenameLength);
 		ConvertStringToLChar(saveFileDialog1->FileName, *filenameBuffer);
 		g_STDebugger->SaveTextFile(filenameBuffer, ConvertStringToChar(LogWindow->Text), LogWindow->Text->Length);
+
+		mString usedDrivePath = (u16*)filenameBuffer;
+		usedDrivePath.GetPath();
+		g_STDebugger->SetLastDrivePath(usedDrivePath);
 	}
 }
 
@@ -1644,12 +1665,18 @@ private: System::Void MemoryWindow_MouseDown(System::Object^ sender, System::Win
 // Save to Text FIle
 private: System::Void MemoryWindowSaveToTextFile(System::Object^ sender, System::EventArgs^ e)
 {
+	mString drivePath = g_STDebugger->GetLastDrivePath();
+	if (drivePath.Empty())
+	{
+		drivePath = g_STDebugger->GetDefaultDrivePath();
+	}
+
 	// show file dialog
 	saveFileDialog1->Title = "Save memory to text file";
 	saveFileDialog1->Filter = "Memory files (*.txt)|*.txt;";
 	saveFileDialog1->FilterIndex = 1;
 	saveFileDialog1->FileName = L"";
-	saveFileDialog1->InitialDirectory = L"";	// ConvertCharToString(g_Editor->m_IniSettings.m_ScenePath.Get());
+	saveFileDialog1->InitialDirectory = ConvertCharToString(drivePath.GetPtr());
 
 	if (saveFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 	{
@@ -1658,18 +1685,28 @@ private: System::Void MemoryWindowSaveToTextFile(System::Object^ sender, System:
 		memset(filenameBuffer, 0, FilenameLength);
 		ConvertStringToLChar(saveFileDialog1->FileName, *filenameBuffer);
 		g_STDebugger->SaveTextFile(filenameBuffer, ConvertStringToChar(MemoryWindow->Text), MemoryWindow->Text->Length);
+
+		mString usedDrivePath = (u16*)filenameBuffer;
+		usedDrivePath.GetPath();
+		g_STDebugger->SetLastDrivePath(usedDrivePath);
 	}
 }
 
 // Save to Binary FIle
 private: System::Void MemoryWindowSaveToBinaryFile(System::Object^ sender, System::EventArgs^ e)
 {
+	mString drivePath = g_STDebugger->GetLastDrivePath();
+	if (drivePath.Empty())
+	{
+		drivePath = g_STDebugger->GetDefaultDrivePath();
+	}
+
 	// show file dialog
 	saveFileDialog1->Title = "Save memory to binary file";
 	saveFileDialog1->Filter = "Memory binary files (*.bin)|*.bin;";
 	saveFileDialog1->FilterIndex = 1;
 	saveFileDialog1->FileName = L"";
-	saveFileDialog1->InitialDirectory = L"";	// ConvertCharToString(g_Editor->m_IniSettings.m_ScenePath.Get());
+	saveFileDialog1->InitialDirectory = ConvertCharToString(drivePath.GetPtr());
 
 	if (saveFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 	{
@@ -1678,6 +1715,10 @@ private: System::Void MemoryWindowSaveToBinaryFile(System::Object^ sender, Syste
 		memset(filenameBuffer, 0, FilenameLength);
 		ConvertStringToLChar(saveFileDialog1->FileName, *filenameBuffer);
 		g_STDebugger->SaveMemoryBinary(filenameBuffer, 0, MEMORY_BUFFER_SIZE);		// TODO allow size to save (or highlighted block)
+
+		mString usedDrivePath = (u16*)filenameBuffer;
+		usedDrivePath.GetPath();
+		g_STDebugger->SetLastDrivePath(usedDrivePath);
 	}
 }
 

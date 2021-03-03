@@ -14,6 +14,7 @@
 #include "Commands.h"
 #include "..\..\..\VariousSourceCodes\minIni-master\dev\minIni.h"
 #include "68kDisasm.h"
+#include <direct.h>
 
 #define sizearray(a)  (sizeof(a) / sizeof((a)[0]))
 const char inifile[] = "STRemoteDebugger.ini";
@@ -180,22 +181,8 @@ void STDebugger::Init(void* formPtr)
 	ReadBuffer = new u8[MEMORY_BUFFER_SIZE + 32];
 	memset(ReadBuffer, 0, MEMORY_BUFFER_SIZE + 32);
 
-	//char buf[255];
-	//for (int i = 1; i < 255; i++)
-	//{
-	//	buf[i] = i;
-	//}
-
-	//System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
-	//CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
-
-	//if (mainWindow != nullptr)
-	//{
-	//	System::Windows::Forms::RichTextBox^ logWindow = mainWindow->GetLogWindow();
-
-	//	char* c = buf;
-	//	logWindow->Text =ConvertCharToString(c);
-	//}
+	DefaultDrivePath.Clear(128);
+	_getcwd(DefaultDrivePath.GetPtr(), 128);
 }
 
 // Shutdown
@@ -288,6 +275,13 @@ void STDebugger::ReadIniFile()
 	MemoryViewSize = n;
 	n = ini_getl("View", "NumColumms", 8, inifile);
 	MemoryWindowNumberOfColumns = n;
+
+	// path
+	n = ini_gets("Path", "DefaultPath", "", str, sizearray(str), inifile);
+	if (str[0] != 0)
+	{
+		LastDrivePath = str;
+	}
 }
 
 // write ini file
@@ -323,6 +317,12 @@ void STDebugger::WriteIniFile()
 	n = ini_putl("Computer", "TOS", TosVersion, inifile);
 	n = ini_putl("View", "MemorySize", MemoryViewSize, inifile);
 	n = ini_putl("View", "NumColumms", MemoryWindowNumberOfColumns, inifile);
+
+	// path
+	if (!LastDrivePath.Empty())
+	{
+		n = ini_puts("Path", "DefaultPath", LastDrivePath.GetPtr(), inifile);
+	}
 }
 
 // Connect to target

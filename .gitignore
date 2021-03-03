@@ -69,3 +69,6 @@
 /.vs/STRemoteDebugger/v16/ipch/AutoPCH/b8b6afb5db5697bc/CURSORTABLES.ipch
 /.vs/STRemoteDebugger/v16/ipch/AutoPCH/b6065a873dbca984/DIALOGTEXTINPUT.ipch
 /STRemoteDebugger/Debug/STRemoteDebugger.DialogTextInput.resources
+/STRemoteDebugger/mem.bin
+/STRemoteDebugger/mem.txt
+/STRemoteDebugger/test.log
