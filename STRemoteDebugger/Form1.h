@@ -663,11 +663,7 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 			dialogTextInput->TabIndex = 2;
 
 			// TODO fix the starting position for the position in the window
-			findStartIndex = 0;
-			s32 index = rtb->GetCharIndexFromPosition(rtb->Cursor->Position);
-			if (index != -1)
-				findStartIndex = index;
-
+			findStartIndex = rtb->SelectionStart;
 			searchField = nullptr;
 			dialogTextInput->startIndex = 0;
 
@@ -690,6 +686,11 @@ private: System::Void MemoryWindow_KeyDown(System::Object^ sender, System::Windo
 			{
 				MemoryWindow->Select(index, searchField->Length);
 				findStartIndex = index + searchField->Length;
+			}
+			else // end of search
+			{
+				// flash window or sound
+
 			}
 		}
 	}
