@@ -313,8 +313,6 @@ namespace CppCLRWinformsSTDebugger
 			this->OKButton->TabIndex = 7;
 			this->OKButton->Text = L"OK";
 			this->OKButton->UseVisualStyleBackColor = true;
-			this->OKButton->Click += gcnew System::EventHandler(this, &Preferences::OKButton_Click);
-			this->OKButton->Enter += gcnew System::EventHandler(this, &Preferences::OKButton_Enter);
 			// 
 			// button1
 			// 
@@ -325,7 +323,6 @@ namespace CppCLRWinformsSTDebugger
 			this->button1->TabIndex = 8;
 			this->button1->Text = L"Cancel";
 			this->button1->UseVisualStyleBackColor = true;
-			this->button1->Click += gcnew System::EventHandler(this, &Preferences::button1_Click);
 			// 
 			// Preferences
 			// 
@@ -385,14 +382,6 @@ private: System::Void BaudRate_SelectedIndexChanged(System::Object^ sender, Syst
 	SelectedBaudRate = atoi(baud);
 }
 
-// OK
-private: System::Void OKButton_Click(System::Object^ sender, System::EventArgs^ e)
-{
-}
-private: System::Void OKButton_Enter(System::Object^ sender, System::EventArgs^ e) 
-{
-
-}
 
 private: System::Void Preferences_Activated(System::Object^ sender, System::EventArgs^ e) 
 {
@@ -402,10 +391,6 @@ private: System::Void Preferences_Enter(System::Object^ sender, System::EventArg
 {
 }
 
-// cancel
-private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) 
-{
-}
 // computer type
 private: System::Void ComputerType_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
 {
