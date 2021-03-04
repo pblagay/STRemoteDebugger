@@ -203,9 +203,6 @@ public:
 	void SetSendCmdTimeout(s32 pTimeout) { SendCmdTimeout = pTimeout;  }
 	s32  GetSendCmdTimeout() { return SendCmdTimeout; }
 
-	// clear refs
-	void ClearMainWindowPreferencesReference();
-
 	void DebugMemoryData();
 	void RefreshWindows();
 

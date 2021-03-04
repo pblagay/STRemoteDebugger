@@ -1321,15 +1321,6 @@ void STDebugger::DisassembleCode()
 	SetCurrentLine(0);
 }
 
-// Clear mainWindow reference
-void STDebugger::ClearMainWindowPreferencesReference()
-{
-	System::Runtime::InteropServices::GCHandle ht = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(FormWindow));
-	CppCLRWinformsSTDebugger::Form1^ mainWindow = (CppCLRWinformsSTDebugger::Form1^)ht.Target;
-
-	mainWindow->SetPreferencesWindow(nullptr);
-}
-
 //////////////////////////////////////////////////////////////
 void STDebugger::OutputToLog(mString Text)
 {

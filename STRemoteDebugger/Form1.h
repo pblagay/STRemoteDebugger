@@ -1202,7 +1202,15 @@ private: System::Void preferencesToolStripMenuItem_Click(System::Object^ sender,
 			break;
 		}
 
-		preferencesWindow->Show();
+		// show dialog
+		if (preferencesWindow->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+		{
+			g_STDebugger->SetBaudRate(preferencesWindow->SelectedBaudRate);
+			char* portName = ConvertStringToChar(preferencesWindow->SelectedComPort);
+			g_STDebugger->SetComPortName(portName);
+			g_STDebugger->WriteIniFile();
+		}
+		preferencesWindow = nullptr;
 	}
 }
 

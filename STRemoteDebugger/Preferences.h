@@ -131,11 +131,10 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->PreferencesTabControl->Controls->Add(this->tabPage1);
 			this->PreferencesTabControl->Controls->Add(this->tabPage2);
-			this->PreferencesTabControl->Location = System::Drawing::Point(9, 8);
-			this->PreferencesTabControl->Margin = System::Windows::Forms::Padding(2);
+			this->PreferencesTabControl->Location = System::Drawing::Point(14, 12);
 			this->PreferencesTabControl->Name = L"PreferencesTabControl";
 			this->PreferencesTabControl->SelectedIndex = 0;
-			this->PreferencesTabControl->Size = System::Drawing::Size(538, 271);
+			this->PreferencesTabControl->Size = System::Drawing::Size(807, 417);
 			this->PreferencesTabControl->TabIndex = 0;
 			// 
 			// tabPage1
@@ -147,11 +146,10 @@ namespace CppCLRWinformsSTDebugger
 			this->tabPage1->Controls->Add(this->label1);
 			this->tabPage1->Controls->Add(this->ComPorts);
 			this->tabPage1->Controls->Add(this->SerialPortDesc);
-			this->tabPage1->Location = System::Drawing::Point(4, 22);
-			this->tabPage1->Margin = System::Windows::Forms::Padding(2);
+			this->tabPage1->Location = System::Drawing::Point(4, 29);
 			this->tabPage1->Name = L"tabPage1";
-			this->tabPage1->Padding = System::Windows::Forms::Padding(2);
-			this->tabPage1->Size = System::Drawing::Size(530, 245);
+			this->tabPage1->Padding = System::Windows::Forms::Padding(3, 3, 3, 3);
+			this->tabPage1->Size = System::Drawing::Size(799, 384);
 			this->tabPage1->TabIndex = 0;
 			this->tabPage1->Text = L"Serial Port";
 			this->tabPage1->UseVisualStyleBackColor = true;
@@ -164,40 +162,36 @@ namespace CppCLRWinformsSTDebugger
 				L"115200", L"57600", L"38400", L"19200", L"9600",
 					L"4800", L"2400"
 			});
-			this->BaudRate->Location = System::Drawing::Point(338, 41);
-			this->BaudRate->Margin = System::Windows::Forms::Padding(2);
+			this->BaudRate->Location = System::Drawing::Point(507, 63);
 			this->BaudRate->Name = L"BaudRate";
-			this->BaudRate->Size = System::Drawing::Size(92, 21);
+			this->BaudRate->Size = System::Drawing::Size(136, 28);
 			this->BaudRate->TabIndex = 6;
 			this->BaudRate->SelectedIndexChanged += gcnew System::EventHandler(this, &Preferences::BaudRate_SelectedIndexChanged);
 			// 
 			// label3
 			// 
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(336, 15);
-			this->label3->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
+			this->label3->Location = System::Drawing::Point(504, 23);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(58, 13);
+			this->label3->Size = System::Drawing::Size(86, 20);
 			this->label3->TabIndex = 5;
 			this->label3->Text = L"Baud Rate";
 			// 
 			// label2
 			// 
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(115, 15);
-			this->label2->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
+			this->label2->Location = System::Drawing::Point(172, 23);
 			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(60, 13);
+			this->label2->Size = System::Drawing::Size(89, 20);
 			this->label2->TabIndex = 4;
 			this->label2->Text = L"Description";
 			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(9, 15);
-			this->label1->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
+			this->label1->Location = System::Drawing::Point(14, 23);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(85, 13);
+			this->label1->Size = System::Drawing::Size(126, 20);
 			this->label1->TabIndex = 3;
 			this->label1->Text = L"Select COM port";
 			// 
@@ -205,20 +199,18 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			this->ComPorts->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->ComPorts->FormattingEnabled = true;
-			this->ComPorts->Location = System::Drawing::Point(9, 41);
-			this->ComPorts->Margin = System::Windows::Forms::Padding(2);
+			this->ComPorts->Location = System::Drawing::Point(14, 63);
 			this->ComPorts->Name = L"ComPorts";
-			this->ComPorts->Size = System::Drawing::Size(82, 21);
+			this->ComPorts->Size = System::Drawing::Size(121, 28);
 			this->ComPorts->TabIndex = 2;
 			this->ComPorts->SelectedIndexChanged += gcnew System::EventHandler(this, &Preferences::ComPorts_SelectedIndexChanged);
 			// 
 			// SerialPortDesc
 			// 
-			this->SerialPortDesc->Location = System::Drawing::Point(115, 41);
-			this->SerialPortDesc->Margin = System::Windows::Forms::Padding(2);
+			this->SerialPortDesc->Location = System::Drawing::Point(172, 63);
 			this->SerialPortDesc->Name = L"SerialPortDesc";
 			this->SerialPortDesc->ReadOnly = true;
-			this->SerialPortDesc->Size = System::Drawing::Size(203, 42);
+			this->SerialPortDesc->Size = System::Drawing::Size(302, 62);
 			this->SerialPortDesc->TabIndex = 1;
 			this->SerialPortDesc->Text = L"";
 			// 
@@ -230,11 +222,10 @@ namespace CppCLRWinformsSTDebugger
 			this->tabPage2->Controls->Add(this->SystemMemory);
 			this->tabPage2->Controls->Add(this->label4);
 			this->tabPage2->Controls->Add(this->ComputerType);
-			this->tabPage2->Location = System::Drawing::Point(4, 22);
-			this->tabPage2->Margin = System::Windows::Forms::Padding(2);
+			this->tabPage2->Location = System::Drawing::Point(4, 29);
 			this->tabPage2->Name = L"tabPage2";
-			this->tabPage2->Padding = System::Windows::Forms::Padding(2);
-			this->tabPage2->Size = System::Drawing::Size(530, 245);
+			this->tabPage2->Padding = System::Windows::Forms::Padding(3, 3, 3, 3);
+			this->tabPage2->Size = System::Drawing::Size(799, 384);
 			this->tabPage2->TabIndex = 1;
 			this->tabPage2->Text = L"Computer";
 			this->tabPage2->UseVisualStyleBackColor = true;
@@ -242,9 +233,10 @@ namespace CppCLRWinformsSTDebugger
 			// label6
 			// 
 			this->label6->AutoSize = true;
-			this->label6->Location = System::Drawing::Point(19, 77);
+			this->label6->Location = System::Drawing::Point(28, 118);
+			this->label6->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label6->Name = L"label6";
-			this->label6->Size = System::Drawing::Size(67, 13);
+			this->label6->Size = System::Drawing::Size(99, 20);
 			this->label6->TabIndex = 5;
 			this->label6->Text = L"TOS Version";
 			// 
@@ -257,18 +249,20 @@ namespace CppCLRWinformsSTDebugger
 					L"Tos 1.62", L"Tos 2.05", L"Tos 2.06", L"Tos 3.00", L"Tos 3.01", L"Tos 3.05", L"Tos 3.06", L"Tos 4.00", L"Tos 4.01", L"Tos 4.02",
 					L"Tos 4.04"
 			});
-			this->TOSVersion->Location = System::Drawing::Point(22, 93);
+			this->TOSVersion->Location = System::Drawing::Point(33, 143);
+			this->TOSVersion->Margin = System::Windows::Forms::Padding(4, 5, 4, 5);
 			this->TOSVersion->Name = L"TOSVersion";
-			this->TOSVersion->Size = System::Drawing::Size(121, 21);
+			this->TOSVersion->Size = System::Drawing::Size(180, 28);
 			this->TOSVersion->TabIndex = 4;
 			this->TOSVersion->SelectedIndexChanged += gcnew System::EventHandler(this, &Preferences::TOSVersion_SelectedIndexChanged);
 			// 
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(179, 19);
+			this->label5->Location = System::Drawing::Point(268, 29);
+			this->label5->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label5->Name = L"label5";
-			this->label5->Size = System::Drawing::Size(81, 13);
+			this->label5->Size = System::Drawing::Size(122, 20);
 			this->label5->TabIndex = 3;
 			this->label5->Text = L"System Memory";
 			// 
@@ -277,18 +271,20 @@ namespace CppCLRWinformsSTDebugger
 			this->SystemMemory->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->SystemMemory->FormattingEnabled = true;
 			this->SystemMemory->Items->AddRange(gcnew cli::array< System::Object^  >(5) { L"512 KB", L"1 MB", L"2.5 MB", L"4 MB", L"14 MB" });
-			this->SystemMemory->Location = System::Drawing::Point(182, 38);
+			this->SystemMemory->Location = System::Drawing::Point(273, 58);
+			this->SystemMemory->Margin = System::Windows::Forms::Padding(4, 5, 4, 5);
 			this->SystemMemory->Name = L"SystemMemory";
-			this->SystemMemory->Size = System::Drawing::Size(121, 21);
+			this->SystemMemory->Size = System::Drawing::Size(180, 28);
 			this->SystemMemory->TabIndex = 2;
 			this->SystemMemory->SelectedIndexChanged += gcnew System::EventHandler(this, &Preferences::SystemMemory_SelectedIndexChanged);
 			// 
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(19, 19);
+			this->label4->Location = System::Drawing::Point(28, 29);
+			this->label4->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label4->Name = L"label4";
-			this->label4->Size = System::Drawing::Size(79, 13);
+			this->label4->Size = System::Drawing::Size(117, 20);
 			this->label4->TabIndex = 1;
 			this->label4->Text = L"Computer Type";
 			// 
@@ -300,19 +296,20 @@ namespace CppCLRWinformsSTDebugger
 				L"Atari ST / Mega ST", L"Atari STe", L"Atari TT",
 					L"Atari Falcon"
 			});
-			this->ComputerType->Location = System::Drawing::Point(22, 38);
+			this->ComputerType->Location = System::Drawing::Point(33, 58);
+			this->ComputerType->Margin = System::Windows::Forms::Padding(4, 5, 4, 5);
 			this->ComputerType->Name = L"ComputerType";
-			this->ComputerType->Size = System::Drawing::Size(121, 21);
+			this->ComputerType->Size = System::Drawing::Size(180, 28);
 			this->ComputerType->TabIndex = 0;
 			this->ComputerType->SelectedIndexChanged += gcnew System::EventHandler(this, &Preferences::ComputerType_SelectedIndexChanged);
 			// 
 			// OKButton
 			// 
+			this->OKButton->DialogResult = System::Windows::Forms::DialogResult::OK;
 			this->OKButton->FlatAppearance->BorderColor = System::Drawing::Color::Blue;
-			this->OKButton->Location = System::Drawing::Point(414, 300);
-			this->OKButton->Margin = System::Windows::Forms::Padding(2);
+			this->OKButton->Location = System::Drawing::Point(621, 462);
 			this->OKButton->Name = L"OKButton";
-			this->OKButton->Size = System::Drawing::Size(61, 29);
+			this->OKButton->Size = System::Drawing::Size(92, 45);
 			this->OKButton->TabIndex = 7;
 			this->OKButton->Text = L"OK";
 			this->OKButton->UseVisualStyleBackColor = true;
@@ -321,10 +318,10 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// button1
 			// 
-			this->button1->Location = System::Drawing::Point(488, 300);
-			this->button1->Margin = System::Windows::Forms::Padding(2);
+			this->button1->DialogResult = System::Windows::Forms::DialogResult::Cancel;
+			this->button1->Location = System::Drawing::Point(732, 462);
 			this->button1->Name = L"button1";
-			this->button1->Size = System::Drawing::Size(56, 29);
+			this->button1->Size = System::Drawing::Size(84, 45);
 			this->button1->TabIndex = 8;
 			this->button1->Text = L"Cancel";
 			this->button1->UseVisualStyleBackColor = true;
@@ -332,13 +329,14 @@ namespace CppCLRWinformsSTDebugger
 			// 
 			// Preferences
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
+			this->AutoScaleDimensions = System::Drawing::SizeF(9, 20);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(557, 339);
+			this->ClientSize = System::Drawing::Size(836, 522);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->OKButton);
 			this->Controls->Add(this->PreferencesTabControl);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::Fixed3D;
+			this->Margin = System::Windows::Forms::Padding(4, 5, 4, 5);
 			this->Name = L"Preferences";
 			this->Text = L"Preferences";
 			this->Activated += gcnew System::EventHandler(this, &Preferences::Preferences_Activated);
@@ -390,13 +388,6 @@ private: System::Void BaudRate_SelectedIndexChanged(System::Object^ sender, Syst
 // OK
 private: System::Void OKButton_Click(System::Object^ sender, System::EventArgs^ e)
 {
-	// send values to the debugger
-	g_STDebugger->SetBaudRate(SelectedBaudRate);
-	char* portName = ConvertStringToChar(SelectedComPort);
-	g_STDebugger->SetComPortName(portName);
-	g_STDebugger->ClearMainWindowPreferencesReference();
-	g_STDebugger->WriteIniFile();
-	Close();
 }
 private: System::Void OKButton_Enter(System::Object^ sender, System::EventArgs^ e) 
 {
@@ -414,8 +405,6 @@ private: System::Void Preferences_Enter(System::Object^ sender, System::EventArg
 // cancel
 private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) 
 {
-	g_STDebugger->ClearMainWindowPreferencesReference();
-	Close();
 }
 // computer type
 private: System::Void ComputerType_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) 
